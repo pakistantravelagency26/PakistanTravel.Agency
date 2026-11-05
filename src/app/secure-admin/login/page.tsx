@@ -4,7 +4,8 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight, KeyRound } from "lucide-react";
+import Image from "next/image";
+import { Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -45,61 +46,70 @@ function AdminLoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-950 text-slate-100">
-      <div className="max-w-md w-full space-y-6 bg-slate-900 p-8 sm:p-10 rounded-3xl shadow-2xl border border-slate-800">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 text-slate-800">
+      <div className="max-w-md w-full space-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-emerald/10 text-emerald-400 border border-emerald-500/20 mb-2">
-            <KeyRound className="w-7 h-7" />
+          <div className="inline-flex items-center justify-center mb-2">
+            <div className="w-14 h-14 relative rounded-2xl overflow-hidden shadow-md shadow-emerald-600/15">
+              <Image
+                src="/logo.png"
+                alt="PakistanTravel.Agency"
+                fill
+                sizes="56px"
+                className="object-cover"
+                priority
+              />
+            </div>
           </div>
-          <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-widest block">
+          <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest block">
             Internal Platform Operations
           </span>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Super Admin Sign In
           </h1>
-          <p className="text-xs text-slate-400">
-            Sign in with your Admin Login ID or Authorized Email
+          <p className="text-xs text-slate-500">
+            Sign in with your authorized Administrator credentials
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-slate-300 uppercase mb-1">
+            <label className="block font-bold text-slate-700 uppercase mb-1">
               Admin Login ID / Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
               <input
                 type="text"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="e.g. admin@pakistantravel.agency or 'admin'"
-                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                placeholder="Enter Administrator Login ID or Email"
+                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 text-xs font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 uppercase mb-1">
+            <label className="block font-bold text-slate-700 uppercase mb-1">
               Security Key / Password
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-slate-950 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                placeholder="Enter Administrator Password"
+                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 text-xs font-medium"
               />
             </div>
           </div>
@@ -107,15 +117,15 @@ function AdminLoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl bg-brand-emerald hover:bg-emerald-600 text-white font-bold text-sm transition shadow-lg shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition shadow-lg shadow-emerald-600/25 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? "Verifying Authorization..." : "Access Control Center"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-slate-900">
-          <Link href="/" className="text-xs text-slate-500 hover:text-slate-300">
+        <div className="text-center pt-2 border-t border-slate-100">
+          <Link href="/" className="text-xs text-slate-500 hover:text-slate-800 font-semibold">
             ← Return to Public Website
           </Link>
         </div>
@@ -126,7 +136,7 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-xs text-slate-400">Loading admin portal...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-xs text-slate-400">Loading admin portal...</div>}>
       <AdminLoginForm />
     </Suspense>
   );
