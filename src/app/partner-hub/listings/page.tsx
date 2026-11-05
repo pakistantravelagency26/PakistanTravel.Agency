@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { 
   PlusCircle, 
   ExternalLink, 
@@ -14,10 +15,12 @@ import {
   Check,
   DollarSign
 } from "lucide-react";
-import { MOCK_LISTINGS, ListingData } from "@/services/listing.service";
+import { ListingData } from "@/services/listing.service";
 
 export default function VendorListingsPage() {
-  const [tours, setTours] = useState<ListingData[]>(MOCK_LISTINGS);
+  const { data: session } = useSession();
+  const [tours, setTours] = useState<ListingData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingTour, setEditingTour] = useState<ListingData | null>(null);
   const [editForm, setEditForm] = useState({
     title: "",
@@ -28,16 +31,25 @@ export default function VendorListingsPage() {
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const vendorName = session?.user?.name || "Verified Partner Agency";
+
   useEffect(() => {
-    fetch("/api/listings?all=true")
+    setLoading(true);
+    const vendorId = (session?.user as any)?.vendorId;
+    const url = vendorId 
+      ? `/api/listings?all=true&vendorId=${encodeURIComponent(vendorId)}` 
+      : `/api/listings?all=true`;
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.listings)) {
           setTours(data.listings);
         }
       })
-      .catch((err) => console.log("Listings fetch error:", err));
-  }, []);
+      .catch((err) => console.log("Listings fetch error:", err))
+      .finally(() => setLoading(false));
+  }, [session]);
 
   function openEditModal(tour: ListingData) {
     setEditingTour(tour);
@@ -121,7 +133,7 @@ export default function VendorListingsPage() {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Logged in as <strong className="text-slate-800">Karakoram Expeditions & Northern Tours</strong>. Manage prices, itineraries, and dates.
+            Logged in as <strong className="text-slate-800">{vendorName}</strong>. Manage prices, itineraries, and dates.
           </p>
         </div>
 
@@ -134,8 +146,18 @@ export default function VendorListingsPage() {
         </Link>
       </div>
 
-      {/* Grid of Tours */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loading ? (
+        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center text-slate-400 text-xs">
+          Loading your tours from database...
+        </div>
+      ) : tours.length === 0 ? (
+        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3">
+          <p className="text-slate-500 text-sm font-semibold">No tours found for your account.</p>
+          <p className="text-xs text-slate-400">Click &apos;Add New Tour&apos; above to publish your first tour package.</p>
+        </div>
+      ) : (
+        /* Grid of Tours */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tours.map((item) => (
           <div
             key={item.id}
@@ -220,7 +242,8 @@ export default function VendorListingsPage() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Edit Tour Modal */}
       {editingTour && (

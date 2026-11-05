@@ -15,7 +15,13 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
+    const validVendorIds = new Set(dbVendors.map((v) => v.id));
+
+    // Only include listings that belong to currently existing vendors
     const dbListings = await prisma.listing.findMany({
+      where: {
+        vendorId: { in: Array.from(validVendorIds) },
+      },
       include: {
         vendor: true,
         destination: true,
@@ -23,82 +29,83 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    if (dbVendors && dbVendors.length > 0) {
-      const totalVendors = dbVendors.length;
-      const activeVendors = dbVendors.filter((v) => v.status === "VERIFIED").length;
-      const disabledVendors = dbVendors.filter((v) => v.status !== "VERIFIED").length;
+    // Neon DB is active: compute strictly from database (even if 0 vendors or 0 tours)
+    const totalVendors = dbVendors.length;
+    const activeVendors = dbVendors.filter((v) => v.status === "VERIFIED").length;
+    const disabledVendors = dbVendors.filter((v) => v.status !== "VERIFIED").length;
 
-      const totalTours = dbListings.length;
-      const approvedTours = dbListings.filter((l) => l.status === "PUBLISHED").length;
-      const pendingTours = dbListings.filter((l) => l.status === "PENDING_APPROVAL").length;
-      const rejectedTours = dbListings.filter((l) => l.status === "ARCHIVED" || l.status === "DRAFT").length;
+    const totalTours = dbListings.length;
+    const approvedTours = dbListings.filter((l) => l.status === "PUBLISHED").length;
+    const pendingTours = dbListings.filter((l) => l.status === "PENDING_APPROVAL").length;
+    const rejectedTours = dbListings.filter((l) => l.status === "ARCHIVED" || l.status === "DRAFT").length;
 
-      const totalPrice = dbListings.reduce((acc, l) => acc + Number(l.basePrice || 0), 0);
-      const avgPrice = totalTours > 0 ? Math.round(totalPrice / totalTours) : 0;
+    const totalPrice = dbListings.reduce((acc, l) => acc + Number(l.basePrice || 0), 0);
+    const avgPrice = totalTours > 0 ? Math.round(totalPrice / totalTours) : 0;
 
-      // Group tours by destination
-      const destinationMap: { [dest: string]: number } = {};
-      dbListings.forEach((l) => {
-        const dest = l.destination?.name || l.city || "Other";
-        destinationMap[dest] = (destinationMap[dest] || 0) + 1;
-      });
+    // Group tours by destination
+    const destinationMap: { [dest: string]: number } = {};
+    dbListings.forEach((l) => {
+      const dest = l.destination?.name || l.city || "Other";
+      destinationMap[dest] = (destinationMap[dest] || 0) + 1;
+    });
 
-      const destinations = Object.entries(destinationMap).map(([name, count]) => ({
-        name,
-        count,
-        percent: Math.round((count / (totalTours || 1)) * 100),
-      }));
+    const destinations = Object.entries(destinationMap).map(([name, count]) => ({
+      name,
+      count,
+      percent: Math.round((count / (totalTours || 1)) * 100),
+    }));
 
-      // Vendor directory with real tour counts
-      const vendorsWithCounts = dbVendors.map((v) => {
-        const details = (v.bankDetails as any) || {};
-        return {
-          id: v.id,
-          companyName: v.businessName,
-          city: v.city,
-          tourismLicense: v.cnicOrTaxNumber || "DTS-VERIFIED",
-          phone1: details.phone1 || v.phone,
-          status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
-          listingsCount: v.listings.length,
-        };
-      });
+    // Vendor directory with real synchronized tour counts
+    const vendorsWithCounts = dbVendors.map((v) => {
+      const details = (v.bankDetails as any) || {};
+      const vendorListings = dbListings.filter((l) => l.vendorId === v.id);
+      return {
+        id: v.id,
+        companyName: v.businessName,
+        city: v.city,
+        tourismLicense: v.cnicOrTaxNumber || "DTS-VERIFIED",
+        phone1: details.phone1 || v.phone,
+        status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
+        listingsCount: vendorListings.length,
+      };
+    });
 
-      // Recent listings
-      const recentListings = dbListings.slice(0, 6).map((l) => ({
-        id: l.id,
-        slug: l.slug,
-        title: l.title,
-        destinationName: l.destination?.name || l.city,
-        province: l.destination?.province || "Pakistan",
-        basePrice: Number(l.basePrice),
-        duration: "5 Days / 4 Nights",
-        photos: l.photos.length > 0 ? l.photos : ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
-        moderationStatus: l.status === "PUBLISHED" ? ("APPROVED" as const) : l.status === "PENDING_APPROVAL" ? ("PENDING_APPROVAL" as const) : ("REJECTED" as const),
-        vendor: {
-          id: l.vendorId,
-          businessName: l.vendor?.businessName || "Partner Agency",
-        },
-      }));
+    // Recent listings
+    const recentListings = dbListings.slice(0, 8).map((l) => ({
+      id: l.id,
+      slug: l.slug,
+      title: l.title,
+      destinationName: l.destination?.name || l.city,
+      province: l.destination?.province || "Pakistan",
+      basePrice: Number(l.basePrice),
+      duration: "5 Days / 4 Nights",
+      photos: l.photos.length > 0 ? l.photos : ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
+      moderationStatus: l.status === "PUBLISHED" ? ("APPROVED" as const) : l.status === "PENDING_APPROVAL" ? ("PENDING_APPROVAL" as const) : ("REJECTED" as const),
+      vendor: {
+        id: l.vendorId,
+        businessName: l.vendor?.businessName || "Partner Agency",
+      },
+    }));
 
-      return NextResponse.json({
-        success: true,
-        stats: {
-          totalVendors,
-          activeVendors,
-          disabledVendors,
-          totalTours,
-          approvedTours,
-          pendingTours,
-          rejectedTours,
-          avgPrice,
-        },
-        destinations,
-        vendors: vendorsWithCounts,
-        recentListings,
-      });
-    }
-
-    // 2. Fallback to in-memory store
+    return NextResponse.json({
+      success: true,
+      stats: {
+        totalVendors,
+        activeVendors,
+        disabledVendors,
+        totalTours,
+        approvedTours,
+        pendingTours,
+        rejectedTours,
+        avgPrice,
+      },
+      destinations,
+      vendors: vendorsWithCounts,
+      recentListings,
+    });
+  } catch (error: any) {
+    console.error("Neon DB overview query error, falling back to memory:", error);
+    // Fallback to in-memory store ONLY if DB network connection completely fails
     const vendors = getAllVendors();
     const listings = getAllListingsForAdmin();
 
@@ -130,10 +137,5 @@ export async function GET() {
       vendors: [],
       recentListings: [],
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
   }
 }

@@ -16,34 +16,33 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    if (dbVendors && dbVendors.length > 0) {
-      const formatted = dbVendors.map((v) => {
-        const details = (v.bankDetails as any) || {};
-        return {
-          id: v.id,
-          companyName: v.businessName,
-          city: v.city,
-          tourismLicense: v.cnicOrTaxNumber || "DTS-VERIFIED",
-          phone1: details.phone1 || v.phone,
-          phone2: details.phone2 || "",
-          phone3: details.phone3 || "",
-          email: details.email || `${v.id}@pakistantravel.agency`,
-          loginId: details.loginId || v.id.replace("v-", ""),
-          passwordPlain: details.passwordPlain || "vendor123",
-          status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
-          commissionRate: v.commissionRate,
-          listingsCount: v.listings.length,
-          createdAt: v.createdAt.toISOString(),
-        };
-      });
+    const formatted = dbVendors.map((v) => {
+      const details = (v.bankDetails as any) || {};
+      return {
+        id: v.id,
+        companyName: v.businessName,
+        city: v.city,
+        tourismLicense: v.cnicOrTaxNumber || "DTS-VERIFIED",
+        phone1: details.phone1 || v.phone,
+        phone2: details.phone2 || "",
+        phone3: details.phone3 || "",
+        email: details.email || `${v.id}@pakistantravel.agency`,
+        loginId: details.loginId || v.id.replace("v-", ""),
+        passwordPlain: details.passwordPlain || "vendor123",
+        status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
+        commissionRate: v.commissionRate,
+        listingsCount: v.listings.length,
+        createdAt: v.createdAt.toISOString(),
+      };
+    });
 
-      return NextResponse.json({
-        success: true,
-        vendors: formatted,
-      });
-    }
-
-    // 2. Fallback to in-memory store
+    return NextResponse.json({
+      success: true,
+      vendors: formatted,
+    });
+  } catch (error: any) {
+    console.error("Neon DB vendor query error, falling back to memory:", error);
+    // Fallback to in-memory store ONLY if DB network connection completely fails
     const vendors = getAllVendors();
     const allListings = getAllListingsForAdmin();
     const vendorsWithCounts = vendors.map((v) => {
@@ -57,17 +56,6 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       vendors: vendorsWithCounts,
-    });
-  } catch (error: any) {
-    // Fallback if DB query fails
-    const vendors = getAllVendors();
-    const allListings = getAllListingsForAdmin();
-    return NextResponse.json({
-      success: true,
-      vendors: vendors.map((v) => ({
-        ...v,
-        listingsCount: allListings.filter((l) => l.vendor?.id === v.id).length,
-      })),
     });
   }
 }

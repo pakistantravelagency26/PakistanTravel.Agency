@@ -15,12 +15,32 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  let includeAll = false;
   try {
     const { searchParams } = new URL(req.url);
-    const includeAll = searchParams.get("all") === "true" || searchParams.get("includeDisabled") === "true";
+    includeAll = searchParams.get("all") === "true" || searchParams.get("includeDisabled") === "true";
+    const vendorId = searchParams.get("vendorId");
 
-    // 1. Query from Neon PostgreSQL Database for 100% persistent data
+    // 1. Fetch valid existing vendors from DB
+    const dbVendors = await prisma.vendor.findMany({ select: { id: true, status: true } });
+    const validVendorIds = new Set(dbVendors.map((v) => v.id));
+
+    // 2. Query from Neon PostgreSQL Database for existing vendors only
+    const whereCondition: any = {
+      vendorId: { in: Array.from(validVendorIds) },
+    };
+    if (vendorId && validVendorIds.has(vendorId)) {
+      whereCondition.vendorId = vendorId;
+    } else if (vendorId) {
+      // Requested a vendor that does not exist in DB
+      return NextResponse.json({
+        success: true,
+        listings: [],
+      });
+    }
+
     const dbListings = await prisma.listing.findMany({
+      where: whereCondition,
       include: {
         vendor: true,
         destination: true,
@@ -28,8 +48,7 @@ export async function GET(req: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    if (dbListings && dbListings.length > 0) {
-      let formatted: ListingData[] = dbListings.map((l) => ({
+    let formatted: ListingData[] = dbListings.map((l) => ({
         id: l.id,
         slug: l.slug,
         title: l.title,
@@ -75,16 +94,9 @@ export async function GET(req: Request) {
         success: true,
         listings: formatted,
       });
-    }
-
-    // 2. Fallback to in-memory store
-    const listings = includeAll ? getAllListingsForAdmin() : getActiveListings();
-    return NextResponse.json({
-      success: true,
-      listings,
-    });
   } catch (error: any) {
-    const listings = getAllListingsForAdmin();
+    console.error("Neon DB listings query error, falling back to memory:", error);
+    const listings = includeAll ? getAllListingsForAdmin() : getActiveListings();
     return NextResponse.json({
       success: true,
       listings,
@@ -290,16 +302,18 @@ export async function DELETE(req: Request) {
     }
 
     // 1. Delete permanently from Neon PostgreSQL Database
-    let deletedFromDb = false;
     try {
+      await prisma.listingUnit.deleteMany({ where: { listingId: id } }).catch(() => {});
+      await prisma.review.deleteMany({ where: { listingId: id } }).catch(() => {});
+      await prisma.booking.deleteMany({ where: { listingId: id } }).catch(() => {});
+      await prisma.wishlist.deleteMany({ where: { listingId: id } }).catch(() => {});
       await prisma.listing.delete({ where: { id } });
-      deletedFromDb = true;
     } catch (dbErr) {
       console.warn("DB listing delete error:", dbErr);
     }
 
     // 2. Also delete from in-memory store
-    const deletedLocally = deleteListing(id);
+    deleteListing(id);
 
     return NextResponse.json({
       success: true,
