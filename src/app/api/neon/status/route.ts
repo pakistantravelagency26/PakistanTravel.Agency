@@ -5,10 +5,13 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const rawUrl = process.env.DATABASE_URL || "NOT_SET";
+    const maskedUrl = rawUrl === "NOT_SET" ? "NOT_SET" : rawUrl.replace(/:[^:@]+@/, ":***@");
     const health = await checkNeonHealth();
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
+      databaseUrlMasked: maskedUrl,
       services: health,
     });
   } catch (error: any) {
