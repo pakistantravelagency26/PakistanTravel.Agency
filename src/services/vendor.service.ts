@@ -166,3 +166,35 @@ export async function createVendorAccount(data: {
 
   return newVendor;
 }
+
+export function deleteVendorAccount(vendorId: string): boolean {
+  const vendorIdx = VENDORS_STORE.findIndex((v) => v.id === vendorId);
+  if (vendorIdx === -1) return false;
+
+  const vendor = VENDORS_STORE[vendorIdx];
+  // 1. Remove from VENDORS_STORE
+  VENDORS_STORE.splice(vendorIdx, 1);
+
+  // 2. Remove corresponding user credentials from USERS_STORE
+  const userIdx = USERS_STORE.findIndex(
+    (u) =>
+      u.vendorId === vendorId ||
+      u.email.toLowerCase() === vendor.email.toLowerCase() ||
+      (u.username && u.username.toLowerCase() === vendor.loginId.toLowerCase())
+  );
+  if (userIdx >= 0) {
+    USERS_STORE.splice(userIdx, 1);
+  }
+
+  // 3. Remove all tours from this vendor
+  try {
+    const { deleteListingsByVendorId } = require("./listing.service");
+    if (typeof deleteListingsByVendorId === "function") {
+      deleteListingsByVendorId(vendorId);
+    }
+  } catch (err) {
+    console.error("Failed to delete listings for vendor:", err);
+  }
+
+  return true;
+}

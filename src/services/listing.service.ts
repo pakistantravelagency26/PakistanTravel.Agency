@@ -950,3 +950,14 @@ export function deleteListing(id: string): boolean {
   }
   return false;
 }
+
+export function deleteListingsByVendorId(vendorId: string): number {
+  let count = 0;
+  for (let i = MOCK_LISTINGS.length - 1; i >= 0; i--) {
+    if (MOCK_LISTINGS[i].vendor?.id === vendorId) {
+      MOCK_LISTINGS.splice(i, 1);
+      count++;
+    }
+  }
+  return count;
+}
