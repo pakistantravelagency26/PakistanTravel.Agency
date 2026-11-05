@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MOCK_LISTINGS, getActiveListings, createNewListing, ListingData } from "@/services/listing.service";
+import { MOCK_LISTINGS, getActiveListings, getAllListingsForAdmin, createNewListing, updateListing, ListingData } from "@/services/listing.service";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const includeDisabled = searchParams.get("includeDisabled") === "true";
-    const listings = includeDisabled ? MOCK_LISTINGS : getActiveListings();
+    const includeAll = searchParams.get("all") === "true" || searchParams.get("includeDisabled") === "true";
+    const listings = includeAll ? getAllListingsForAdmin() : getActiveListings();
 
     return NextResponse.json({
       success: true,
@@ -66,6 +66,9 @@ export async function POST(req: Request) {
       id: uniqueSlug,
       slug: uniqueSlug,
       title: body.title,
+      moderationStatus: "PENDING_APPROVAL",
+      isEdited: false,
+      submittedAt: new Date().toISOString(),
       type: body.type || "TOUR",
       duration: body.duration || "5 Days / 4 Nights",
       destinationSlug: body.destinationSlug || body.destination || "hunza",
@@ -176,5 +179,47 @@ export async function POST(req: Request) {
       { success: false, error: error.message },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    if (!body.id) {
+      return NextResponse.json({ success: false, error: "Listing ID is required" }, { status: 400 });
+    }
+
+    const updates: Partial<ListingData> = {
+      title: body.title,
+      basePrice: body.basePrice ? Number(body.basePrice) : undefined,
+      duration: body.duration,
+      city: body.city,
+      description: body.description,
+      amenities: Array.isArray(body.amenities) ? body.amenities : undefined,
+      photos: Array.isArray(body.photos) ? body.photos : undefined,
+      moderationStatus: "PENDING_APPROVAL", // Re-enters moderation queue
+      isEdited: true, // Marked as edited for Super Admin inspection
+      submittedAt: new Date().toISOString(),
+    };
+
+    // Remove undefined fields
+    Object.keys(updates).forEach((key) => {
+      if ((updates as any)[key] === undefined) {
+        delete (updates as any)[key];
+      }
+    });
+
+    const updated = updateListing(body.id, updates);
+    if (!updated) {
+      return NextResponse.json({ success: false, error: "Listing not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Tour changes saved and submitted to Super Admin for re-approval.",
+      listing: updated,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

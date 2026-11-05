@@ -1,114 +1,610 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Building2, CheckCircle2, XCircle, ExternalLink, ShieldCheck } from "lucide-react";
+import { 
+  Building2, 
+  CheckCircle2, 
+  XCircle, 
+  AlertCircle, 
+  ExternalLink, 
+  ShieldCheck, 
+  Search, 
+  Clock, 
+  MapPin, 
+  DollarSign, 
+  Sparkles, 
+  Check, 
+  Eye, 
+  RotateCcw,
+  Calendar,
+  Layers,
+  FileText,
+  UserCheck
+} from "lucide-react";
+import { ListingData } from "@/services/listing.service";
 
 export default function AdminListingsPage() {
-  const [pendingListings, setPendingListings] = useState([
-    {
-      id: "serena-shigar-fort",
-      title: "Serena Shigar Fort - The Palace on the Rock",
-      type: "HOTEL",
-      vendor: "Hunza Serena Hospitality Ltd",
-      destination: "Shigar Valley, Skardu",
-      basePrice: 42000,
-      photos: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80",
-      status: "PENDING_APPROVAL",
-      cancellationDays: 2,
-    },
-    {
-      id: "kumrat-luxury-camps",
-      title: "Kumrat Valley Alpine Riverside Glamping",
-      type: "HOTEL",
-      vendor: "Swat Green Valley Resorts",
-      destination: "Kumrat Valley, Upper Dir",
-      basePrice: 22000,
-      photos: "https://images.unsplash.com/photo-1596761011406-8d18d4052973?w=800&auto=format&fit=crop&q=80",
-      status: "PENDING_APPROVAL",
-      cancellationDays: 1,
-    },
-  ]);
+  const [listings, setListings] = useState<ListingData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED">("PENDING_APPROVAL");
 
-  function handleAction(id: string, newStatus: string) {
-    setPendingListings((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
-    );
+  // Deep Inspection Modal State
+  const [selectedTour, setSelectedTour] = useState<ListingData | null>(null);
+  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionMessage, setActionMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
+
+  async function fetchListings() {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/listings");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.listings)) {
+        setListings(data.listings);
+      }
+    } catch (err) {
+      console.error("Error fetching listings for moderation:", err);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  async function handleModerate(id: string, action: "APPROVE" | "REJECT", notes?: string) {
+    setActionLoading(true);
+    setActionMessage(null);
+
+    try {
+      const res = await fetch(`/api/admin/listings/${id}/moderate`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, notes: notes || adminNotes }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setListings((prev) =>
+          prev.map((l) => (l.id === id ? { ...l, ...data.listing } : l))
+        );
+        setActionMessage({
+          type: "success",
+          text:
+            action === "APPROVE"
+              ? `Tour "${data.listing.title}" is now APPROVED & LIVE on PakistanTravel.Agency!`
+              : `Tour "${data.listing.title}" was marked as revision required / rejected.`,
+        });
+        if (selectedTour?.id === id) {
+          setSelectedTour(data.listing);
+        }
+        setTimeout(() => {
+          setSelectedTour(null);
+          setAdminNotes("");
+        }, 1500);
+      } else {
+        setActionMessage({ type: "error", text: data.error || "Failed to process moderation." });
+      }
+    } catch (err: any) {
+      setActionMessage({ type: "error", text: "Network error during moderation." });
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  // Filter & Search
+  const filteredListings = listings.filter((l) => {
+    const query = searchQuery.toLowerCase().trim();
+    const matchSearch =
+      !query ||
+      l.title.toLowerCase().includes(query) ||
+      l.city.toLowerCase().includes(query) ||
+      l.destinationName.toLowerCase().includes(query) ||
+      l.vendor?.businessName?.toLowerCase().includes(query);
+
+    const effectiveStatus = l.moderationStatus || "APPROVED";
+    if (statusFilter === "ALL") return matchSearch;
+    return matchSearch && effectiveStatus === statusFilter;
+  });
+
+  const pendingCount = listings.filter((l) => l.moderationStatus === "PENDING_APPROVAL").length;
+  const approvedCount = listings.filter((l) => !l.moderationStatus || l.moderationStatus === "APPROVED").length;
+  const rejectedCount = listings.filter((l) => l.moderationStatus === "REJECTED").length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Listing Moderation Queue</h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Verify photos, amenities, pricing, and hotel policies before publishing to travelers
-        </p>
+      {/* Page Header */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold mb-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Listing Quality & Compliance Gate</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Listing Moderation Queue
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Review new tour submissions and modified packages from all vendors. Inspect itineraries, pricing, photos, and policies in detail before approving them live for public travelers.
+          </p>
+        </div>
+
+        {pendingCount > 0 && (
+          <div className="px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-2.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-xs font-bold">{pendingCount} Tours Awaiting Your Review</span>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {pendingListings.map((item) => (
-          <div
-            key={item.id}
-            className="bg-slate-800/80 rounded-2xl border border-slate-700 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="relative h-48">
-              <img src={item.photos} alt={item.title} className="w-full h-full object-cover" />
-              <div className="absolute top-3 left-3 flex gap-2">
-                <span className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2 py-0.5 rounded shadow">
-                  {item.status === "PENDING_APPROVAL" ? "Awaiting Admin Review" : "Published"}
-                </span>
-                <span className="bg-slate-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-sm">
-                  {item.type}
-                </span>
+      {/* Global Action Banner */}
+      {actionMessage && (
+        <div
+          className={`p-4 rounded-2xl text-xs font-semibold flex items-center justify-between ${
+            actionMessage.type === "success"
+              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+              : "bg-red-50 border border-red-200 text-red-800"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {actionMessage.type === "success" ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span>{actionMessage.text}</span>
+          </div>
+          <button onClick={() => setActionMessage(null)} className="font-bold">✕</button>
+        </div>
+      )}
+
+      {/* Stats Counter Bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <button
+          onClick={() => setStatusFilter("PENDING_APPROVAL")}
+          className={`text-left p-5 rounded-2xl border transition shadow-sm ${
+            statusFilter === "PENDING_APPROVAL"
+              ? "bg-amber-50/80 border-amber-300 ring-2 ring-amber-400"
+              : "bg-white border-slate-200/80 hover:bg-slate-50"
+          }`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">Pending Moderation</span>
+          <div className="text-2xl font-extrabold text-amber-800 mt-1">{pendingCount}</div>
+          <p className="text-[11px] text-amber-600/90 mt-0.5">Awaiting Super Admin review</p>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("APPROVED")}
+          className={`text-left p-5 rounded-2xl border transition shadow-sm ${
+            statusFilter === "APPROVED"
+              ? "bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500"
+              : "bg-white border-slate-200/80 hover:bg-slate-50"
+          }`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Approved & Live</span>
+          <div className="text-2xl font-extrabold text-emerald-800 mt-1">{approvedCount}</div>
+          <p className="text-[11px] text-emerald-600/90 mt-0.5">Live on public website</p>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("REJECTED")}
+          className={`text-left p-5 rounded-2xl border transition shadow-sm ${
+            statusFilter === "REJECTED"
+              ? "bg-red-50/80 border-red-300 ring-2 ring-red-400"
+              : "bg-white border-slate-200/80 hover:bg-slate-50"
+          }`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 block">Revision Requested</span>
+          <div className="text-2xl font-extrabold text-red-700 mt-1">{rejectedCount}</div>
+          <p className="text-[11px] text-red-600/90 mt-0.5">Returned to vendor</p>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("ALL")}
+          className={`text-left p-5 rounded-2xl border transition shadow-sm ${
+            statusFilter === "ALL"
+              ? "bg-slate-100 border-slate-300 ring-2 ring-slate-400"
+              : "bg-white border-slate-200/80 hover:bg-slate-50"
+          }`}
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">All Listings</span>
+          <div className="text-2xl font-extrabold text-slate-900 mt-1">{listings.length}</div>
+          <p className="text-[11px] text-slate-500 mt-0.5">Total across all partners</p>
+        </button>
+      </div>
+
+      {/* Filter Tabs & Search */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full sm:w-96">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <input
+            type="text"
+            placeholder="Search by tour title, vendor name, or destination..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 self-stretch sm:self-auto overflow-x-auto pb-1 sm:pb-0">
+          {(
+            [
+              { id: "PENDING_APPROVAL", label: `Pending Review (${pendingCount})` },
+              { id: "APPROVED", label: `Approved & Live (${approvedCount})` },
+              { id: "REJECTED", label: `Rejected (${rejectedCount})` },
+              { id: "ALL", label: `All Tours (${listings.length})` },
+            ] as const
+          ).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setStatusFilter(t.id)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                statusFilter === t.id
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Listings Grid */}
+      {loading ? (
+        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center text-slate-400 text-xs">
+          Loading tour moderation queue...
+        </div>
+      ) : filteredListings.length === 0 ? (
+        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-2">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
+            <Building2 className="w-6 h-6" />
+          </div>
+          <h3 className="font-extrabold text-slate-800 text-sm">No Listings Found</h3>
+          <p className="text-xs text-slate-500">
+            {statusFilter === "PENDING_APPROVAL"
+              ? "All caught up! There are no pending tour packages waiting for approval right now."
+              : "No tour packages found matching the selected filters."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredListings.map((item) => {
+            const isPending = item.moderationStatus === "PENDING_APPROVAL";
+            const isRejected = item.moderationStatus === "REJECTED";
+            const isApproved = !item.moderationStatus || item.moderationStatus === "APPROVED";
+
+            return (
+              <div
+                key={item.id}
+                className={`bg-white rounded-3xl border transition overflow-hidden shadow-sm hover:shadow-md flex flex-col justify-between ${
+                  isPending
+                    ? "border-amber-300 ring-1 ring-amber-200"
+                    : isRejected
+                    ? "border-red-200 bg-red-50/20"
+                    : "border-slate-200"
+                }`}
+              >
+                <div>
+                  {/* Tour Image + Status Badges */}
+                  <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
+                    <img
+                      src={item.photos[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+
+                    <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+                      {isPending ? (
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500 text-slate-950 font-extrabold text-[10px] shadow-md flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{item.isEdited ? "Updated Tour — Re-approval Required" : "New Tour — Awaiting Approval"}</span>
+                        </span>
+                      ) : isRejected ? (
+                        <span className="px-2.5 py-1 rounded-full bg-red-600 text-white font-extrabold text-[10px] shadow-md flex items-center gap-1">
+                          <XCircle className="w-3 h-3" />
+                          <span>Revision Requested</span>
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-600 text-white font-extrabold text-[10px] shadow-md flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Live on Marketplace</span>
+                        </span>
+                      )}
+
+                      <span className="px-2 py-0.5 rounded-md bg-slate-900/80 backdrop-blur-sm text-white text-[9px] font-bold">
+                        {item.type}
+                      </span>
+                    </div>
+
+                    {item.duration && (
+                      <span className="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-sm text-slate-900 text-[10px] font-bold shadow-sm">
+                        {item.duration}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 space-y-3">
+                    <div>
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700">
+                        <MapPin className="w-3 h-3" />
+                        <span>{item.destinationName} ({item.province})</span>
+                      </div>
+
+                      <h3 className="font-extrabold text-sm text-slate-900 mt-1 line-clamp-2 leading-snug">
+                        {item.title}
+                      </h3>
+
+                      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-1.5">
+                        <UserCheck className="w-3 h-3 text-slate-400" />
+                        <span>Submitted by: </span>
+                        <strong className="text-slate-800 font-semibold">{item.vendor?.businessName || "Partner Agency"}</strong>
+                      </div>
+                    </div>
+
+                    {/* Price & Cancellation Pills */}
+                    <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
+                      <div>
+                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Package Price</span>
+                        <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                          PKR {item.basePrice.toLocaleString()}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Cancellation</span>
+                        <span className="font-bold text-emerald-600 text-xs">
+                          {item.freeCancellationDays || 3} Days Free
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="p-4 pt-0 space-y-2">
+                  {/* Primary Review Button */}
+                  <button
+                    onClick={() => {
+                      setSelectedTour(item);
+                      setActivePhotoIdx(0);
+                      setAdminNotes(item.moderationNotes || "");
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-sm"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Review & Inspect (Check All Details)</span>
+                  </button>
+
+                  {/* Quick Action Buttons for Pending */}
+                  {isPending && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleModerate(item.id, "APPROVE")}
+                        className="py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve Live</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setSelectedTour(item);
+                          setActivePhotoIdx(0);
+                          setAdminNotes("");
+                        }}
+                        className="py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs flex items-center justify-center gap-1 transition"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Reject / Notes</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            );
+          })}
+        </div>
+      )}
 
-            <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+      {/* DEEP INSPECTION MODAL (AK AK CHEEZ YAHAN SE CHECK HOGI) */}
+      {selectedTour && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+          <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto space-y-6">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
               <div>
-                <h3 className="font-bold text-base text-white">{item.title}</h3>
-                <p className="text-xs text-emerald-400 mt-0.5">{item.destination}</p>
-                <p className="text-xs text-slate-400 mt-1">Submitted by: <span className="text-slate-200 font-semibold">{item.vendor}</span></p>
-
-                <div className="mt-3 p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 flex justify-between text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase block">Starting Rate</span>
-                    <span className="font-extrabold text-white text-sm">
-                      PKR {item.basePrice.toLocaleString()}
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">
+                    Tour Package Compliance Inspection
+                  </span>
+                  {selectedTour.isEdited && (
+                    <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">
+                      Vendor Updated Existing Tour
                     </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase block">Cancellation</span>
-                    <span className="text-emerald-400 font-bold">{item.cancellationDays} Days Free</span>
-                  </div>
+                  )}
+                </div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
+                  {selectedTour.title}
+                </h2>
+                <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                  <span>Operated by:</span>
+                  <strong className="text-slate-800">{selectedTour.vendor?.businessName}</strong>
+                  <span>•</span>
+                  <span>Vendor ID: <code className="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">{selectedTour.vendor?.id}</code></span>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-700 flex items-center justify-between">
-                {item.status === "PENDING_APPROVAL" ? (
-                  <div className="flex gap-2 w-full">
+              <button
+                onClick={() => setSelectedTour(null)}
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Photo Gallery Viewer */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                1. Uploaded Photos Gallery ({selectedTour.photos.length} Photos)
+              </span>
+
+              <div className="relative h-64 sm:h-80 w-full rounded-2xl overflow-hidden bg-slate-950">
+                <img
+                  src={selectedTour.photos[activePhotoIdx] || selectedTour.photos[0]}
+                  alt="Tour Photo Preview"
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                  Photo {activePhotoIdx + 1} of {selectedTour.photos.length}
+                </span>
+              </div>
+
+              {selectedTour.photos.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  {selectedTour.photos.map((url, idx) => (
                     <button
-                      onClick={() => handleAction(item.id, "PUBLISHED")}
-                      className="flex-1 py-2 bg-brand-emerald hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition shadow"
+                      key={idx}
+                      onClick={() => setActivePhotoIdx(idx)}
+                      className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition ${
+                        activePhotoIdx === idx ? "border-emerald-600 scale-105" : "border-transparent opacity-70 hover:opacity-100"
+                      }`}
                     >
-                      Approve & Publish Live
+                      <img src={url} alt="Thumbnail" className="w-full h-full object-cover" />
                     </button>
-                    <button
-                      onClick={() => handleAction(item.id, "REJECTED")}
-                      className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 font-bold text-xs rounded-xl transition border border-red-500/30"
-                    >
-                      Request Revisions
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4" /> Published to Marketplace
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Detailed Parameters Grid (Ek ek cheez) */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                2. Operational & Pricing Specifications
+              </span>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Starting Price</span>
+                  <span className="font-extrabold text-slate-900 text-sm">PKR {selectedTour.basePrice.toLocaleString()}</span>
+                  <span className="text-[10px] text-slate-500 block">per person</span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Tour Duration</span>
+                  <span className="font-extrabold text-slate-900 text-sm">{selectedTour.duration || "Multi-Day"}</span>
+                  <span className="text-[10px] text-slate-500 block">Itinerary Length</span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Destination & Region</span>
+                  <span className="font-extrabold text-slate-900 text-sm">{selectedTour.city}</span>
+                  <span className="text-[10px] text-slate-500 block">{selectedTour.province}</span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cancellation Policy</span>
+                  <span className="font-extrabold text-emerald-700 text-sm">{selectedTour.freeCancellationDays || 3} Days Free</span>
+                  <span className="text-[10px] text-slate-500 block">100% Refundable</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Included Amenities & Services */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                3. Included Amenities & Inclusions
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {selectedTour.amenities.map((amenity, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold"
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{amenity}</span>
                   </span>
-                )}
+                ))}
+              </div>
+            </div>
+
+            {/* Full Description & Itinerary Details */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                4. Full Package Description & Overview
+              </span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+                {selectedTour.description}
+              </div>
+            </div>
+
+            {/* Edit Alert Warning if modified */}
+            {selectedTour.isEdited && (
+              <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 text-xs flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-purple-600 shrink-0" />
+                <div>
+                  <p className="font-bold">Notice: Vendor Modified This Package</p>
+                  <p className="text-[11px] text-purple-700 mt-0.5">
+                    This tour was previously approved, but the vendor has updated prices or details. Please verify all information before publishing it back live to travelers.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Admin Decision & Notes Panel */}
+            <div className="pt-4 border-t border-slate-200 space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                  Admin Feedback / Revision Notes (Optional for Rejections)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Please upload higher resolution photos for Deosai Plains, or correct the pickup location."
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <Link
+                  href={`/listing/${selectedTour.slug}`}
+                  target="_blank"
+                  className="text-xs font-bold text-sky-600 hover:underline flex items-center gap-1.5"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Preview as Traveler</span>
+                </Link>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={() => handleModerate(selectedTour.id, "REJECT", adminNotes)}
+                    className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs transition disabled:opacity-50"
+                  >
+                    Reject / Request Changes
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={() => handleModerate(selectedTour.id, "APPROVE")}
+                    className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Approve & Publish Live</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

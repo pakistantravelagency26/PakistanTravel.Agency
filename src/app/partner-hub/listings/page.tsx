@@ -29,7 +29,7 @@ export default function VendorListingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
-    fetch("/api/listings")
+    fetch("/api/listings?all=true")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.listings)) {
@@ -50,30 +50,47 @@ export default function VendorListingsPage() {
     });
   }
 
-  function handleSaveEdit(e: React.FormEvent) {
+  async function handleSaveEdit(e: React.FormEvent) {
     e.preventDefault();
     if (!editingTour) return;
 
-    setTours((prev) =>
-      prev.map((t) =>
-        t.id === editingTour.id
-          ? {
-              ...t,
-              title: editForm.title,
-              basePrice: Number(editForm.basePrice),
-              duration: editForm.duration,
-              city: editForm.city,
-              description: editForm.description,
-            }
-          : t
-      )
-    );
+    try {
+      const res = await fetch("/api/listings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingTour.id,
+          title: editForm.title,
+          basePrice: Number(editForm.basePrice),
+          duration: editForm.duration,
+          city: editForm.city,
+          description: editForm.description,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTours((prev) =>
+          prev.map((t) =>
+            t.id === editingTour.id
+              ? {
+                  ...t,
+                  ...data.listing,
+                  moderationStatus: "PENDING_APPROVAL",
+                  isEdited: true,
+                }
+              : t
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Save edit error:", err);
+    }
 
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);
       setEditingTour(null);
-    }, 1200);
+    }, 1500);
   }
 
   function handleDelete(id: string) {
@@ -116,9 +133,19 @@ export default function VendorListingsPage() {
             <div className="relative h-48">
               <img src={item.photos[0]} alt={item.title} className="w-full h-full object-cover" />
               <div className="absolute top-3 left-3 flex gap-2">
-                <span className="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow">
-                  Live on Marketplace
-                </span>
+                {item.moderationStatus === "PENDING_APPROVAL" ? (
+                  <span className="bg-amber-500 text-slate-950 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow">
+                    {item.isEdited ? "Edited · Awaiting Re-Approval" : "Under Admin Review"}
+                  </span>
+                ) : item.moderationStatus === "REJECTED" ? (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow">
+                    Revision Requested
+                  </span>
+                ) : (
+                  <span className="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow">
+                    Live on Marketplace
+                  </span>
+                )}
                 {item.badge && (
                   <span className="bg-slate-900/80 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                     {item.badge}

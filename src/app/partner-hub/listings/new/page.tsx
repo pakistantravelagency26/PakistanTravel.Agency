@@ -169,15 +169,15 @@ export default function NewListingPage() {
       </div>
 
       {submitted && (
-        <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-3 shadow-lg animate-in fade-in">
-          <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-600" />
+        <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-3 shadow-lg animate-in fade-in">
+          <Clock className="w-6 h-6 shrink-0 text-amber-600" />
           <div className="space-y-1">
-            <span className="font-bold text-sm text-emerald-950 block">🎉 Tour Published Successfully to Marketplace!</span>
-            <p className="text-emerald-800">Your listing is now active and will appear on the homepage and catalog search results.</p>
+            <span className="font-bold text-sm text-amber-950 block">🎉 Tour Package Submitted for Admin Review!</span>
+            <p className="text-amber-800">Your tour has been submitted to PakistanTravel.Agency Super Admin. It will undergo listing moderation and will go live across the marketplace once approved.</p>
             {createdSlug && (
               <p className="pt-2">
                 <Link href={`/listing/${createdSlug}`} target="_blank" className="font-bold text-sky-700 underline hover:text-sky-900">
-                  Click here to view your live listing →
+                  Preview listing draft →
                 </Link>
               </p>
             )}

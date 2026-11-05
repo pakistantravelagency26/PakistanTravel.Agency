@@ -33,6 +33,11 @@ export interface ListingData {
   badge?: string;
   duration?: string;
   cancellationPolicy: string;
+  moderationStatus?: "APPROVED" | "PENDING_APPROVAL" | "REJECTED";
+  isEdited?: boolean;
+  moderationNotes?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
   vendor: {
     id: string;
     businessName: string;
@@ -871,8 +876,12 @@ export async function getListings(filters?: {
   amenities?: string[];
   sortBy?: string;
 }): Promise<ListingData[]> {
-  // Exclude listings from disabled vendors
-  let results = MOCK_LISTINGS.filter((l) => isVendorEnabled(l.vendor?.id));
+  // Exclude listings from disabled vendors and unapproved listings
+  let results = MOCK_LISTINGS.filter((l) => {
+    const isVendorLive = isVendorEnabled(l.vendor?.id);
+    const isApproved = !l.moderationStatus || l.moderationStatus === "APPROVED";
+    return isVendorLive && isApproved;
+  });
 
   if (filters?.destination) {
     const q = filters.destination.toLowerCase().trim();
@@ -914,7 +923,11 @@ export async function getListings(filters?: {
 }
 
 export function getActiveListings(): ListingData[] {
-  return MOCK_LISTINGS.filter((l) => isVendorEnabled(l.vendor?.id));
+  return MOCK_LISTINGS.filter((l) => {
+    const isVendorLive = isVendorEnabled(l.vendor?.id);
+    const isApproved = !l.moderationStatus || l.moderationStatus === "APPROVED";
+    return isVendorLive && isApproved;
+  });
 }
 
 export async function getListingBySlugOrId(idOrSlug: string): Promise<ListingData | null> {
@@ -960,4 +973,27 @@ export function deleteListingsByVendorId(vendorId: string): number {
     }
   }
   return count;
+}
+
+export function getAllListingsForAdmin(): ListingData[] {
+  return [...MOCK_LISTINGS];
+}
+
+export function moderateListing(
+  id: string,
+  status: "APPROVED" | "REJECTED",
+  notes?: string
+): ListingData | null {
+  const item = MOCK_LISTINGS.find((l) => l.id === id || l.slug === id);
+  if (!item) return null;
+
+  item.moderationStatus = status;
+  if (status === "APPROVED") {
+    item.isEdited = false;
+  }
+  if (notes !== undefined) {
+    item.moderationNotes = notes;
+  }
+  item.reviewedAt = new Date().toISOString();
+  return item;
 }
