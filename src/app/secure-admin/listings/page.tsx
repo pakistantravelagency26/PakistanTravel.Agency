@@ -84,7 +84,19 @@ export default function AdminListingsPage() {
 
   async function handleConfirmApproval() {
     if (!approvingTour) return;
-    await handleModerate(approvingTour.id, "APPROVE", adminNotes, commissionRate);
+    const vendorRate = approvingTour.vendorPrice || approvingTour.basePrice;
+    const commRate = Number(commissionRate) || 0;
+    const commAmt = Math.round((vendorRate * commRate) / 100);
+    const totalPublicPrice = vendorRate + commAmt;
+
+    await handleModerate(
+      approvingTour.id,
+      "APPROVE",
+      adminNotes,
+      commRate,
+      vendorRate,
+      totalPublicPrice
+    );
     setApprovingTour(null);
   }
 
@@ -92,7 +104,9 @@ export default function AdminListingsPage() {
     id: string,
     action: "APPROVE" | "REJECT",
     notes?: string,
-    customCommission?: number
+    customCommission?: number,
+    vendorPrice?: number,
+    totalPrice?: number
   ) {
     setActionLoading(true);
     setActionMessage(null);
@@ -105,6 +119,8 @@ export default function AdminListingsPage() {
           action,
           notes: notes || adminNotes,
           commissionRate: customCommission !== undefined ? customCommission : commissionRate,
+          vendorPrice,
+          totalPrice,
         }),
       });
       const data = await res.json();
@@ -117,7 +133,7 @@ export default function AdminListingsPage() {
           type: "success",
           text:
             action === "APPROVE"
-              ? `Tour "${data.listing.title}" is now APPROVED & LIVE on PakistanTravel.Agency with ${data.listing.commissionRate || commissionRate}% commission!`
+              ? `Tour "${data.listing.title}" is now APPROVED & LIVE on PakistanTravel.Agency at total price PKR ${(data.listing.basePrice || totalPrice || 0).toLocaleString()} (Vendor gets PKR ${(vendorPrice || data.listing.vendorPrice || 0).toLocaleString()} + Agency markup ${(data.listing.commissionRate || commissionRate)}%)!`
               : `Tour "${data.listing.title}" was marked as revision required / rejected.`,
         });
         if (selectedTour?.id === id) {
@@ -126,7 +142,7 @@ export default function AdminListingsPage() {
         setTimeout(() => {
           setSelectedTour(null);
           setAdminNotes("");
-        }, 1500);
+        }, 2000);
       } else {
         setActionMessage({ type: "error", text: data.error || "Failed to process moderation." });
       }
@@ -408,23 +424,23 @@ export default function AdminListingsPage() {
                     {/* Price & Cancellation Pills */}
                     <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
                       <div>
-                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Package Price</span>
-                        <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                          PKR {item.basePrice.toLocaleString()}
+                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Vendor Demanded Price</span>
+                        <span className="font-extrabold text-slate-700 text-xs sm:text-sm">
+                          PKR {(item.vendorPrice || item.basePrice).toLocaleString()}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Cancellation</span>
-                        <span className="font-bold text-emerald-600 text-xs">
-                          {item.freeCancellationDays || 3} Days Free
+                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Total Price on Web</span>
+                        <span className="font-black text-emerald-700 text-xs sm:text-sm">
+                          PKR {item.basePrice.toLocaleString()}
                         </span>
                       </div>
                       <div className="col-span-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
                         <span className="text-slate-500 font-medium flex items-center gap-1">
-                          <Percent className="w-3 h-3 text-emerald-600" /> Commission:
+                          <Percent className="w-3 h-3 text-emerald-600" /> Agency Markup:
                         </span>
                         <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          {item.commissionRate ?? 12}% (PKR {Math.round((item.basePrice * (item.commissionRate ?? 12)) / 100).toLocaleString()})
+                          +{item.commissionRate ?? 12}% (+PKR {Math.round(((item.vendorPrice || item.basePrice) * (item.commissionRate ?? 12)) / 100).toLocaleString()})
                         </span>
                       </div>
                     </div>
@@ -553,11 +569,21 @@ export default function AdminListingsPage() {
                 2. Operational & Pricing Specifications
               </span>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Starting Price</span>
-                  <span className="font-extrabold text-slate-900 text-sm">PKR {selectedTour.basePrice.toLocaleString()}</span>
-                  <span className="text-[10px] text-slate-500 block">per person</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Vendor Price</span>
+                  <span className="font-extrabold text-slate-900 text-sm">
+                    PKR {(selectedTour.vendorPrice || selectedTour.basePrice).toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">Vendor Demanded</span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <span className="text-[10px] text-emerald-700 font-bold uppercase block">Public Price on Web</span>
+                  <span className="font-black text-emerald-800 text-sm">
+                    PKR {selectedTour.basePrice.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-emerald-600 block">+{selectedTour.commissionRate ?? 12}% Commission</span>
                 </div>
 
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
@@ -706,9 +732,9 @@ export default function AdminListingsPage() {
                 <span className="font-bold text-slate-800">{approvingTour.vendor?.businessName}</span>
               </div>
               <div className="text-right">
-                <span className="text-[10px] text-slate-400 font-semibold block">Tour Package Price</span>
+                <span className="text-[10px] text-slate-400 font-semibold block">Vendor Demanded Amount</span>
                 <span className="font-extrabold text-slate-900 text-sm">
-                  PKR {approvingTour.basePrice.toLocaleString()}
+                  PKR {(approvingTour.vendorPrice || approvingTour.basePrice).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -717,9 +743,9 @@ export default function AdminListingsPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  Commission Take-Rate (%)
+                  Our Agency Commission Markup (%)
                 </label>
-                <span className="text-xs text-slate-500 font-medium">Enter rate to auto-calculate amounts</span>
+                <span className="text-xs text-slate-500 font-medium">Enter % to add to Vendor Amount</span>
               </div>
 
               <div className="flex items-center gap-3">
@@ -732,7 +758,7 @@ export default function AdminListingsPage() {
                     value={commissionRate}
                     onChange={(e) => setCommissionRate(Number(e.target.value) || 0)}
                     className="w-full pl-4 pr-10 py-3 rounded-2xl border-2 border-emerald-500/40 focus:border-emerald-600 text-lg font-black text-slate-900 focus:outline-none"
-                    placeholder="12"
+                    placeholder="10"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-sm">
                     %
@@ -761,57 +787,58 @@ export default function AdminListingsPage() {
 
             {/* Real-Time Live Amount Breakdown Card (Amounts show hongi) */}
             {(() => {
-              const base = approvingTour.basePrice;
+              const vendorRate = approvingTour.vendorPrice || approvingTour.basePrice;
               const rate = Number(commissionRate) || 0;
-              const commissionAmt = Math.round((base * rate) / 100);
-              const vendorPayout = Math.max(0, base - commissionAmt);
-              const vendorSharePercent = Math.max(0, 100 - rate);
+              const commissionAmt = Math.round((vendorRate * rate) / 100);
+              const totalWebPrice = vendorRate + commissionAmt;
 
               return (
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 border border-emerald-200/80 space-y-3">
                   <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-widest block">
-                    Financial Split Per Booking
+                    Markup & Live Website Selling Price
                   </span>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    {/* Agency Commission */}
-                    <div className="p-3 rounded-xl bg-emerald-600 text-white shadow-sm">
-                      <span className="text-[10px] text-emerald-100 font-bold block uppercase">
-                        Agency Commission ({rate}%)
-                      </span>
-                      <span className="text-base sm:text-lg font-black block mt-0.5">
-                        PKR {commissionAmt.toLocaleString()}
-                      </span>
-                      <span className="text-[9px] text-emerald-100/90 block">Our Direct Platform Earning</span>
-                    </div>
-
-                    {/* Vendor Net Earnings */}
+                    {/* Vendor Net Amount */}
                     <div className="p-3 rounded-xl bg-white border border-slate-200 text-slate-900 shadow-sm">
                       <span className="text-[10px] text-slate-400 font-bold block uppercase">
-                        Vendor Net Payout ({vendorSharePercent.toFixed(1)}%)
+                        Vendor Gets (Net Demanded)
                       </span>
                       <span className="text-base sm:text-lg font-black block mt-0.5 text-slate-800">
-                        PKR {vendorPayout.toLocaleString()}
+                        PKR {vendorRate.toLocaleString()}
                       </span>
-                      <span className="text-[9px] text-slate-500 block">Disbursed to Partner</span>
+                      <span className="text-[9px] text-slate-500 block">Vendor ka apna amount</span>
+                    </div>
+
+                    {/* Agency Commission */}
+                    <div className="p-3 rounded-xl bg-amber-500 text-white shadow-sm">
+                      <span className="text-[10px] text-amber-100 font-bold block uppercase">
+                        Agency Markup (+{rate}%)
+                      </span>
+                      <span className="text-base sm:text-lg font-black block mt-0.5">
+                        + PKR {commissionAmt.toLocaleString()}
+                      </span>
+                      <span className="text-[9px] text-amber-100/90 block">Humara Profit</span>
                     </div>
                   </div>
 
-                  {/* Share Progress Bar */}
-                  <div className="space-y-1 pt-1">
-                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden flex">
-                      <div
-                        style={{ width: `${Math.min(100, rate)}%` }}
-                        className="bg-emerald-600 h-full transition-all duration-300"
-                      />
-                      <div
-                        style={{ width: `${Math.max(0, 100 - rate)}%` }}
-                        className="bg-slate-400 h-full transition-all duration-300"
-                      />
+                  {/* Highlighted Total Public Price Box */}
+                  <div className="p-3.5 rounded-xl bg-emerald-600 text-white flex items-center justify-between shadow-md">
+                    <div>
+                      <span className="text-[10px] text-emerald-100 font-bold uppercase tracking-wider block">
+                        Total Amount Jo Web Par Jaye Ga (Customer Price)
+                      </span>
+                      <span className="text-xs text-emerald-100">
+                        Vendor (PKR {vendorRate.toLocaleString()}) + Commission (PKR {commissionAmt.toLocaleString()})
+                      </span>
                     </div>
-                    <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
-                      <span className="text-emerald-700">Agency Share: {rate}%</span>
-                      <span>Vendor Share: {vendorSharePercent.toFixed(1)}%</span>
+                    <div className="text-right">
+                      <span className="text-xl sm:text-2xl font-black block tracking-tight">
+                        PKR {totalWebPrice.toLocaleString()}
+                      </span>
+                      <span className="text-[9px] bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                        Live on Web
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -819,7 +846,7 @@ export default function AdminListingsPage() {
             })()}
 
             <p className="text-[11px] text-slate-500 leading-normal">
-              Approve kartay hi yeh tour status <strong>PUBLISHED</strong> ho kar foran live public website par active ho jaye ga aur calculated commission database may record ho jaye ga.
+              Approve hotay hi yeh tour status <strong>PUBLISHED</strong> ho kar foran website par <strong>Total Amount</strong> k sath active ho jaye ga aur vendor ko uski demanded raqam guaranteed rahay gi.
             </p>
 
             {/* Modal Actions */}
@@ -839,7 +866,7 @@ export default function AdminListingsPage() {
                 className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition disabled:opacity-50 flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Confirm & Approve Live</span>
+                <span>Confirm & Publish Total Price Live</span>
               </button>
             </div>
           </div>

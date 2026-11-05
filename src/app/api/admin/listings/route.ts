@@ -33,6 +33,7 @@ export async function GET() {
       province: l.destination?.province || "Gilgit-Baltistan",
       address: l.address,
       city: l.city,
+      vendorPrice: l.vendorPrice !== undefined && l.vendorPrice !== null ? Number(l.vendorPrice) : Number(l.basePrice),
       basePrice: Number(l.basePrice),
       commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : 12.0,
       avgRating: l.avgRating || 5.0,

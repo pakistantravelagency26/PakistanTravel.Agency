@@ -22,6 +22,7 @@ export interface ListingData {
   province: string;
   address: string;
   city: string;
+  vendorPrice?: number;
   basePrice: number;
   commissionRate?: number;
   avgRating: number;

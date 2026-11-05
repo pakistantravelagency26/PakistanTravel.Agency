@@ -173,6 +173,7 @@ model Listing {
   cancellationPolicy  String        @db.Text
   freeCancellationDays Int          @default(1)
 
+  vendorPrice         Float?
   basePrice           Decimal       @db.Decimal(10, 2)
   commissionRate      Float?        @default(12.0)
   avgRating           Float         @default(0.0)

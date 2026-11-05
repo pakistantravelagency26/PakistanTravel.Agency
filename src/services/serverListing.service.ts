@@ -24,6 +24,7 @@ export function formatDbListing(l: any): ListingData {
     province: l.destination?.province || "Pakistan",
     address: l.address,
     city: l.city,
+    vendorPrice: l.vendorPrice !== undefined && l.vendorPrice !== null ? Number(l.vendorPrice) : Number(l.basePrice),
     basePrice: Number(l.basePrice),
     commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : 12.0,
     avgRating: l.avgRating || 4.9,

@@ -28,6 +28,12 @@ export async function PATCH(
       if (body.commissionRate !== undefined && body.commissionRate !== null) {
         updateData.commissionRate = Number(body.commissionRate);
       }
+      if (body.vendorPrice !== undefined && body.vendorPrice !== null) {
+        updateData.vendorPrice = Number(body.vendorPrice);
+      }
+      if (body.totalPrice !== undefined && body.totalPrice !== null) {
+        updateData.basePrice = Number(body.totalPrice);
+      }
       updatedDbListing = await prisma.listing.update({
         where: { id },
         data: updateData,
@@ -63,6 +69,8 @@ export async function PATCH(
         ...(updated || {}),
         id,
         title,
+        basePrice: body.totalPrice !== undefined ? Number(body.totalPrice) : Number(updatedDbListing?.basePrice),
+        vendorPrice: body.vendorPrice !== undefined ? Number(body.vendorPrice) : (updatedDbListing?.vendorPrice || updatedDbListing?.basePrice),
         moderationStatus: action === "APPROVE" ? "APPROVED" : "REJECTED",
         commissionRate: body.commissionRate !== undefined ? Number(body.commissionRate) : (updatedDbListing?.commissionRate || 12.0),
       },
