@@ -134,8 +134,8 @@ export function Navbar() {
               <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
                 Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
               </span>
-              <p className="text-[11px] text-sky-700 tracking-wide font-bold hidden sm:block">
-                Book Your Best Tour
+              <p className="text-[11px] text-slate-500 font-medium hidden lg:block max-w-md line-clamp-1">
+                Discover Pakistan&apos;s breathtaking destinations, explore tours from local operators, and book your perfect adventure—all in one place.
               </p>
             </div>
           </Link>

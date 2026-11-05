@@ -29,7 +29,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Book verified hotels in Hunza & Skardu, guided northern tours, and family vacation packages with instant Pakistani confirmations.
+            Discover Pakistan&apos;s breathtaking destinations, explore tours from local operators, and book your perfect adventure—all in one place.
           </p>
         </div>
 
