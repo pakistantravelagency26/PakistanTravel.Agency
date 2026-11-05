@@ -10,10 +10,13 @@ import {
   Headphones, 
   CheckCircle2, 
 } from "lucide-react";
-import { getActiveListings } from "@/services/listing.service";
+import { getActiveDbListings } from "@/services/serverListing.service";
 import { TourMarketplaceSection } from "@/components/home/TourMarketplaceSection";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const listings = await getActiveDbListings();
   return (
     <div className="space-y-12 pb-20 bg-slate-50/50">
       {/* Light & Modern Hero Banner (Musandam Tours style) */}
@@ -142,7 +145,7 @@ export default function HomePage() {
       </section>
 
       {/* Main Multi-Vendor Marketplace Catalog: 4 items per row with Filter running on top */}
-      <TourMarketplaceSection initialListings={getActiveListings()} />
+      <TourMarketplaceSection initialListings={listings} />
     </div>
   );
 }

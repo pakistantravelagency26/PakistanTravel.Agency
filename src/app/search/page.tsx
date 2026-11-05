@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -19,7 +19,7 @@ import {
   Clock,
   RotateCcw
 } from "lucide-react";
-import { getActiveListings } from "@/services/listing.service";
+import { ListingData } from "@/services/listing.service";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +46,24 @@ function SearchContent() {
     );
   }
 
+  const [dbListings, setDbListings] = useState<ListingData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/listings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.listings)) {
+          setDbListings(data.listings);
+        }
+      })
+      .catch((err) => console.error("Error fetching live listings:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
   // Filtered and Sorted Listings
   const filteredListings = useMemo(() => {
-    let list = getActiveListings();
+    let list = [...dbListings];
 
     if (destinationQuery.trim()) {
       const q = destinationQuery.toLowerCase().trim();
@@ -88,6 +103,7 @@ function SearchContent() {
 
     return list;
   }, [
+    dbListings,
     destinationQuery,
     selectedType,
     priceMax,

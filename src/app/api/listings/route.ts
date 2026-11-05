@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { 
-  MOCK_LISTINGS, 
   getActiveListings, 
   getAllListingsForAdmin, 
   createNewListing, 
@@ -10,6 +9,7 @@ import {
   deleteListing,
   ListingData 
 } from "@/services/listing.service";
+import { formatDbListing } from "@/services/serverListing.service";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -20,23 +20,29 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     includeAll = searchParams.get("all") === "true" || searchParams.get("includeDisabled") === "true";
     const vendorId = searchParams.get("vendorId");
+    const singleId = searchParams.get("id") || searchParams.get("slug");
 
     // 1. Fetch valid existing vendors from DB
     const dbVendors = await prisma.vendor.findMany({ select: { id: true, status: true } });
-    const validVendorIds = new Set(dbVendors.map((v) => v.id));
+    const verifiedVendorIds = new Set(dbVendors.filter((v) => v.status === "VERIFIED").map((v) => v.id));
+    const allVendorIds = new Set(dbVendors.map((v) => v.id));
 
-    // 2. Query from Neon PostgreSQL Database for existing vendors only
-    const whereCondition: any = {
-      vendorId: { in: Array.from(validVendorIds) },
-    };
-    if (vendorId && validVendorIds.has(vendorId)) {
+    // 2. Query from Neon PostgreSQL Database
+    const whereCondition: any = {};
+
+    if (includeAll) {
+      whereCondition.vendorId = { in: Array.from(allVendorIds) };
+    } else {
+      whereCondition.vendorId = { in: Array.from(verifiedVendorIds) };
+      whereCondition.status = "PUBLISHED";
+    }
+
+    if (vendorId) {
       whereCondition.vendorId = vendorId;
-    } else if (vendorId) {
-      // Requested a vendor that does not exist in DB
-      return NextResponse.json({
-        success: true,
-        listings: [],
-      });
+    }
+
+    if (singleId) {
+      whereCondition.OR = [{ id: singleId }, { slug: singleId }];
     }
 
     const dbListings = await prisma.listing.findMany({
@@ -44,62 +50,35 @@ export async function GET(req: Request) {
       include: {
         vendor: true,
         destination: true,
+        units: true,
+        reviews: {
+          include: {
+            user: true,
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    let formatted: ListingData[] = dbListings.map((l) => ({
-        id: l.id,
-        slug: l.slug,
-        title: l.title,
-        type: l.type as any,
-        duration: "5 Days / 4 Nights",
-        destinationSlug: l.destination?.slug || "hunza",
-        destinationName: l.destination?.name || l.city,
-        province: l.destination?.province || "Gilgit-Baltistan",
-        address: l.address,
-        city: l.city,
-        basePrice: Number(l.basePrice),
-        avgRating: l.avgRating || 5.0,
-        totalReviews: l.totalReviews || 1,
-        isFeatured: l.isFeatured,
-        freeCancellation: true,
-        freeCancellationDays: l.freeCancellationDays,
-        badge: l.type === "TOUR" ? "Verified Tour" : "Verified Stay",
-        photos: l.photos.length > 0 ? l.photos : [
-          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
-        ],
-        amenities: l.amenities,
-        description: l.description,
-        cancellationPolicy: l.cancellationPolicy,
-        moderationStatus: l.status === "PUBLISHED" ? "APPROVED" : l.status === "PENDING_APPROVAL" ? "PENDING_APPROVAL" : "REJECTED",
-        vendor: {
-          id: l.vendorId,
-          businessName: l.vendor?.businessName || "Partner Agency",
-          verified: l.vendor?.status === "VERIFIED",
-          joinedYear: 2024,
-          rating: 4.95,
-        },
-        units: [],
-        reviews: [],
-      }));
+    const formatted: ListingData[] = dbListings.map(formatDbListing);
 
-      if (!includeAll) {
-        formatted = formatted.filter(
-          (l) => l.moderationStatus === "APPROVED" && l.vendor.verified !== false
-        );
-      }
-
+    if (singleId) {
       return NextResponse.json({
         success: true,
+        listing: formatted[0] || null,
         listings: formatted,
       });
-  } catch (error: any) {
-    console.error("Neon DB listings query error, falling back to memory:", error);
-    const listings = includeAll ? getAllListingsForAdmin() : getActiveListings();
+    }
+
     return NextResponse.json({
       success: true,
-      listings,
+      listings: formatted,
+    });
+  } catch (error: any) {
+    console.error("Neon DB listings query error:", error);
+    return NextResponse.json({
+      success: true,
+      listings: [],
     });
   }
 }

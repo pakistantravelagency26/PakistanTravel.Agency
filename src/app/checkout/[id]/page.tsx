@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -15,9 +15,10 @@ import {
   CheckCircle2, 
   AlertCircle,
   Tag,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from "lucide-react";
-import { MOCK_LISTINGS } from "@/services/listing.service";
+import { ListingData } from "@/services/listing.service";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +33,20 @@ function CheckoutContent() {
   const startParam = searchParams.get("start") || "2026-11-10";
   const endParam = searchParams.get("end") || "2026-11-13";
 
-  const listing = MOCK_LISTINGS.find((l) => l.id === listingId || l.slug === listingId) || MOCK_LISTINGS[0];
-  const unit = listing.units.find((u) => u.id === unitId) || listing.units[0];
+  const [listing, setListing] = useState<ListingData | null>(null);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
-  const nightsCount = 3;
-  const baseRate = unit ? unit.basePrice * nightsCount * qty : listing.basePrice * nightsCount;
-  const tax = Math.round(baseRate * 0.05); // 5% provincial tourism levy
+  useEffect(() => {
+    fetch(`/api/listings?id=${encodeURIComponent(listingId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.listing) {
+          setListing(data.listing);
+        }
+      })
+      .catch((err) => console.error("Error loading checkout listing:", err))
+      .finally(() => setIsPageLoading(false));
+  }, [listingId]);
 
   // Form State
   const [guestName, setGuestName] = useState("Usman Tariq");
@@ -58,6 +67,34 @@ function CheckoutContent() {
   const [discount, setDiscount] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
 
+  if (isPageLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-emerald mb-2" />
+        <p className="text-sm text-slate-500 font-medium">Securing checkout session...</p>
+      </div>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Tour Listing Unavailable</h2>
+        <p className="text-sm text-slate-500 max-w-md mb-6">
+          This package is currently not available for instant booking.
+        </p>
+        <Link href="/" className="px-5 py-2.5 bg-brand-emerald text-white font-bold rounded-xl text-sm">
+          Return to Marketplace
+        </Link>
+      </div>
+    );
+  }
+
+  const unit = (listing.units || []).find((u) => u.id === unitId) || listing.units?.[0];
+  const nightsCount = 3;
+  const baseRate = unit ? unit.basePrice * nightsCount * qty : listing.basePrice * nightsCount;
+  const tax = Math.round(baseRate * 0.05); // 5% provincial tourism levy
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -76,6 +113,7 @@ function CheckoutContent() {
 
   async function handleCompleteBooking(e: React.FormEvent) {
     e.preventDefault();
+    if (!listing) return;
     setLoading(true);
     setError("");
 

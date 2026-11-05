@@ -1,7 +1,9 @@
 import { MetadataRoute } from "next";
-import { MOCK_LISTINGS } from "@/services/listing.service";
+import { getActiveDbListings } from "@/services/serverListing.service";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://pakistantravel.agency";
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -45,12 +47,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.85,
   }));
 
-  const listingRoutes: MetadataRoute.Sitemap = MOCK_LISTINGS.map((listing) => ({
-    url: `${baseUrl}/listing/${listing.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "daily",
-    priority: 0.9,
-  }));
+  let listingRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const activeListings = await getActiveDbListings();
+    listingRoutes = activeListings.map((listing) => ({
+      url: `${baseUrl}/listing/${listing.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    }));
+  } catch (err) {
+    console.warn("Sitemap DB fetch fallback:", err);
+  }
 
   return [...staticRoutes, ...destinationRoutes, ...listingRoutes];
 }

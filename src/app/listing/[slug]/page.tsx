@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -21,9 +21,10 @@ import {
   ChevronRight,
   Building,
   ArrowRight,
-  MessageSquarePlus
+  MessageSquarePlus,
+  Loader2
 } from "lucide-react";
-import { MOCK_LISTINGS } from "@/services/listing.service";
+import { ListingData } from "@/services/listing.service";
 import { isVendorEnabled } from "@/services/vendor.service";
 import { WriteReviewModal } from "@/components/reviews/WriteReviewModal";
 
@@ -32,17 +33,60 @@ export default function ListingDetailPage() {
   const router = useRouter();
   const slug = params.slug as string;
 
-  const listing = MOCK_LISTINGS.find((l) => l.slug === slug || l.id === slug) || MOCK_LISTINGS[0];
-  const isListingActive = isVendorEnabled(listing?.vendor?.id);
+  const [listing, setListing] = useState<ListingData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [activePhoto, setActivePhoto] = useState(0);
-  const [selectedUnitId, setSelectedUnitId] = useState<string>(listing.units[0]?.id || "");
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
   const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
   const [checkInDate, setCheckInDate] = useState("2026-11-10");
   const [checkOutDate, setCheckOutDate] = useState("2026-11-13");
   const [isSaved, setIsSaved] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [reviewsList, setReviewsList] = useState(listing.reviews);
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(`/api/listings?id=${encodeURIComponent(slug)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.listing) {
+          setListing(data.listing);
+          if (data.listing.units?.[0]?.id) {
+            setSelectedUnitId(data.listing.units[0].id);
+          }
+          if (Array.isArray(data.listing.reviews)) {
+            setReviewsList(data.listing.reviews);
+          }
+        }
+      })
+      .catch((err) => console.error("Error loading listing details:", err))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-brand-emerald mb-2" />
+        <p className="text-sm text-slate-500 font-medium">Loading tour details...</p>
+      </div>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Tour Listing Not Found</h2>
+        <p className="text-sm text-slate-500 max-w-md mb-6">
+          This experience is either undergoing moderation or is currently inactive.
+        </p>
+        <Link href="/" className="px-5 py-2.5 bg-brand-emerald text-white font-bold rounded-xl text-sm">
+          Browse Verified Tours
+        </Link>
+      </div>
+    );
+  }
+
+  const isListingActive = isVendorEnabled(listing?.vendor?.id);
 
   // Schema.org Structured Data JSON-LD for Google Rich Results
   const jsonLd = {
@@ -80,9 +124,9 @@ export default function ListingDetailPage() {
   const totalPrice = unitPrice * nightsCount * selectedQuantity;
 
   function handleReserve() {
-    // Direct checkout initiation
+    if (!listing) return;
     router.push(
-      `/checkout/${listing.id}?unitId=${selectedUnit.id}&qty=${selectedQuantity}&start=${checkInDate}&end=${checkOutDate}`
+      `/checkout/${listing.id}?unitId=${selectedUnit?.id || ""}&qty=${selectedQuantity}&start=${checkInDate}&end=${checkOutDate}`
     );
   }
 

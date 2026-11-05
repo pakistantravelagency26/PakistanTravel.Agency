@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, DollarSign, Plus, Lock, CheckCircle2 } from "lucide-react";
-import { MOCK_LISTINGS } from "@/services/listing.service";
 
 export default function VendorCalendarPage() {
-  const [selectedListing, setSelectedListing] = useState("skardu-7-day-tour");
+  const [vendorListings, setVendorListings] = useState<any[]>([]);
+  const [selectedListing, setSelectedListing] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("Per Person Seat");
+
+  useEffect(() => {
+    fetch("/api/listings?includeDisabled=true")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && Array.isArray(d.listings)) {
+          setVendorListings(d.listings);
+          if (d.listings.length > 0) {
+            setSelectedListing(d.listings[0].id);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Custom pricing rule state
   const [ruleName, setRuleName] = useState("Autumn Peak Foliage");
@@ -49,7 +63,7 @@ export default function VendorCalendarPage() {
             onChange={(e) => setSelectedListing(e.target.value)}
             className="px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white shadow-sm"
           >
-            {MOCK_LISTINGS.map((t) => (
+            {vendorListings.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.title}
               </option>
