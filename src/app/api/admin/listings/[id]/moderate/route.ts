@@ -24,9 +24,13 @@ export async function PATCH(
     let updatedDbListing = null;
     try {
       const dbStatus = action === "APPROVE" ? "PUBLISHED" : "ARCHIVED";
+      const updateData: any = { status: dbStatus };
+      if (body.commissionRate !== undefined && body.commissionRate !== null) {
+        updateData.commissionRate = Number(body.commissionRate);
+      }
       updatedDbListing = await prisma.listing.update({
         where: { id },
-        data: { status: dbStatus },
+        data: updateData,
         include: { vendor: true },
       });
     } catch (dbErr) {
@@ -55,10 +59,12 @@ export async function PATCH(
         action === "APPROVE"
           ? `Listing "${title}" has been approved and is now live on PakistanTravel.Agency marketplace!`
           : `Listing "${title}" was marked as revision required/rejected.`,
-      listing: updated || {
+      listing: {
+        ...(updated || {}),
         id,
         title,
         moderationStatus: action === "APPROVE" ? "APPROVED" : "REJECTED",
+        commissionRate: body.commissionRate !== undefined ? Number(body.commissionRate) : (updatedDbListing?.commissionRate || 12.0),
       },
     });
   } catch (error: any) {

@@ -34,6 +34,7 @@ export async function GET() {
       address: l.address,
       city: l.city,
       basePrice: Number(l.basePrice),
+      commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : 12.0,
       avgRating: l.avgRating || 5.0,
       totalReviews: l.totalReviews || 1,
       isFeatured: l.isFeatured,

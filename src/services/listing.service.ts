@@ -23,6 +23,7 @@ export interface ListingData {
   address: string;
   city: string;
   basePrice: number;
+  commissionRate?: number;
   avgRating: number;
   totalReviews: number;
   isFeatured: boolean;

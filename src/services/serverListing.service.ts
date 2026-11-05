@@ -25,6 +25,7 @@ export function formatDbListing(l: any): ListingData {
     address: l.address,
     city: l.city,
     basePrice: Number(l.basePrice),
+    commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : 12.0,
     avgRating: l.avgRating || 4.9,
     totalReviews: l.totalReviews || 1,
     isFeatured: l.isFeatured,

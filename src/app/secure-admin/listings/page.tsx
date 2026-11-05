@@ -21,7 +21,8 @@ import {
   Calendar,
   Layers,
   FileText,
-  UserCheck
+  UserCheck,
+  Percent
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
 
@@ -39,6 +40,10 @@ export default function AdminListingsPage() {
   const [adminNotes, setAdminNotes] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Approval & Commission Modal State
+  const [approvingTour, setApprovingTour] = useState<ListingData | null>(null);
+  const [commissionRate, setCommissionRate] = useState<number>(12.0);
 
   useEffect(() => {
     fetchListings();
@@ -72,7 +77,23 @@ export default function AdminListingsPage() {
     }
   }
 
-  async function handleModerate(id: string, action: "APPROVE" | "REJECT", notes?: string) {
+  function handleOpenApproval(tour: ListingData) {
+    setApprovingTour(tour);
+    setCommissionRate(tour.commissionRate !== undefined ? tour.commissionRate : 12.0);
+  }
+
+  async function handleConfirmApproval() {
+    if (!approvingTour) return;
+    await handleModerate(approvingTour.id, "APPROVE", adminNotes, commissionRate);
+    setApprovingTour(null);
+  }
+
+  async function handleModerate(
+    id: string,
+    action: "APPROVE" | "REJECT",
+    notes?: string,
+    customCommission?: number
+  ) {
     setActionLoading(true);
     setActionMessage(null);
 
@@ -80,7 +101,11 @@ export default function AdminListingsPage() {
       const res = await fetch(`/api/admin/listings/${id}/moderate`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, notes: notes || adminNotes }),
+        body: JSON.stringify({
+          action,
+          notes: notes || adminNotes,
+          commissionRate: customCommission !== undefined ? customCommission : commissionRate,
+        }),
       });
       const data = await res.json();
 
@@ -92,7 +117,7 @@ export default function AdminListingsPage() {
           type: "success",
           text:
             action === "APPROVE"
-              ? `Tour "${data.listing.title}" is now APPROVED & LIVE on PakistanTravel.Agency!`
+              ? `Tour "${data.listing.title}" is now APPROVED & LIVE on PakistanTravel.Agency with ${data.listing.commissionRate || commissionRate}% commission!`
               : `Tour "${data.listing.title}" was marked as revision required / rejected.`,
         });
         if (selectedTour?.id === id) {
@@ -394,6 +419,14 @@ export default function AdminListingsPage() {
                           {item.freeCancellationDays || 3} Days Free
                         </span>
                       </div>
+                      <div className="col-span-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500 font-medium flex items-center gap-1">
+                          <Percent className="w-3 h-3 text-emerald-600" /> Commission:
+                        </span>
+                        <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          {item.commissionRate ?? 12}% (PKR {Math.round((item.basePrice * (item.commissionRate ?? 12)) / 100).toLocaleString()})
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -417,7 +450,7 @@ export default function AdminListingsPage() {
                   {isPending && (
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => handleModerate(item.id, "APPROVE")}
+                        onClick={() => handleOpenApproval(item)}
                         className="py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition"
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -626,14 +659,188 @@ export default function AdminListingsPage() {
                   <button
                     type="button"
                     disabled={actionLoading}
-                    onClick={() => handleModerate(selectedTour.id, "APPROVE")}
+                    onClick={() => handleOpenApproval(selectedTour)}
                     className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Approve & Publish Live</span>
+                    <span>Set Commission & Approve Live</span>
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* APPROVAL & LIVE COMMISSION CALCULATOR MODAL */}
+      {approvingTour && (
+        <div className="fixed inset-0 z-[60] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <Percent className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">
+                    Listing Approval & Take-Rate
+                  </span>
+                  <h3 className="font-extrabold text-base text-slate-900 line-clamp-1">
+                    {approvingTour.title}
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setApprovingTour(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Tour & Vendor Details */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs flex justify-between items-center">
+              <div>
+                <span className="text-[10px] text-slate-400 font-semibold block">Operator / Vendor</span>
+                <span className="font-bold text-slate-800">{approvingTour.vendor?.businessName}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 font-semibold block">Tour Package Price</span>
+                <span className="font-extrabold text-slate-900 text-sm">
+                  PKR {approvingTour.basePrice.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Commission Percentage Input */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Commission Take-Rate (%)
+                </label>
+                <span className="text-xs text-slate-500 font-medium">Enter rate to auto-calculate amounts</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="100"
+                    value={commissionRate}
+                    onChange={(e) => setCommissionRate(Number(e.target.value) || 0)}
+                    className="w-full pl-4 pr-10 py-3 rounded-2xl border-2 border-emerald-500/40 focus:border-emerald-600 text-lg font-black text-slate-900 focus:outline-none"
+                    placeholder="12"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-sm">
+                    %
+                  </span>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {[10, 12, 15, 20].map((rate) => (
+                    <button
+                      key={rate}
+                      type="button"
+                      onClick={() => setCommissionRate(rate)}
+                      className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition ${
+                        commissionRate === rate
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      {rate}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Real-Time Live Amount Breakdown Card (Amounts show hongi) */}
+            {(() => {
+              const base = approvingTour.basePrice;
+              const rate = Number(commissionRate) || 0;
+              const commissionAmt = Math.round((base * rate) / 100);
+              const vendorPayout = Math.max(0, base - commissionAmt);
+              const vendorSharePercent = Math.max(0, 100 - rate);
+
+              return (
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 border border-emerald-200/80 space-y-3">
+                  <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-widest block">
+                    Financial Split Per Booking
+                  </span>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    {/* Agency Commission */}
+                    <div className="p-3 rounded-xl bg-emerald-600 text-white shadow-sm">
+                      <span className="text-[10px] text-emerald-100 font-bold block uppercase">
+                        Agency Commission ({rate}%)
+                      </span>
+                      <span className="text-base sm:text-lg font-black block mt-0.5">
+                        PKR {commissionAmt.toLocaleString()}
+                      </span>
+                      <span className="text-[9px] text-emerald-100/90 block">Our Direct Platform Earning</span>
+                    </div>
+
+                    {/* Vendor Net Earnings */}
+                    <div className="p-3 rounded-xl bg-white border border-slate-200 text-slate-900 shadow-sm">
+                      <span className="text-[10px] text-slate-400 font-bold block uppercase">
+                        Vendor Net Payout ({vendorSharePercent.toFixed(1)}%)
+                      </span>
+                      <span className="text-base sm:text-lg font-black block mt-0.5 text-slate-800">
+                        PKR {vendorPayout.toLocaleString()}
+                      </span>
+                      <span className="text-[9px] text-slate-500 block">Disbursed to Partner</span>
+                    </div>
+                  </div>
+
+                  {/* Share Progress Bar */}
+                  <div className="space-y-1 pt-1">
+                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden flex">
+                      <div
+                        style={{ width: `${Math.min(100, rate)}%` }}
+                        className="bg-emerald-600 h-full transition-all duration-300"
+                      />
+                      <div
+                        style={{ width: `${Math.max(0, 100 - rate)}%` }}
+                        className="bg-slate-400 h-full transition-all duration-300"
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
+                      <span className="text-emerald-700">Agency Share: {rate}%</span>
+                      <span>Vendor Share: {vendorSharePercent.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <p className="text-[11px] text-slate-500 leading-normal">
+              Approve kartay hi yeh tour status <strong>PUBLISHED</strong> ho kar foran live public website par active ho jaye ga aur calculated commission database may record ho jaye ga.
+            </p>
+
+            {/* Modal Actions */}
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setApprovingTour(null)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={actionLoading}
+                onClick={handleConfirmApproval}
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition disabled:opacity-50 flex items-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Confirm & Approve Live</span>
+              </button>
             </div>
           </div>
         </div>
