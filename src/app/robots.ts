@@ -6,9 +6,16 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/vendor/", "/account/", "/checkout/"],
+        disallow: [
+          "/secure-admin/",
+          "/partner-hub/",
+          "/api/",
+          "/checkout/",
+          "/account/",
+          "/confirmation/",
+        ],
       },
     ],
-    sitemap: "https://pakistantravel.agency/sitemap.xml",
+    sitemap: "https://pakistan-travel-agency.vercel.app/sitemap.xml",
   };
 }
