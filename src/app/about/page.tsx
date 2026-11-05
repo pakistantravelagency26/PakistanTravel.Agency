@@ -1,0 +1,69 @@
+import Link from "next/link";
+import { Compass, ShieldCheck, Heart, Award, Users } from "lucide-react";
+
+export default function AboutPage() {
+  return (
+    <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-12">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 text-sky-700 text-xs font-bold border border-sky-100">
+            <Compass className="w-4 h-4" /> Built for Pakistan Tourism
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+            Connecting the World to Pakistan&apos;s Wonder
+          </h1>
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            PakistanTravel.agency is the trusted multi-vendor travel marketplace dedicated to making the Northern Areas, historic cities, and scenic coastal highways accessible, reliable, and effortless to book.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base">Verified Hosts</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Every hotel, glamping pod, and 4x4 mountain driver is physically vetted by our field coordinators in Gilgit, Skardu, and Swat.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+            <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
+              <Heart className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base">Zero Double-Booking</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Our real-time transaction locks guarantee that when you book a room or tour seat, your inventory is instantly reserved.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-2">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <Award className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-base">Local Empowerment</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              We empower indigenous mountain tour guides and local family-run lodges with automated direct bank payouts via State Bank Raast.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-sky-600 to-teal-600 rounded-3xl p-8 sm:p-12 text-white text-center space-y-4 shadow-xl">
+          <h2 className="text-2xl sm:text-3xl font-extrabold">Ready to explore Pakistan?</h2>
+          <p className="text-xs sm:text-sm text-sky-100 max-w-xl mx-auto">
+            From the world&apos;s second-highest plateau at Deosai to the turquoise waters of Attabad Lake.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/search"
+              className="px-6 py-3 rounded-2xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-100 transition shadow-lg inline-block"
+            >
+              Browse All 10 Expeditions
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

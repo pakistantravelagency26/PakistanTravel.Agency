@@ -1,0 +1,378 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --------------------------------------------------------
+// ENUMS
+// --------------------------------------------------------
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum VendorStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+  REJECTED
+}
+
+enum ListingType {
+  HOTEL
+  TOUR
+  ACTIVITY
+  RENTAL
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_APPROVAL
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED_BY_CUSTOMER
+  CANCELLED_BY_VENDOR
+  COMPLETED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  JAZZCASH
+  EASYPAISA
+  CASH_ON_ARRIVAL
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+// --------------------------------------------------------
+// USERS & VENDORS
+// --------------------------------------------------------
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  passwordHash  String?
+  image         String?
+  role          Role      @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  vendorProfile Vendor?
+  bookings      Booking[]
+  reviews       Review[]
+  wishlists     Wishlist[]
+  notifications Notification[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Vendor {
+  id              String       @id @default(uuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName    String
+  cnicOrTaxNumber String?
+  phone           String
+  address         String?
+  city            String
+  status          VendorStatus @default(PENDING)
+  commissionRate  Float        @default(12.0)
+  bankDetails     Json?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  listings        Listing[]
+  payouts         Payout[]
+
+  @@index([status])
+}
+
+// --------------------------------------------------------
+// TAXONOMY: CATEGORIES & DESTINATIONS
+// --------------------------------------------------------
+
+model Destination {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  province    String
+  description String?   @db.Text
+  image       String
+  isFeatured  Boolean   @default(false)
+  listings    Listing[]
+
+  @@index([slug])
+  @@index([isFeatured])
+}
+
+model Category {
+  id          String      @id @default(uuid())
+  name        String
+  slug        String      @unique
+  icon        String?
+  type        ListingType
+  listings    Listing[]
+
+  @@index([slug])
+}
+
+// --------------------------------------------------------
+// LISTINGS & SUB-UNITS (ROOMS / PACKAGES)
+// --------------------------------------------------------
+
+model Listing {
+  id                  String        @id @default(uuid())
+  vendorId            String
+  vendor              Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  title               String
+  slug                String        @unique
+  description         String        @db.Text
+  type                ListingType
+  status              ListingStatus @default(DRAFT)
+  destinationId       String
+  destination         Destination   @relation(fields: [destinationId], references: [id])
+  categoryId          String
+  category            Category      @relation(fields: [categoryId], references: [id])
+  
+  address             String
+  city                String
+  latitude            Float?
+  longitude           Float?
+
+  photos              String[]
+  amenities           String[]
+  cancellationPolicy  String        @db.Text
+  freeCancellationDays Int          @default(1)
+
+  basePrice           Decimal       @db.Decimal(10, 2)
+  avgRating           Float         @default(0.0)
+  totalReviews        Int           @default(0)
+  isFeatured          Boolean       @default(false)
+
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  units               ListingUnit[]
+  reviews             Review[]
+  wishlists           Wishlist[]
+  bookings            Booking[]
+
+  @@index([slug])
+  @@index([type, status])
+  @@index([destinationId])
+  @@index([categoryId])
+  @@index([basePrice])
+  @@index([avgRating])
+}
+
+model ListingUnit {
+  id            String         @id @default(uuid())
+  listingId     String
+  listing       Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?        @db.Text
+  maxGuests     Int            @default(2)
+  totalQuantity Int            @default(1)
+  basePrice     Decimal        @db.Decimal(10, 2)
+  photos        String[]
+  amenities     String[]
+
+  availability  Availability[]
+  pricingRules  PricingRule[]
+  bookings      Booking[]
+
+  @@index([listingId])
+}
+
+// --------------------------------------------------------
+// INVENTORY, AVAILABILITY & SEASONAL PRICING
+// --------------------------------------------------------
+
+model Availability {
+  id              String      @id @default(uuid())
+  unitId          String
+  unit            ListingUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  date            DateTime    @db.Date
+  availableCount  Int
+  isBlocked       Boolean     @default(false)
+
+  @@unique([unitId, date])
+  @@index([unitId, date])
+}
+
+model PricingRule {
+  id          String      @id @default(uuid())
+  unitId      String
+  unit        ListingUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  startDate   DateTime    @db.Date
+  endDate     DateTime    @db.Date
+  customPrice Decimal     @db.Decimal(10, 2)
+  reason      String?
+
+  @@index([unitId, startDate, endDate])
+}
+
+// --------------------------------------------------------
+// BOOKINGS & TRANSACTIONS
+// --------------------------------------------------------
+
+model Booking {
+  id              String        @id @default(uuid())
+  bookingNumber   String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  listingId       String
+  listing         Listing       @relation(fields: [listingId], references: [id])
+  unitId          String
+  unit            ListingUnit   @relation(fields: [unitId], references: [id])
+  
+  startDate       DateTime      @db.Date
+  endDate         DateTime      @db.Date
+  guestsCount     Int           @default(1)
+  unitsCount      Int           @default(1)
+
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  vendorEarnings  Decimal       @db.Decimal(10, 2)
+  platformFee     Decimal       @db.Decimal(10, 2)
+  discountAmount  Decimal       @default(0.0) @db.Decimal(10, 2)
+
+  status          BookingStatus @default(PENDING_PAYMENT)
+  
+  guestName       String
+  guestEmail      String
+  guestPhone      String
+  specialRequests String?       @db.Text
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  payment         Payment?
+  couponId        String?
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+
+  @@index([bookingNumber])
+  @@index([userId])
+  @@index([listingId])
+  @@index([status])
+  @@index([startDate, endDate])
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  bookingId       String        @unique
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("PKR")
+  paymentMethod   PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  transactionRef  String?       @unique
+  rawResponse     Json?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+
+  @@index([transactionRef])
+  @@index([status])
+}
+
+model Payout {
+  id            String       @id @default(uuid())
+  vendorId      String
+  vendor        Vendor       @relation(fields: [vendorId], references: [id])
+  amount        Decimal      @db.Decimal(10, 2)
+  status        PayoutStatus @default(PENDING)
+  referenceCode String?
+  notes         String?
+  processedAt   DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([vendorId])
+  @@index([status])
+}
+
+// --------------------------------------------------------
+// REVIEWS, WISHLIST, COUPONS & NOTIFICATIONS
+// --------------------------------------------------------
+
+model Review {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  rating      Int
+  comment     String   @db.Text
+  vendorReply String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, listingId])
+  @@index([listingId])
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+}
+
+model Coupon {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  discountPercent Int?
+  flatDiscount    Decimal?  @db.Decimal(10, 2)
+  minSpend        Decimal?  @db.Decimal(10, 2)
+  validFrom       DateTime
+  validUntil      DateTime
+  maxUses         Int       @default(100)
+  usedCount       Int       @default(0)
+  isActive        Boolean   @default(true)
+  bookings        Booking[]
+
+  @@index([code])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String   @db.Text
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
