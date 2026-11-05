@@ -56,7 +56,7 @@ export const USERS_STORE: LocalUser[] = [
     email: "emraanirshad88@gmail.com",
     username: "emraanirshad88",
     phone: "03000000001",
-    passwordHash: "$2a$10$ZygBAZkFLLWER1He200Vxe/OT8NT8AWVal1ESwkZNFChzPVBi1kzi", // Emra@91173259
+    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS", // Emra@91173259
     role: "ADMIN",
   },
   {
@@ -65,7 +65,7 @@ export const USERS_STORE: LocalUser[] = [
     email: "admin@pakistantravel.agency",
     username: "admin",
     phone: "03000000001",
-    passwordHash: "$2a$10$ZygBAZkFLLWER1He200Vxe/OT8NT8AWVal1ESwkZNFChzPVBi1kzi", // Emra@91173259
+    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS", // Emra@91173259
     role: "ADMIN",
   },
   {
@@ -73,7 +73,7 @@ export const USERS_STORE: LocalUser[] = [
     name: "Super Admin",
     email: "admin@tours.pk",
     phone: "03000000001",
-    passwordHash: "$2a$10$ZygBAZkFLLWER1He200Vxe/OT8NT8AWVal1ESwkZNFChzPVBi1kzi",
+    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS",
     role: "ADMIN",
   },
 
