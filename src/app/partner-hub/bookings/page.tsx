@@ -105,7 +105,7 @@ export default function VendorBookingsListPage() {
             onClick={() => setStatusFilter(s)}
             className={`px-3.5 py-1.5 rounded-lg transition ${
               statusFilter === s
-                ? "bg-slate-900 text-white"
+                ? "bg-orange-500 text-white font-bold"
                 : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
           >

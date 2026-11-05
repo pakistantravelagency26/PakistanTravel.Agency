@@ -4,7 +4,8 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, KeyRound } from "lucide-react";
+import Image from "next/image";
+import { Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,8 @@ function VendorLoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/partner-hub/listings";
 
-  const [identifier, setIdentifier] = useState("vendor@pakistantravel.agency");
-  const [password, setPassword] = useState("vendor123");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,94 +45,71 @@ function VendorLoginForm() {
     }
   }
 
-  function handleAutoFill() {
-    setIdentifier("vendor@pakistantravel.agency");
-    setPassword("vendor123");
-    setError("");
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-900 text-slate-100">
-      <div className="max-w-md w-full space-y-6 bg-slate-950 p-8 sm:p-10 rounded-3xl shadow-2xl border border-slate-800">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 text-slate-800">
+      <div className="max-w-md w-full space-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-orange-500/10 text-orange-500 border border-orange-500/20 mb-2">
-            <Briefcase className="w-7 h-7" />
+          <div className="inline-flex items-center justify-center mb-2">
+            <div className="w-14 h-14 relative rounded-2xl overflow-hidden shadow-md shadow-sky-600/15">
+              <Image
+                src="/logo.png"
+                alt="PakistanTravel.Agency"
+                fill
+                sizes="56px"
+                className="object-cover"
+                priority
+              />
+            </div>
           </div>
-          <span className="text-[10px] font-extrabold text-orange-400 uppercase tracking-widest block">
+          <span className="text-[10px] font-extrabold text-orange-600 uppercase tracking-widest block">
             Partner Extranet Portal
           </span>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Vendor Partner Sign In
           </h1>
-          <p className="text-xs text-slate-400">
-            Sign in to manage tours, publish new packages, and track bookings
+          <p className="text-xs text-slate-500">
+            Sign in to manage your tours, update prices, and track guest bookings
           </p>
         </div>
 
-        {/* Demo Credentials Helper Pill */}
-        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-orange-400 flex items-center gap-1.5">
-              <KeyRound className="w-3.5 h-3.5" /> Official Vendor Credentials
-            </span>
-            <button
-              type="button"
-              onClick={handleAutoFill}
-              className="text-[10px] bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded border border-orange-500/30 transition"
-            >
-              Fill Credentials
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-slate-300">
-            <div>
-              <span className="text-slate-500 text-[10px] block">Login ID / Email:</span>
-              <span className="text-white font-bold truncate block">vendor@pakistantravel.agency</span>
-            </div>
-            <div>
-              <span className="text-slate-500 text-[10px] block">Password:</span>
-              <span className="text-white font-bold block">vendor123</span>
-            </div>
-          </div>
-        </div>
-
         {error && (
-          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-slate-300 uppercase mb-1">
+            <label className="block font-bold text-slate-700 uppercase mb-1">
               Vendor Login ID / Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
               <input
                 type="text"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="e.g. vendor@pakistantravel.agency or 'vendor'"
-                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+                placeholder="Enter your registered Vendor Login ID or Email"
+                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 uppercase mb-1">
+            <label className="block font-bold text-slate-700 uppercase mb-1">
               Password
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter vendor password"
-                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-700 bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+                placeholder="Enter your password"
+                className="w-full pl-9 pr-3.5 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs font-medium"
               />
             </div>
           </div>
@@ -139,15 +117,15 @@ function VendorLoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition shadow-lg shadow-orange-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition shadow-lg shadow-orange-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? "Authenticating Partner..." : "Access Vendor Extranet"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-slate-900">
-          <Link href="/" className="text-xs text-slate-500 hover:text-slate-300">
+        <div className="text-center pt-2 border-t border-slate-100">
+          <Link href="/" className="text-xs text-slate-500 hover:text-slate-800 font-semibold">
             ← Return to Public Website
           </Link>
         </div>
@@ -158,7 +136,7 @@ function VendorLoginForm() {
 
 export default function VendorLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center text-xs text-slate-400">Loading vendor portal...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-xs text-slate-400">Loading vendor portal...</div>}>
       <VendorLoginForm />
     </Suspense>
   );
