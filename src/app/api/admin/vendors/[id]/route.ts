@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { getVendorById, deleteVendorAccount } from "@/services/vendor.service";
 
 export const dynamic = "force-dynamic";
@@ -9,39 +10,46 @@ export async function DELETE(
 ) {
   try {
     const { id } = params;
-    const vendor = getVendorById(id);
 
-    if (!vendor) {
+    // 1. Delete permanently from Neon PostgreSQL Database
+    let deletedFromDb = false;
+    let companyName = "";
+    try {
+      const vendor = await prisma.vendor.findUnique({
+        where: { id },
+        include: { user: true },
+      });
+
+      if (vendor) {
+        companyName = vendor.businessName;
+        // Cascade delete vendor (automatically deletes their listings due to onDelete: Cascade)
+        await prisma.vendor.delete({ where: { id } });
+        if (vendor.userId) {
+          await prisma.user.delete({ where: { id: vendor.userId } }).catch(() => {});
+        }
+        deletedFromDb = true;
+      }
+    } catch (dbErr) {
+      console.warn("Prisma vendor delete error:", dbErr);
+    }
+
+    // 2. Also delete from in-memory store
+    const localVendor = getVendorById(id);
+    if (localVendor && !companyName) {
+      companyName = localVendor.companyName;
+    }
+    const deletedLocally = deleteVendorAccount(id);
+
+    if (!deletedFromDb && !deletedLocally) {
       return NextResponse.json(
         { success: false, error: "Vendor not found" },
         { status: 404 }
       );
     }
 
-    // Security check: Vendor can only be deleted if they are disabled first
-    if (vendor.status !== "DISABLED") {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: "Vendor must be disabled before they can be deleted. Please disable the partner account first." 
-        },
-        { status: 400 }
-      );
-    }
-
-    const companyName = vendor.companyName;
-    const deleted = deleteVendorAccount(id);
-
-    if (!deleted) {
-      return NextResponse.json(
-        { success: false, error: "Failed to delete partner account" },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json({
       success: true,
-      message: `Partner account "${companyName}" and all associated listings have been deleted successfully.`,
+      message: `Partner account "${companyName || id}" and all associated listings have been permanently deleted from the database.`,
     });
   } catch (error: any) {
     return NextResponse.json(

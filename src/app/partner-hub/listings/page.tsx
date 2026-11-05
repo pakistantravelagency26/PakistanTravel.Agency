@@ -93,9 +93,20 @@ export default function VendorListingsPage() {
     }, 1500);
   }
 
-  function handleDelete(id: string) {
-    if (confirm("Are you sure you want to remove this tour package from the marketplace?")) {
-      setTours((prev) => prev.filter((t) => t.id !== id));
+  async function handleDelete(id: string) {
+    if (confirm("Are you sure you want to permanently delete this tour package from the marketplace?")) {
+      try {
+        const res = await fetch(`/api/listings?id=${id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (data.success) {
+          setTours((prev) => prev.filter((t) => t.id !== id));
+        }
+      } catch (err) {
+        console.error("Delete tour error:", err);
+        setTours((prev) => prev.filter((t) => t.id !== id));
+      }
     }
   }
 
