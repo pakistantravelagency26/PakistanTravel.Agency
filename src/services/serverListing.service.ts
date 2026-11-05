@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { ListingData } from "./listing.service";
 
@@ -80,18 +81,12 @@ export function formatDbListing(l: any): ListingData {
   };
 }
 
-export async function getActiveDbListings(): Promise<ListingData[]> {
+export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
   try {
-    const dbVendors = await prisma.vendor.findMany({
-      where: { status: "VERIFIED" },
-      select: { id: true },
-    });
-    const verifiedVendorIds = dbVendors.map((v) => v.id);
-
     const dbListings = await prisma.listing.findMany({
       where: {
         status: "PUBLISHED",
-        vendorId: { in: verifiedVendorIds },
+        vendor: { status: "VERIFIED" },
       },
       include: {
         vendor: true,
@@ -111,16 +106,10 @@ export async function getActiveDbListings(): Promise<ListingData[]> {
     console.error("Error fetching active DB listings:", error);
     return [];
   }
-}
+});
 
-export async function getDbListingBySlugOrId(idOrSlug: string): Promise<ListingData | null> {
+export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<ListingData | null> => {
   try {
-    const dbVendors = await prisma.vendor.findMany({
-      where: { status: "VERIFIED" },
-      select: { id: true },
-    });
-    const verifiedVendorIds = new Set(dbVendors.map((v) => v.id));
-
     const dbListing = await prisma.listing.findFirst({
       where: {
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
@@ -139,15 +128,9 @@ export async function getDbListingBySlugOrId(idOrSlug: string): Promise<ListingD
 
     if (!dbListing) return null;
 
-    // Only return if verified vendor and published (or for preview)
-    const isLive = dbListing.status === "PUBLISHED" && verifiedVendorIds.has(dbListing.vendorId);
-    const formatted = formatDbListing(dbListing);
-    if (!isLive) {
-      formatted.moderationStatus = dbListing.status === "PUBLISHED" ? "APPROVED" : "PENDING_APPROVAL";
-    }
-    return formatted;
+    return formatDbListing(dbListing);
   } catch (error) {
     console.error("Error fetching DB listing by slug/id:", error);
     return null;
   }
-}
+});

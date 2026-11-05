@@ -22,19 +22,12 @@ export async function GET(req: Request) {
     const vendorId = searchParams.get("vendorId");
     const singleId = searchParams.get("id") || searchParams.get("slug");
 
-    // 1. Fetch valid existing vendors from DB
-    const dbVendors = await prisma.vendor.findMany({ select: { id: true, status: true } });
-    const verifiedVendorIds = new Set(dbVendors.filter((v) => v.status === "VERIFIED").map((v) => v.id));
-    const allVendorIds = new Set(dbVendors.map((v) => v.id));
-
-    // 2. Query from Neon PostgreSQL Database
+    // Direct single-query relational scan (fast latency)
     const whereCondition: any = {};
 
-    if (includeAll) {
-      whereCondition.vendorId = { in: Array.from(allVendorIds) };
-    } else {
-      whereCondition.vendorId = { in: Array.from(verifiedVendorIds) };
+    if (!includeAll) {
       whereCondition.status = "PUBLISHED";
+      whereCondition.vendor = { status: "VERIFIED" };
     }
 
     if (vendorId) {
