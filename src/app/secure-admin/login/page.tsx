@@ -36,8 +36,7 @@ function AdminLoginForm() {
         setError(res.error || "Invalid administrative credentials. Access restricted.");
         setLoading(false);
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        window.location.href = callbackUrl;
       }
     } catch (err: any) {
       setError("An unexpected error occurred. Please try again.");

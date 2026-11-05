@@ -26,15 +26,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (pathname !== "/secure-admin/login" && status === "unauthenticated") {
-      router.replace(`/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`);
+      window.location.href = `/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`;
     } else if (
       pathname !== "/secure-admin/login" &&
       status === "authenticated" &&
       session?.user?.role !== "ADMIN"
     ) {
-      router.replace(`/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`);
+      window.location.href = `/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`;
     }
-  }, [status, session, pathname, router]);
+  }, [status, session, pathname]);
 
   // If on login page, render clean login view without sidebar
   if (pathname === "/secure-admin/login") {

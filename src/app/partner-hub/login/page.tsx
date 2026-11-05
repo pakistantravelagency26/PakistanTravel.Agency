@@ -36,8 +36,7 @@ function VendorLoginForm() {
         setError(res.error || "Invalid vendor credentials. Check your Login ID or password.");
         setLoading(false);
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        window.location.href = callbackUrl;
       }
     } catch (err: any) {
       setError("An unexpected error occurred. Please try again.");

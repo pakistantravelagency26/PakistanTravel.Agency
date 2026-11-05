@@ -25,9 +25,9 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (pathname !== "/partner-hub/login" && status === "unauthenticated") {
-      router.replace(`/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`);
+      window.location.href = `/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`;
     }
-  }, [status, pathname, router]);
+  }, [status, pathname]);
 
   // If on login page, render clean login view without sidebar
   if (pathname === "/partner-hub/login") {
