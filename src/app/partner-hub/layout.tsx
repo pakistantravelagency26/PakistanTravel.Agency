@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { 
   LayoutDashboard, 
@@ -19,11 +20,38 @@ import {
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (pathname !== "/partner-hub/login" && status === "unauthenticated") {
+      router.replace(`/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`);
+    }
+  }, [status, pathname, router]);
 
   // If on login page, render clean login view without sidebar
   if (pathname === "/partner-hub/login") {
     return <>{children}</>;
+  }
+
+  // Guard: require authenticated session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 text-xs font-semibold">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying Partner Extranet credentials...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 text-xs font-semibold">
+        Redirecting to Partner Extranet login...
+      </div>
+    );
   }
 
   const businessTitle = session?.user?.name?.includes("Karakoram") || session?.user?.email?.includes("karakoram")

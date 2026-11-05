@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { 
   ShieldCheck, 
   LayoutDashboard, 
@@ -20,10 +21,44 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (pathname !== "/secure-admin/login" && status === "unauthenticated") {
+      router.replace(`/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`);
+    } else if (
+      pathname !== "/secure-admin/login" &&
+      status === "authenticated" &&
+      session?.user?.role !== "ADMIN"
+    ) {
+      router.replace(`/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`);
+    }
+  }, [status, session, pathname, router]);
 
   // If on login page, render clean login view without sidebar
   if (pathname === "/secure-admin/login") {
     return <>{children}</>;
+  }
+
+  // Guard: require authenticated Super Admin session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 text-xs font-semibold">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying Super Admin authorization...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated" || session?.user?.role !== "ADMIN") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 text-xs font-semibold">
+        Redirecting to Super Admin sign-in...
+      </div>
+    );
   }
 
   const navItems = [
