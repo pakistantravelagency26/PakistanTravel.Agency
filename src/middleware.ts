@@ -35,6 +35,10 @@ export default withAuth(
     return NextResponse.next();
   },
   {
+    secret: process.env.NEXTAUTH_SECRET || "super-secret-random-key-change-in-production",
+    pages: {
+      signIn: "/secure-admin/login",
+    },
     callbacks: {
       authorized: ({ token, req }) => {
         const path = req.nextUrl.pathname;
@@ -53,15 +57,17 @@ export default withAuth(
           return true;
         }
 
-        // Protected portal routes require valid session token
-        if (
-          path.startsWith("/secure-admin") ||
-          path.startsWith("/partner-hub") ||
-          path.startsWith("/account") ||
-          path.startsWith("/checkout") ||
-          path.startsWith("/admin") ||
-          path.startsWith("/vendor")
-        ) {
+        // For secure-admin: require valid token with ADMIN role
+        if (path.startsWith("/secure-admin")) {
+          return !!token && token.role === "ADMIN";
+        }
+
+        // For partner-hub: require valid token with VENDOR or ADMIN role
+        if (path.startsWith("/partner-hub")) {
+          return !!token && (token.role === "VENDOR" || token.role === "ADMIN");
+        }
+
+        if (path.startsWith("/account") || path.startsWith("/checkout")) {
           return !!token;
         }
 
