@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "PakistanTravel.Agency | Book Hotels, Northern Tours & Rentals in Pakistan",
   description: "Official booking marketplace for Pakistan. Explore luxury hotels in Hunza & Skardu, family tour packages, 4x4 Prado rentals, and local activities with instant confirmation.",
   keywords: ["Pakistan travel", "Hunza hotels", "Skardu tours", "Kalam hotels", "Pakistan booking.com", "Swat resorts", "JazzCash travel booking"],
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/icon-192.png",
+  },
 };
 
 export default function RootLayout({
