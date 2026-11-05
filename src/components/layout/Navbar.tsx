@@ -10,8 +10,7 @@ import {
   LogOut, 
   Menu, 
   X,
-  Heart,
-  MessageCircle
+  Heart
 } from "lucide-react";
 import { useState } from "react";
 
@@ -38,7 +37,7 @@ export function Navbar() {
 
   return (
     <header className="bg-white text-slate-800 sticky top-0 z-50 shadow-sm border-b border-slate-100">
-      {/* Top Announcement & Helpline Bar (Musandam.tours style) */}
+      {/* Top Announcement Bar */}
       <div className="bg-slate-50 border-b border-slate-100 text-slate-600 text-[11px] py-1.5 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -46,16 +45,6 @@ export function Navbar() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Pakistan&apos;s Verified Tourism Marketplace
             </span>
-            <span className="hidden sm:inline text-slate-300">|</span>
-            <a
-              href="https://wa.me/923222327096"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 font-semibold"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              WhatsApp Helpdesk: +92 322 2327096
-            </a>
           </div>
 
           {/* Right items: Currency, Language & Customer Sign In / Up */}
@@ -145,23 +134,21 @@ export function Navbar() {
               <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
                 Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
               </span>
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold hidden sm:block">
-                Hotels & Resorts · Guided Tour Packages
+              <p className="text-[11px] text-sky-700 tracking-wide font-bold hidden sm:block">
+                Book Your Best Tour
               </p>
             </div>
           </Link>
 
-          {/* Right Action Items: Clean WhatsApp Helpline pill */}
+          {/* Right Action: Explore Catalog button */}
           <div className="hidden sm:flex items-center gap-3">
-            <a
-              href="https://wa.me/923222327096"
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition flex items-center gap-2"
+            <Link
+              href="/search"
+              className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
-              <span>WhatsApp Booking: +92 322 2327096</span>
-            </a>
+              <Compass className="w-4 h-4 text-sky-600" />
+              <span>Explore Tours & Hotels</span>
+            </Link>
           </div>
 
           {/* Mobile hamburger */}

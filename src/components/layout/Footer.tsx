@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, ShieldCheck, CreditCard, PhoneCall, Mail, MessageCircle } from "lucide-react";
+import { Compass, ShieldCheck, CreditCard, Mail, Headphones } from "lucide-react";
 
 export function Footer() {
   const pathname = usePathname();
@@ -22,7 +22,7 @@ export function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Value Proposition Highlights (Musandam Tours style) */}
+        {/* Value Proposition Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12 border-b border-slate-800 text-sm">
           <div className="flex items-start gap-4 p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60">
             <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
@@ -50,10 +50,10 @@ export function Footer() {
 
           <div className="flex items-start gap-4 p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <MessageCircle className="w-6 h-6" />
+              <Headphones className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white">24/7 WhatsApp Assistance</h4>
+              <h4 className="font-bold text-white">24/7 Online Assistance</h4>
               <p className="text-xs text-slate-400 mt-1">
                 Dedicated on-ground emergency and route coordinators active during your journeys.
               </p>
@@ -97,16 +97,8 @@ export function Footer() {
           <div>
             <h5 className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">Direct Support</h5>
             <div className="space-y-2 text-xs text-slate-400">
-              <a href="https://wa.me/923222327096" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-emerald-400 transition font-semibold text-white">
-                <MessageCircle className="w-4 h-4 text-emerald-400" />
-                WhatsApp: +92 322 2327096
-              </a>
               <p className="flex items-center gap-2">
-                <PhoneCall className="w-4 h-4 text-slate-400" />
-                Helpline: +92 322 2327096
-              </p>
-              <p className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-slate-400" />
+                <Mail className="w-4 h-4 text-emerald-400" />
                 pakistantravel.agency26@gmail.com
               </p>
               <p className="pt-2 text-[11px] text-slate-500">

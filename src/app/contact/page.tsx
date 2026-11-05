@@ -1,42 +1,33 @@
 "use client";
 
-import { MessageCircle, PhoneCall, Mail, MapPin, Clock } from "lucide-react";
+import Link from "next/link";
+import { Mail, MapPin, ArrowLeft, Headphones, Clock } from "lucide-react";
 
 export default function ContactPage() {
   return (
-    <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">Customer Care</span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Get in Touch with Our Team</h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-            Our trip coordinators and mountain safety advisors are available round-the-clock for bookings, inquiries, and road status.
-          </p>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+      <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-sky-600 mb-6">
+        <ArrowLeft className="w-4 h-4" /> Back to Home
+      </Link>
+
+      <div className="space-y-8">
+        <div>
+          <span className="text-xs font-bold text-sky-600 uppercase tracking-widest">Support & Inquiries</span>
+          <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Contact Customer Desk</h1>
+          <p className="text-xs text-slate-500 mt-1">Our on-ground coordinators are active 24/7 to assist with your bookings and travel plans.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Direct channels */}
+          <div className="space-y-4">
             <h2 className="text-base font-bold text-slate-900">Direct Contact Channels</h2>
 
             <div className="space-y-4 text-xs text-slate-600">
-              <a
-                href="https://wa.me/923222327096"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-100 hover:bg-emerald-100 transition font-bold"
-              >
-                <MessageCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-sky-50 text-sky-900 border border-sky-100 font-bold">
+                <Headphones className="w-6 h-6 text-sky-600 shrink-0" />
                 <div>
-                  <span className="block text-sm">24/7 WhatsApp Helpdesk</span>
-                  <span className="text-[11px] font-normal text-emerald-700">+92 322 2327096 (Instant reply)</span>
-                </div>
-              </a>
-
-              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                <PhoneCall className="w-5 h-5 text-sky-600 shrink-0" />
-                <div>
-                  <span className="font-bold text-slate-900 block text-sm">Official Helpline & Call Support</span>
-                  <span className="text-slate-500">+92 322 2327096</span>
+                  <span className="block text-sm">24/7 Online Support</span>
+                  <span className="text-[11px] font-normal text-sky-700">Instant assistance for travelers and bookings</span>
                 </div>
               </div>
 
@@ -45,6 +36,14 @@ export default function ContactPage() {
                 <div>
                   <span className="font-bold text-slate-900 block text-sm">Email Inquiries</span>
                   <span className="text-slate-500">pakistantravel.agency26@gmail.com</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                <Clock className="w-5 h-5 text-teal-600 shrink-0" />
+                <div>
+                  <span className="font-bold text-slate-900 block text-sm">Operating Hours</span>
+                  <span className="text-slate-500">Monday – Sunday · 24 Hours Active</span>
                 </div>
               </div>
 
@@ -61,7 +60,7 @@ export default function ContactPage() {
           {/* Quick Message Form */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-slate-900">Send an Online Message</h2>
-            <form onSubmit={(e) => { e.preventDefault(); alert("Message sent! Our support coordinator will WhatsApp you shortly."); }} className="space-y-3 text-xs">
+            <form onSubmit={(e) => { e.preventDefault(); alert("Message sent! Our support team will respond to your email shortly."); }} className="space-y-3 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Your Name</label>
                 <input
@@ -73,11 +72,11 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Phone / WhatsApp</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Your Email</label>
                 <input
-                  type="tel"
+                  type="email"
                   required
-                  placeholder="03001234567"
+                  placeholder="name@example.com"
                   className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
@@ -105,3 +104,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+

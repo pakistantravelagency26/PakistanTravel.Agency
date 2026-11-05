@@ -7,8 +7,7 @@ import {
   Search, 
   ShieldCheck, 
   Sparkles, 
-  MessageCircle, 
-  PhoneCall, 
+  Headphones, 
   CheckCircle2, 
 } from "lucide-react";
 import { MOCK_LISTINGS } from "@/services/listing.service";
@@ -44,53 +43,62 @@ export default function HomePage() {
             {/* Destination */}
             <div className="md:col-span-4 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
               <MapPin className="w-5 h-5 text-sky-600 shrink-0" />
-              <div className="w-full">
-                <label className="block text-[10px] font-bold uppercase text-slate-400">Destination</label>
-                <input
-                  type="text"
-                  name="destination"
-                  placeholder="Hunza, Skardu, Swat, Murree..."
-                  className="w-full text-xs sm:text-sm font-bold bg-transparent focus:outline-none placeholder:font-normal placeholder:text-slate-400"
-                />
-              </div>
-            </div>
-
-            {/* Dates */}
-            <div className="md:col-span-3 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
-              <Calendar className="w-5 h-5 text-orange-500 shrink-0" />
-              <div className="w-full">
-                <label className="block text-[10px] font-bold uppercase text-slate-400">Travel Dates</label>
-                <input
-                  type="text"
-                  name="dates"
-                  placeholder="Check-in — Check-out"
-                  className="w-full text-xs sm:text-sm font-bold bg-transparent focus:outline-none placeholder:font-normal placeholder:text-slate-400"
-                />
-              </div>
-            </div>
-
-            {/* Guests */}
-            <div className="md:col-span-3 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
-              <Users className="w-5 h-5 text-teal-600 shrink-0" />
-              <div className="w-full">
-                <label className="block text-[10px] font-bold uppercase text-slate-400">Guests & Type</label>
+              <div className="w-full text-left">
+                <label htmlFor="destination-select" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Where in Pakistan?</label>
                 <select
-                  name="type"
-                  className="w-full text-xs sm:text-sm font-bold bg-transparent focus:outline-none text-slate-800"
-                  defaultValue="ALL"
+                  id="destination-select"
+                  name="destination"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 outline-none cursor-pointer"
+                  defaultValue=""
                 >
-                  <option value="ALL">All Experiences</option>
-                  <option value="TOUR">Guided Tour Packages</option>
-                  <option value="HOTEL">Hotels & Resorts</option>
+                  <option value="">All Destinations (Hunza, Skardu, Swat...)</option>
+                  <option value="hunza">Hunza Valley & Attabad</option>
+                  <option value="skardu">Skardu & Deosai Plains</option>
+                  <option value="swat">Swat & Kalam</option>
+                  <option value="murree">Murree & Bhurban</option>
+                  <option value="kumrat">Kumrat Valley & Dir</option>
                 </select>
               </div>
             </div>
 
-            {/* Submit CTA */}
-            <div className="md:col-span-2">
+            {/* Travel Date */}
+            <div className="md:col-span-3 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
+              <Calendar className="w-5 h-5 text-teal-600 shrink-0" />
+              <div className="w-full text-left">
+                <label htmlFor="travel-date-input" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">When?</label>
+                <input
+                  id="travel-date-input"
+                  type="date"
+                  name="date"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 outline-none cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Experience Category */}
+            <div className="md:col-span-3 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
+              <Compass className="w-5 h-5 text-orange-500 shrink-0" />
+              <div className="w-full text-left">
+                <label htmlFor="type-select" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Experience Type</label>
+                <select
+                  id="type-select"
+                  name="type"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 outline-none cursor-pointer"
+                  defaultValue=""
+                >
+                  <option value="">All Categories</option>
+                  <option value="HOTEL">Hotels & Resorts</option>
+                  <option value="TOUR">Northern Guided Tours</option>
+                  <option value="RENTAL">4x4 Mountain Jeeps</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="md:col-span-2 flex items-center">
               <button
                 type="submit"
-                className="w-full h-full min-h-[52px] bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm rounded-2xl transition shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2"
+                className="w-full h-full min-h-[52px] bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0"
               >
                 <Search className="w-4 h-4" />
                 <span>Search</span>
@@ -98,34 +106,22 @@ export default function HomePage() {
             </div>
           </form>
         </div>
-      </section>
 
-      {/* Trust Badges Bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-white border border-slate-100 shadow-sm text-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-bold text-slate-900 block">100% Verified Partners</span>
-              <span className="text-[11px] text-slate-400">Physical hotel & guide verification</span>
-            </div>
-          </div>
-
+        {/* Confidence Badges (Musandam style) */}
+        <div className="max-w-4xl mx-auto mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-slate-600">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">Zero Double-Booking</span>
-              <span className="text-[11px] text-slate-400">Real-time inventory locks</span>
+              <span className="font-bold text-slate-900 block">100% Verified Partners</span>
+              <span className="text-[11px] text-slate-400">Licensed Northern Operators</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
-              <Sparkles className="w-5 h-5" />
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <span className="font-bold text-slate-900 block">JazzCash & EasyPaisa</span>
@@ -135,11 +131,11 @@ export default function HomePage() {
 
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
-              <PhoneCall className="w-5 h-5" />
+              <Headphones className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">24/7 Helpline Support</span>
-              <span className="text-[11px] text-slate-400">+92 322 2327096 Helpdesk</span>
+              <span className="font-bold text-slate-900 block">24/7 Online Support</span>
+              <span className="text-[11px] text-slate-400">Always available for assistance</span>
             </div>
           </div>
         </div>
@@ -147,20 +143,6 @@ export default function HomePage() {
 
       {/* Main Multi-Vendor Marketplace Catalog: 4 items per row with Filter running on top */}
       <TourMarketplaceSection initialListings={MOCK_LISTINGS} />
-
-      {/* Floating WhatsApp Helpdesk Pill (Iconic Musandam.tours feature) */}
-      <aside aria-label="Customer Support" className="fixed bottom-6 right-6 z-50">
-        <a
-          href="https://wa.me/923222327096?text=Assalam-o-Alaikum%2C%20I%20need%20assistance%20with%20Pakistan%20travel%20booking"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-2.5 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-2xl shadow-emerald-600/40 font-bold text-xs transition-transform hover:scale-105"
-        >
-          <MessageCircle className="w-5 h-5 fill-white text-emerald-600" />
-          <span className="hidden sm:inline">WhatsApp Help: +92 322 2327096</span>
-          <span className="sm:hidden">WhatsApp</span>
-        </a>
-      </aside>
     </div>
   );
 }
