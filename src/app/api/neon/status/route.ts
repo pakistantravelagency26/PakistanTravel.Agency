@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { checkNeonHealth, sealRealtimeQuery } from "@/lib/neon";
+import { checkNeonHealth, sealRealtimeQuery, neonConfig } from "@/lib/neon";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const rawUrl = process.env.DATABASE_URL || "NOT_SET";
+    const rawUrl = neonConfig.databaseUrl || "NOT_SET";
     const maskedUrl = rawUrl === "NOT_SET" ? "NOT_SET" : rawUrl.replace(/:[^:@]+@/, ":***@");
     const health = await checkNeonHealth();
     return NextResponse.json({
