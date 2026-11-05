@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDbListingBySlugOrId } from "@/services/serverListing.service";
+import { getDbListingBySlugOrId, getActiveDbListings } from "@/services/serverListing.service";
 import { ListingDetailClient } from "@/components/listing/ListingDetailClient";
 
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  try {
+    const listings = await getActiveDbListings();
+    return listings.map((l) => ({ slug: l.slug }));
+  } catch {
+    return [];
+  }
+}
 
 interface ListingPageProps {
   params: {
