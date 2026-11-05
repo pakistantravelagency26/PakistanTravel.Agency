@@ -137,12 +137,12 @@ export default function AdminListingsPage() {
               : `Tour "${data.listing.title}" was marked as revision required / rejected.`,
         });
         if (selectedTour?.id === id) {
-          setSelectedTour(data.listing);
+          setSelectedTour((prev) => (prev ? { ...prev, ...data.listing } : data.listing));
         }
         setTimeout(() => {
           setSelectedTour(null);
           setAdminNotes("");
-        }, 2000);
+        }, 1500);
       } else {
         setActionMessage({ type: "error", text: data.error || "Failed to process moderation." });
       }
@@ -426,13 +426,13 @@ export default function AdminListingsPage() {
                       <div>
                         <span className="text-[9px] uppercase font-bold text-slate-400 block">Vendor Demanded Price</span>
                         <span className="font-extrabold text-slate-700 text-xs sm:text-sm">
-                          PKR {(item.vendorPrice || item.basePrice).toLocaleString()}
+                          PKR {(Number(item.vendorPrice || item.basePrice) || 0).toLocaleString()}
                         </span>
                       </div>
                       <div>
                         <span className="text-[9px] uppercase font-bold text-slate-400 block">Total Price on Web</span>
                         <span className="font-black text-emerald-700 text-xs sm:text-sm">
-                          PKR {item.basePrice.toLocaleString()}
+                          PKR {(Number(item.basePrice) || 0).toLocaleString()}
                         </span>
                       </div>
                       <div className="col-span-2 pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
@@ -440,7 +440,7 @@ export default function AdminListingsPage() {
                           <Percent className="w-3 h-3 text-emerald-600" /> Agency Markup:
                         </span>
                         <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          +{item.commissionRate ?? 12}% (+PKR {Math.round(((item.vendorPrice || item.basePrice) * (item.commissionRate ?? 12)) / 100).toLocaleString()})
+                          +{item.commissionRate ?? 12}% (+PKR {Math.round(((Number(item.vendorPrice || item.basePrice) || 0) * (item.commissionRate ?? 12)) / 100).toLocaleString()})
                         </span>
                       </div>
                     </div>
@@ -532,23 +532,23 @@ export default function AdminListingsPage() {
             {/* Photo Gallery Viewer */}
             <div className="space-y-2">
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-                1. Uploaded Photos Gallery ({selectedTour.photos.length} Photos)
+                1. Uploaded Photos Gallery ({(selectedTour.photos || []).length} Photos)
               </span>
 
               <div className="relative h-64 sm:h-80 w-full rounded-2xl overflow-hidden bg-slate-950">
                 <img
-                  src={selectedTour.photos[activePhotoIdx] || selectedTour.photos[0]}
+                  src={(selectedTour.photos || [])[activePhotoIdx] || (selectedTour.photos || [])[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"}
                   alt="Tour Photo Preview"
                   className="w-full h-full object-cover"
                 />
                 <span className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-[11px] font-bold px-3 py-1 rounded-full">
-                  Photo {activePhotoIdx + 1} of {selectedTour.photos.length}
+                  Photo {activePhotoIdx + 1} of {(selectedTour.photos || []).length || 1}
                 </span>
               </div>
 
-              {selectedTour.photos.length > 1 && (
+              {(selectedTour.photos || []).length > 1 && (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {selectedTour.photos.map((url, idx) => (
+                  {(selectedTour.photos || []).map((url, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActivePhotoIdx(idx)}
@@ -573,7 +573,7 @@ export default function AdminListingsPage() {
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] text-slate-400 font-bold uppercase block">Vendor Price</span>
                   <span className="font-extrabold text-slate-900 text-sm">
-                    PKR {(selectedTour.vendorPrice || selectedTour.basePrice).toLocaleString()}
+                    PKR {(Number(selectedTour.vendorPrice || selectedTour.basePrice) || 0).toLocaleString()}
                   </span>
                   <span className="text-[10px] text-slate-500 block">Vendor Demanded</span>
                 </div>
@@ -581,7 +581,7 @@ export default function AdminListingsPage() {
                 <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
                   <span className="text-[10px] text-emerald-700 font-bold uppercase block">Public Price on Web</span>
                   <span className="font-black text-emerald-800 text-sm">
-                    PKR {selectedTour.basePrice.toLocaleString()}
+                    PKR {(Number(selectedTour.basePrice) || 0).toLocaleString()}
                   </span>
                   <span className="text-[10px] text-emerald-600 block">+{selectedTour.commissionRate ?? 12}% Commission</span>
                 </div>
@@ -612,7 +612,7 @@ export default function AdminListingsPage() {
                 3. Included Amenities & Inclusions
               </span>
               <div className="flex flex-wrap gap-2">
-                {selectedTour.amenities.map((amenity, i) => (
+                {(selectedTour.amenities || []).map((amenity, i) => (
                   <span
                     key={i}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold"
@@ -734,7 +734,7 @@ export default function AdminListingsPage() {
               <div className="text-right">
                 <span className="text-[10px] text-slate-400 font-semibold block">Vendor Demanded Amount</span>
                 <span className="font-extrabold text-slate-900 text-sm">
-                  PKR {(approvingTour.vendorPrice || approvingTour.basePrice).toLocaleString()}
+                  PKR {(Number(approvingTour.vendorPrice || approvingTour.basePrice) || 0).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -787,7 +787,7 @@ export default function AdminListingsPage() {
 
             {/* Real-Time Live Amount Breakdown Card (Amounts show hongi) */}
             {(() => {
-              const vendorRate = approvingTour.vendorPrice || approvingTour.basePrice;
+              const vendorRate = Number(approvingTour.vendorPrice || approvingTour.basePrice) || 0;
               const rate = Number(commissionRate) || 0;
               const commissionAmt = Math.round((vendorRate * rate) / 100);
               const totalWebPrice = vendorRate + commissionAmt;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { moderateListing } from "@/services/listing.service";
+import { formatDbListing } from "@/services/serverListing.service";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,14 @@ export async function PATCH(
       updatedDbListing = await prisma.listing.update({
         where: { id },
         data: updateData,
-        include: { vendor: true },
+        include: {
+          vendor: true,
+          destination: true,
+          units: true,
+          reviews: {
+            include: { user: true },
+          },
+        },
       });
     } catch (dbErr) {
       console.warn("DB listing moderate error:", dbErr);
@@ -57,7 +65,20 @@ export async function PATCH(
       );
     }
 
-    const title = updatedDbListing?.title || updated?.title;
+    const title = updatedDbListing?.title || updated?.title || "Tour Package";
+    const finalListing = updatedDbListing
+      ? formatDbListing(updatedDbListing)
+      : {
+          ...(updated || {}),
+          id,
+          title,
+          basePrice: body.totalPrice !== undefined ? Number(body.totalPrice) : 35000,
+          vendorPrice: body.vendorPrice !== undefined ? Number(body.vendorPrice) : 30000,
+          moderationStatus: action === "APPROVE" ? "APPROVED" : "REJECTED",
+          commissionRate: body.commissionRate !== undefined ? Number(body.commissionRate) : 12.0,
+          photos: [],
+          amenities: [],
+        };
 
     return NextResponse.json({
       success: true,
@@ -65,15 +86,7 @@ export async function PATCH(
         action === "APPROVE"
           ? `Listing "${title}" has been approved and is now live on PakistanTravel.Agency marketplace!`
           : `Listing "${title}" was marked as revision required/rejected.`,
-      listing: {
-        ...(updated || {}),
-        id,
-        title,
-        basePrice: body.totalPrice !== undefined ? Number(body.totalPrice) : Number(updatedDbListing?.basePrice),
-        vendorPrice: body.vendorPrice !== undefined ? Number(body.vendorPrice) : (updatedDbListing?.vendorPrice || updatedDbListing?.basePrice),
-        moderationStatus: action === "APPROVE" ? "APPROVED" : "REJECTED",
-        commissionRate: body.commissionRate !== undefined ? Number(body.commissionRate) : (updatedDbListing?.commissionRate || 12.0),
-      },
+      listing: finalListing,
     });
   } catch (error: any) {
     return NextResponse.json(
