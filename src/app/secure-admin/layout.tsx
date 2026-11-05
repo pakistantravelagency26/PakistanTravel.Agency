@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,18 +23,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    if (pathname !== "/secure-admin/login" && status === "unauthenticated") {
-      window.location.href = `/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`;
-    } else if (
-      pathname !== "/secure-admin/login" &&
-      status === "authenticated" &&
-      session?.user?.role !== "ADMIN"
-    ) {
-      window.location.href = `/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`;
+    const timer = setTimeout(() => {
+      setTimedOut(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (pathname !== "/secure-admin/login") {
+      if (status === "unauthenticated" || (timedOut && status === "loading")) {
+        window.location.href = `/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`;
+      } else if (
+        status === "authenticated" &&
+        session?.user?.role !== "ADMIN"
+      ) {
+        window.location.href = `/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`;
+      }
     }
-  }, [status, session, pathname]);
+  }, [status, session, pathname, timedOut]);
 
   // If on login page, render clean login view without sidebar
   if (pathname === "/secure-admin/login") {

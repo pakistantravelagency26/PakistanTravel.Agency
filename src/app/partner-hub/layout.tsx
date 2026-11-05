@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,12 +22,22 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    if (pathname !== "/partner-hub/login" && status === "unauthenticated") {
-      window.location.href = `/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`;
+    const timer = setTimeout(() => {
+      setTimedOut(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (pathname !== "/partner-hub/login") {
+      if (status === "unauthenticated" || (timedOut && status === "loading")) {
+        window.location.href = `/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`;
+      }
     }
-  }, [status, pathname]);
+  }, [status, pathname, timedOut]);
 
   // If on login page, render clean login view without sidebar
   if (pathname === "/partner-hub/login") {
