@@ -24,6 +24,7 @@ import {
   MessageSquarePlus
 } from "lucide-react";
 import { MOCK_LISTINGS } from "@/services/listing.service";
+import { isVendorEnabled } from "@/services/vendor.service";
 import { WriteReviewModal } from "@/components/reviews/WriteReviewModal";
 
 export default function ListingDetailPage() {
@@ -32,6 +33,7 @@ export default function ListingDetailPage() {
   const slug = params.slug as string;
 
   const listing = MOCK_LISTINGS.find((l) => l.slug === slug || l.id === slug) || MOCK_LISTINGS[0];
+  const isListingActive = isVendorEnabled(listing?.vendor?.id);
 
   const [activePhoto, setActivePhoto] = useState(0);
   const [selectedUnitId, setSelectedUnitId] = useState<string>(listing.units[0]?.id || "");

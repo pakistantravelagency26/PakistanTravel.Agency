@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MOCK_LISTINGS, createNewListing, ListingData } from "@/services/listing.service";
+import { MOCK_LISTINGS, getActiveListings, createNewListing, ListingData } from "@/services/listing.service";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const includeDisabled = searchParams.get("includeDisabled") === "true";
+    const listings = includeDisabled ? MOCK_LISTINGS : getActiveListings();
+
     return NextResponse.json({
       success: true,
-      listings: MOCK_LISTINGS,
+      listings,
     });
   } catch (error: any) {
     return NextResponse.json(

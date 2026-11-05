@@ -1,3 +1,4 @@
+import { isVendorEnabled } from "./vendor.service";
 export interface ListingUnitData {
   id: string;
   title: string;
@@ -870,7 +871,8 @@ export async function getListings(filters?: {
   amenities?: string[];
   sortBy?: string;
 }): Promise<ListingData[]> {
-  let results = [...MOCK_LISTINGS];
+  // Exclude listings from disabled vendors
+  let results = MOCK_LISTINGS.filter((l) => isVendorEnabled(l.vendor?.id));
 
   if (filters?.destination) {
     const q = filters.destination.toLowerCase().trim();
@@ -909,6 +911,10 @@ export async function getListings(filters?: {
   }
 
   return results;
+}
+
+export function getActiveListings(): ListingData[] {
+  return MOCK_LISTINGS.filter((l) => isVendorEnabled(l.vendor?.id));
 }
 
 export async function getListingBySlugOrId(idOrSlug: string): Promise<ListingData | null> {

@@ -46,11 +46,20 @@ export const authOptions: NextAuthOptions = {
           isValid = false;
         }
 
-        // Reliable fallback for standard accounts
+        // Reliable fallback for standard accounts & dynamic vendors
         if (!isValid) {
           const pass = credentials.password;
-          if (user.role === "VENDOR" && (pass === "vendor123" || pass === "123456" || pass === "karakoram123")) {
-            isValid = true;
+          if (user.role === "VENDOR") {
+            const { getVendorById } = await import("@/services/vendor.service");
+            const vendorObj = user.vendorId ? getVendorById(user.vendorId) : null;
+            if (
+              pass === "vendor123" ||
+              pass === "123456" ||
+              pass === "karakoram123" ||
+              (vendorObj && vendorObj.passwordPlain === pass)
+            ) {
+              isValid = true;
+            }
           } else if (user.role === "ADMIN" && (pass === "Emra@91173259" || pass === "admin123" || pass === "123456")) {
             isValid = true;
           } else if (user.role === "CUSTOMER" && (pass === "customer123" || pass === "123456")) {
@@ -60,6 +69,14 @@ export const authOptions: NextAuthOptions = {
 
         if (!isValid) {
           throw new Error("Invalid password");
+        }
+
+        // Verify that vendor account is not disabled by Super Admin
+        if (user.role === "VENDOR" && user.vendorId) {
+          const { isVendorEnabled } = await import("@/services/vendor.service");
+          if (!isVendorEnabled(user.vendorId)) {
+            throw new Error("This Vendor / Partner account has been deactivated by Super Admin. Please contact PakistanTravel.Agency administration.");
+          }
         }
 
         return {

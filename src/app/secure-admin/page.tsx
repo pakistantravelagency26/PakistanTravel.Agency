@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function SecureAdminIndexPage() {
-  redirect("/secure-admin/dashboard");
+  redirect("/secure-admin/vendors");
 }

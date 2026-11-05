@@ -27,8 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const navItems = [
+    { href: "/secure-admin/vendors", label: "Partner Hub (Vendors)", icon: Users },
     { href: "/secure-admin/dashboard", label: "Overview & Analytics", icon: LayoutDashboard },
-    { href: "/secure-admin/vendors", label: "Vendor Approvals", icon: Users },
     { href: "/secure-admin/listings", label: "Listing Moderation", icon: Building2 },
     { href: "/secure-admin/commissions", label: "Commission Settings", icon: Percent },
     { href: "/secure-admin/bookings", label: "Bookings & Refunds", icon: BookOpenCheck },

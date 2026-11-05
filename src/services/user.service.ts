@@ -14,7 +14,7 @@ export interface LocalUser {
 }
 
 // In-memory persistent user repository with pre-configured authentic bcrypt credentials
-const USERS_STORE: LocalUser[] = [
+export const USERS_STORE: LocalUser[] = [
   // 1. TOUR VENDOR (Controls the 10 Northern Tours)
   {
     id: "user-vend-karakoram",

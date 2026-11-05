@@ -10,7 +10,7 @@ import {
   Headphones, 
   CheckCircle2, 
 } from "lucide-react";
-import { MOCK_LISTINGS } from "@/services/listing.service";
+import { getActiveListings } from "@/services/listing.service";
 import { TourMarketplaceSection } from "@/components/home/TourMarketplaceSection";
 
 export default function HomePage() {
@@ -142,7 +142,7 @@ export default function HomePage() {
       </section>
 
       {/* Main Multi-Vendor Marketplace Catalog: 4 items per row with Filter running on top */}
-      <TourMarketplaceSection initialListings={MOCK_LISTINGS} />
+      <TourMarketplaceSection initialListings={getActiveListings()} />
     </div>
   );
 }

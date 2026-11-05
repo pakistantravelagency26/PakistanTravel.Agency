@@ -19,7 +19,7 @@ import {
   Clock,
   RotateCcw
 } from "lucide-react";
-import { MOCK_LISTINGS } from "@/services/listing.service";
+import { getActiveListings } from "@/services/listing.service";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +48,7 @@ function SearchContent() {
 
   // Filtered and Sorted Listings
   const filteredListings = useMemo(() => {
-    let list = [...MOCK_LISTINGS];
+    let list = getActiveListings();
 
     if (destinationQuery.trim()) {
       const q = destinationQuery.toLowerCase().trim();
