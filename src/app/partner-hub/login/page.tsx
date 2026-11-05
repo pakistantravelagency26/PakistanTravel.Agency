@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck } from "lucide-react";
+import { Briefcase, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, KeyRound } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +13,8 @@ function VendorLoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/partner-hub/listings";
 
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const [identifier, setIdentifier] = useState("vendor@pakistantravel.agency");
+  const [password, setPassword] = useState("vendor123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +44,12 @@ function VendorLoginForm() {
     }
   }
 
+  function handleAutoFill() {
+    setIdentifier("vendor@pakistantravel.agency");
+    setPassword("vendor123");
+    setError("");
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-900 text-slate-100">
       <div className="max-w-md w-full space-y-6 bg-slate-950 p-8 sm:p-10 rounded-3xl shadow-2xl border border-slate-800">
@@ -58,8 +64,34 @@ function VendorLoginForm() {
             Vendor Partner Sign In
           </h1>
           <p className="text-xs text-slate-400">
-            Sign in with your Vendor Login ID, Email, or Registered Mobile
+            Sign in to manage tours, publish new packages, and track bookings
           </p>
+        </div>
+
+        {/* Demo Credentials Helper Pill */}
+        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-orange-400 flex items-center gap-1.5">
+              <KeyRound className="w-3.5 h-3.5" /> Official Vendor Credentials
+            </span>
+            <button
+              type="button"
+              onClick={handleAutoFill}
+              className="text-[10px] bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded border border-orange-500/30 transition"
+            >
+              Fill Credentials
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-slate-300">
+            <div>
+              <span className="text-slate-500 text-[10px] block">Login ID / Email:</span>
+              <span className="text-white font-bold truncate block">vendor@pakistantravel.agency</span>
+            </div>
+            <div>
+              <span className="text-slate-500 text-[10px] block">Password:</span>
+              <span className="text-white font-bold block">vendor123</span>
+            </div>
+          </div>
         </div>
 
         {error && (

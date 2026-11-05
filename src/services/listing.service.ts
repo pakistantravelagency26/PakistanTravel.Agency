@@ -915,3 +915,32 @@ export async function getListingBySlugOrId(idOrSlug: string): Promise<ListingDat
   const found = MOCK_LISTINGS.find((l) => l.id === idOrSlug || l.slug === idOrSlug);
   return found || null;
 }
+
+
+export function createNewListing(listing: ListingData): ListingData {
+  const existingIdx = MOCK_LISTINGS.findIndex((l) => l.id === listing.id || l.slug === listing.slug);
+  if (existingIdx >= 0) {
+    MOCK_LISTINGS[existingIdx] = listing;
+  } else {
+    MOCK_LISTINGS.unshift(listing);
+  }
+  return listing;
+}
+
+export function updateListing(id: string, updates: Partial<ListingData>): ListingData | null {
+  const idx = MOCK_LISTINGS.findIndex((l) => l.id === id);
+  if (idx >= 0) {
+    MOCK_LISTINGS[idx] = { ...MOCK_LISTINGS[idx], ...updates };
+    return MOCK_LISTINGS[idx];
+  }
+  return null;
+}
+
+export function deleteListing(id: string): boolean {
+  const idx = MOCK_LISTINGS.findIndex((l) => l.id === id);
+  if (idx >= 0) {
+    MOCK_LISTINGS.splice(idx, 1);
+    return true;
+  }
+  return false;
+}
