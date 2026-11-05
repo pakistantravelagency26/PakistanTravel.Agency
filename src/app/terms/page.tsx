@@ -12,13 +12,13 @@ export default function TermsPage() {
         <div>
           <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">Legal Agreement</span>
           <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Terms of Service & Booking Policy</h1>
-          <p className="text-xs text-slate-500 mt-1">Last updated: November 2026 · PakistanTravel.agency</p>
+          <p className="text-xs text-slate-500 mt-1">Last updated: November 2026 · PakistanTravel.Agency</p>
         </div>
 
         <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed pt-4 border-t border-slate-100">
           <h2 className="text-base font-bold text-slate-900">1. Marketplace Platform Role</h2>
           <p>
-            PakistanTravel.agency acts as a multi-vendor reservation marketplace connecting independent travelers with registered hotel partners, tour guides, and 4x4 transport operators across Pakistan. All partners are verified by our operations team.
+            PakistanTravel.Agency acts as a multi-vendor reservation marketplace connecting independent travelers with registered hotel partners, tour guides, and 4x4 transport operators across Pakistan. All partners are verified by our operations team.
           </p>
 
           <h2 className="text-base font-bold text-slate-900">2. Booking & Cancellation Policies</h2>

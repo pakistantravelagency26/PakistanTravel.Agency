@@ -13,7 +13,7 @@ export default function AboutPage() {
             Connecting the World to Pakistan&apos;s Wonder
           </h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            PakistanTravel.agency is the trusted multi-vendor travel marketplace dedicated to making the Northern Areas, historic cities, and scenic coastal highways accessible, reliable, and effortless to book.
+            PakistanTravel.Agency is the trusted multi-vendor travel marketplace dedicated to making the Northern Areas, historic cities, and scenic coastal highways accessible, reliable, and effortless to book.
           </p>
         </div>
 

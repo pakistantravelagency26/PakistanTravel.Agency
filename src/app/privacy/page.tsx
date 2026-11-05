@@ -17,7 +17,7 @@ export default function PrivacyPage() {
 
         <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed pt-4 border-t border-slate-100">
           <p>
-            At PakistanTravel.agency, your personal information is protected under industry-standard 256-bit encryption. We only collect details necessary for issuing valid travel vouchers, road permit clearances, and processing secure transactions.
+            At PakistanTravel.Agency, your personal information is protected under industry-standard 256-bit encryption. We only collect details necessary for issuing valid travel vouchers, road permit clearances, and processing secure transactions.
           </p>
           <h2 className="text-base font-bold text-slate-900">Information We Collect</h2>
           <ul className="list-disc list-inside space-y-1">

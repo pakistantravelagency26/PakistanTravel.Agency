@@ -44,7 +44,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 text-orange-500 shrink-0" />
                 <div>
                   <span className="font-bold text-slate-900 block text-sm">Email Inquiries</span>
-                  <span className="text-slate-500">paksitantravel.agency@gmail.com</span>
+                  <span className="text-slate-500">pakistantravel.agency26@gmail.com</span>
                 </div>
               </div>
 

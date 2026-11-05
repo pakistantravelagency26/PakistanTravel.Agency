@@ -107,7 +107,7 @@ export function Footer() {
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-slate-400" />
-                paksitantravel.agency@gmail.com
+                pakistantravel.agency26@gmail.com
               </p>
               <p className="pt-2 text-[11px] text-slate-500">
                 Blue Area, Islamabad, Pakistan
@@ -118,7 +118,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} PakistanTravel.agency. Designed with pride for Pakistan Tourism.</p>
+          <p>© {new Date().getFullYear()} PakistanTravel.Agency. Designed with pride for Pakistan Tourism.</p>
           <div className="flex flex-wrap items-center gap-5 font-medium">
             <Link href="/about" className="hover:text-white transition">About Us</Link>
             <Link href="/contact" className="hover:text-white transition">Contact & Help</Link>

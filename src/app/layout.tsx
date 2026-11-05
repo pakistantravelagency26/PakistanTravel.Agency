@@ -5,7 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "PakistanTravel.agency | Book Hotels, Northern Tours & Rentals in Pakistan",
+  title: "PakistanTravel.Agency | Book Hotels, Northern Tours & Rentals in Pakistan",
   description: "Official booking marketplace for Pakistan. Explore luxury hotels in Hunza & Skardu, family tour packages, 4x4 Prado rentals, and local activities with instant confirmation.",
   keywords: ["Pakistan travel", "Hunza hotels", "Skardu tours", "Kalam hotels", "Pakistan booking.com", "Swat resorts", "JazzCash travel booking"],
 };

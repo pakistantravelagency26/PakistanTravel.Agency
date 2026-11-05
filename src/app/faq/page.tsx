@@ -8,7 +8,7 @@ export default function FAQPage() {
       a: "All Pakistani citizens must carry their original CNIC. Overseas Pakistanis (NICOP) and international tourists should carry valid original passports and relevant visas. Security checkpoints at Babusar Top, Diamer, and Gilgit require verification.",
     },
     {
-      q: "How does payment work on PakistanTravel.agency?",
+      q: "How does payment work on PakistanTravel.Agency?",
       a: "We support JazzCash, EasyPaisa, Pakistani Credit/Debit cards (Visa/MasterCard via Stripe), and Cash on Arrival. Instant electronic vouchers are generated as soon as your booking is placed.",
     },
     {

@@ -143,7 +143,7 @@ export function Navbar() {
             </div>
             <div>
               <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
-                Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.agency</span>
+                Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
               </span>
               <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold hidden sm:block">
                 Hotels & Resorts · Guided Tour Packages
