@@ -146,18 +146,24 @@ export default function ConfirmationPage() {
                 {booking.destination}
               </p>
               <div className="mt-3 text-xs text-slate-700 font-semibold bg-white p-2.5 rounded-lg border border-slate-200 inline-block">
-                Room: {booking.unitTitle} ({booking.unitsCount} Room, {booking.guestsCount} Guests)
+                {booking.unitTitle?.toLowerCase().includes("seat") || booking.listingTitle?.toLowerCase().includes("tour")
+                  ? `Package: ${booking.unitTitle} (${booking.unitsCount} Seat${booking.unitsCount > 1 ? "s" : ""}, ${booking.guestsCount} Travelers)`
+                  : `Room: ${booking.unitTitle} (${booking.unitsCount} Room, ${booking.guestsCount} Guests)`}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="bg-white p-3 rounded-lg border border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Check-in</span>
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                  {booking.listingTitle?.toLowerCase().includes("tour") ? "Tour Departure" : "Check-in"}
+                </span>
                 <span className="font-bold text-slate-900 block text-sm mt-0.5">{booking.startDate}</span>
                 <span className="text-[10px] text-slate-500">From 02:00 PM</span>
               </div>
               <div className="bg-white p-3 rounded-lg border border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Check-out</span>
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                  {booking.listingTitle?.toLowerCase().includes("tour") ? "Tour Return" : "Check-out"}
+                </span>
                 <span className="font-bold text-slate-900 block text-sm mt-0.5">{booking.endDate}</span>
                 <span className="text-[10px] text-slate-500">Until 12:00 PM</span>
               </div>

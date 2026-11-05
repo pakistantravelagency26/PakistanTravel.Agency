@@ -118,10 +118,11 @@ export default function ListingDetailPage() {
     },
   };
 
+  const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
   const selectedUnit = listing.units.find((u) => u.id === selectedUnitId) || listing.units[0];
-  const nightsCount = 3; // Demo nights duration
+  const nightsCount = 3; // Demo nights duration for hotels
   const unitPrice = selectedUnit ? selectedUnit.basePrice : listing.basePrice;
-  const totalPrice = unitPrice * nightsCount * selectedQuantity;
+  const totalPrice = isTour ? unitPrice * selectedQuantity : unitPrice * nightsCount * selectedQuantity;
 
   function handleReserve() {
     if (!listing) return;
@@ -202,10 +203,10 @@ export default function ListingDetailPage() {
             </button>
 
             <a
-              href="#rooms-table"
-              className="px-6 py-2.5 rounded-xl bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm transition shadow-md"
+              href="#booking-table"
+              className="px-6 py-2.5 rounded-xl bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm transition shadow-md flex items-center gap-2"
             >
-              Reserve Room
+              <span>{isTour ? "Book Tour" : "Reserve Room"}</span>
             </a>
           </div>
         </div>
@@ -243,9 +244,15 @@ export default function ListingDetailPage() {
         {/* Sticky Subnav Bar */}
         <div className="sticky top-20 z-40 bg-white border-y border-slate-200 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 shadow-sm flex gap-6 overflow-x-auto text-xs font-bold text-slate-600">
           <a href="#overview" className="hover:text-brand-emerald transition whitespace-nowrap">Overview</a>
-          <a href="#rooms-table" className="text-brand-emerald transition whitespace-nowrap">Rooms & Pricing</a>
-          <a href="#amenities" className="hover:text-brand-emerald transition whitespace-nowrap">Facilities & Amenities</a>
-          <a href="#policies" className="hover:text-brand-emerald transition whitespace-nowrap">House Rules & Policies</a>
+          <a href="#booking-table" className="text-brand-emerald transition whitespace-nowrap">
+            {isTour ? "Tour Packages & Seats" : "Rooms & Pricing"}
+          </a>
+          <a href="#amenities" className="hover:text-brand-emerald transition whitespace-nowrap">
+            {isTour ? "Inclusions & Perks" : "Facilities & Amenities"}
+          </a>
+          <a href="#policies" className="hover:text-brand-emerald transition whitespace-nowrap">
+            {isTour ? "Schedule & Guidelines" : "House Rules & Policies"}
+          </a>
           <a href="#reviews" className="hover:text-brand-emerald transition whitespace-nowrap">Guest Reviews ({listing.totalReviews})</a>
         </div>
 
@@ -254,7 +261,9 @@ export default function ListingDetailPage() {
           <div className="lg:col-span-2 space-y-8">
             {/* Overview & Key Highlights */}
             <section id="overview" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h2 className="text-lg font-bold text-slate-900">About this Property</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                {isTour ? "About this Tour & Itinerary" : "About this Property"}
+              </h2>
               <p className="text-sm text-slate-600 leading-relaxed">
                 {listing.description}
               </p>
@@ -267,7 +276,7 @@ export default function ListingDetailPage() {
                 </div>
                 <div className="flex items-center gap-2 text-slate-700">
                   <Flame className="w-4 h-4 text-orange-500" />
-                  <span>Heated Rooms</span>
+                  <span>{isTour ? "Campfire Nights" : "Heated Rooms"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-700">
                   <Wifi className="w-4 h-4 text-sky-500" />
@@ -283,20 +292,26 @@ export default function ListingDetailPage() {
                 </div>
                 <div className="flex items-center gap-2 text-slate-700">
                   <Clock className="w-4 h-4 text-blue-600" />
-                  <span>24hr Front Desk</span>
+                  <span>{isTour ? "Guided Schedule" : "24hr Front Desk"}</span>
                 </div>
               </div>
             </section>
 
-            {/* Room / Unit Selection Table (Iconic Booking.com Feature) */}
-            <section id="rooms-table" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            {/* Room / Unit Selection Table */}
+            <section id="booking-table" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">Available Rooms & Packages</h2>
-                  <p className="text-xs text-slate-500">Prices are per room for 3 nights including Pakistani taxes</p>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    {isTour ? "Available Tour Packages & Seat Tiers" : "Available Rooms & Packages"}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {isTour
+                      ? "Prices are per person / traveler including verified mountain transport and stays"
+                      : `Prices are per room for ${nightsCount} nights including Pakistani taxes`}
+                  </p>
                 </div>
                 <span className="text-xs font-semibold text-brand-emerald bg-brand-emeraldLight px-3 py-1 rounded-full">
-                  Real-time Availability
+                  {isTour ? "Guaranteed Departures" : "Real-time Availability"}
                 </span>
               </div>
 
@@ -319,7 +334,10 @@ export default function ListingDetailPage() {
                           <h3 className="font-bold text-base text-slate-900">{unit.title}</h3>
                           <p className="text-xs text-slate-500">{unit.description}</p>
                           <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                            <Users className="w-3.5 h-3.5 text-slate-400" /> Max Guests: {unit.maxGuests} Adults · {unit.bedType}
+                            <Users className="w-3.5 h-3.5 text-slate-400" /> 
+                            {isTour 
+                              ? `Capacity: ${unit.maxGuests} Travelers / Seats · ${unit.bedType}` 
+                              : `Max Guests: ${unit.maxGuests} Adults · ${unit.bedType}`}
                           </p>
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {unit.amenities.map((a) => (
@@ -333,12 +351,14 @@ export default function ListingDetailPage() {
                         {/* Pricing and Selector */}
                         <div className="shrink-0 flex flex-col justify-between items-start md:items-end text-left md:text-right border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                           <div>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Price per night</span>
+                            <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                              {isTour ? "Price per traveler" : "Price per night"}
+                            </span>
                             <p className="text-xl font-extrabold text-slate-900">
                               PKR {unit.basePrice.toLocaleString()}
                             </p>
                             <span className="text-[11px] text-green-700 font-semibold block">
-                              Free cancellation before Nov 8
+                              Free cancellation before trip
                             </span>
                           </div>
 
@@ -351,7 +371,9 @@ export default function ListingDetailPage() {
                                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                               }`}
                             >
-                              {isCurrent ? "Selected Room" : "Choose this Room"}
+                              {isCurrent
+                                ? (isTour ? "Selected Package" : "Selected Room")
+                                : (isTour ? "Choose this Package" : "Choose this Room")}
                             </button>
                           </div>
                         </div>
@@ -377,21 +399,38 @@ export default function ListingDetailPage() {
 
             {/* House Rules & Mountain Advisory */}
             <section id="policies" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h2 className="text-lg font-bold text-slate-900">Property Policies & Northern Travel Advisory</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                {isTour ? "Tour Itinerary Guidelines & Rules" : "Property Policies & Northern Travel Advisory"}
+              </h2>
               <div className="space-y-3 text-xs text-slate-600">
                 <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-start gap-2.5">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
                   <div>
-                    <span className="font-bold block">Northern Areas Power & Weather Advisory</span>
-                    During peak winter/autumn periods in Gilgit-Baltistan, load shedding can occur. This property maintains heavy diesel generators operating during scheduled evening hours.
+                    <span className="font-bold block">
+                      {isTour ? "High-Altitude Travel Advisory" : "Northern Areas Power & Weather Advisory"}
+                    </span>
+                    {isTour
+                      ? "High-altitude weather changes swiftly. Please carry thermal layers, trekking shoes, and government CNIC/Passport at security checkpoints."
+                      : "During peak winter/autumn periods in Gilgit-Baltistan, load shedding can occur. This property maintains heavy diesel generators operating during scheduled evening hours."}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <span className="font-semibold text-slate-800 block mb-1">Check-in / Check-out</span>
-                    <p>Check-in: 02:00 PM</p>
-                    <p>Check-out: 12:00 PM (Noon)</p>
+                    <span className="font-semibold text-slate-800 block mb-1">
+                      {isTour ? "Tour Schedule & Timings" : "Check-in / Check-out"}
+                    </span>
+                    {isTour ? (
+                      <>
+                        <p>Assembly Time: 06:00 AM sharp</p>
+                        <p>Departure: 06:30 AM from pickup terminal</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>Check-in: 02:00 PM</p>
+                        <p>Check-out: 12:00 PM (Noon)</p>
+                      </>
+                    )}
                   </div>
                   <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                     <span className="font-semibold text-slate-800 block mb-1">Cancellation Guarantee</span>
@@ -461,7 +500,9 @@ export default function ListingDetailPage() {
             {/* Sticky Reservation Summary Box */}
             <div className="sticky top-36 bg-white p-6 rounded-2xl border border-slate-200 shadow-xl space-y-5">
               <div>
-                <span className="text-xs text-slate-400 uppercase font-semibold">Total Stay Estimate</span>
+                <span className="text-xs text-slate-400 uppercase font-semibold">
+                  {isTour ? "Tour Booking Summary" : "Total Stay Estimate"}
+                </span>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-xs font-bold text-slate-700">PKR</span>
                   <span className="text-3xl font-extrabold text-slate-900">
@@ -469,7 +510,9 @@ export default function ListingDetailPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  For {nightsCount} nights · {selectedQuantity} {selectedQuantity > 1 ? "rooms" : "room"} (Taxes included)
+                  {isTour
+                    ? `For ${selectedQuantity} ${selectedQuantity > 1 ? "Travelers / Seats" : "Traveler / Seat"} · All taxes included`
+                    : `For ${nightsCount} nights · ${selectedQuantity} ${selectedQuantity > 1 ? "rooms" : "room"} (Taxes included)`}
                 </p>
               </div>
 
@@ -477,7 +520,9 @@ export default function ListingDetailPage() {
               <div className="space-y-2 text-xs">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase">Check-in</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase">
+                      {isTour ? "Tour Start Date" : "Check-in"}
+                    </label>
                     <input
                       type="date"
                       value={checkInDate}
@@ -486,7 +531,9 @@ export default function ListingDetailPage() {
                     />
                   </div>
                   <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase">Check-out</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase">
+                      {isTour ? "Tour End Date" : "Check-out"}
+                    </label>
                     <input
                       type="date"
                       value={checkOutDate}
@@ -497,14 +544,18 @@ export default function ListingDetailPage() {
                 </div>
 
                 <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center">
-                  <span className="text-slate-600 font-medium">Quantity</span>
+                  <span className="text-slate-600 font-medium">
+                    {isTour ? "Travelers / Seats" : "Quantity"}
+                  </span>
                   <select
                     value={selectedQuantity}
                     onChange={(e) => setSelectedQuantity(Number(e.target.value))}
                     className="font-bold text-slate-800 bg-transparent focus:outline-none"
                   >
-                    {[1, 2, 3, 4].map((num) => (
-                      <option key={num} value={num}>{num} {num > 1 ? "Rooms" : "Room"}</option>
+                    {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
+                      <option key={num} value={num}>
+                        {num} {isTour ? (num > 1 ? "Travelers" : "Traveler") : (num > 1 ? "Rooms" : "Room")}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -515,7 +566,7 @@ export default function ListingDetailPage() {
                 onClick={handleReserve}
                 className="w-full py-3.5 bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
               >
-                <span>Book Now & Reserve</span>
+                <span>{isTour ? "Book Tour Now" : "Reserve Room Now"}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -524,7 +575,8 @@ export default function ListingDetailPage() {
                   <Check className="w-3.5 h-3.5" /> No instant charge: Pay online or Cash on arrival
                 </p>
                 <p className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-brand-emerald" /> Guaranteed booking confirmation voucher
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-emerald" /> 
+                  {isTour ? "Guaranteed seat reservation & trip voucher" : "Guaranteed booking confirmation voucher"}
                 </p>
               </div>
             </div>

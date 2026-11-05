@@ -90,9 +90,16 @@ function CheckoutContent() {
     );
   }
 
-  const unit = (listing.units || []).find((u) => u.id === unitId) || listing.units?.[0];
+  const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
+  const unit = (listing.units || []).find((u) => u.id === unitId) || listing.units?.[0] || {
+    id: `${listing.id}-default`,
+    title: isTour ? "Standard Tour Seat" : "Standard Room",
+    basePrice: listing.basePrice,
+    maxGuests: 2,
+  };
   const nightsCount = 3;
-  const baseRate = unit ? unit.basePrice * nightsCount * qty : listing.basePrice * nightsCount;
+  const unitPrice = unit ? unit.basePrice : listing.basePrice;
+  const baseRate = isTour ? unitPrice * qty : unitPrice * nightsCount * qty;
   const tax = Math.round(baseRate * 0.05); // 5% provincial tourism levy
 
   const [loading, setLoading] = useState(false);
@@ -436,7 +443,7 @@ function CheckoutContent() {
                 />
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-brand-emerald uppercase">
-                    {listing.type}
+                    {isTour ? "Tour Package" : "Hotel Stay"}
                   </span>
                   <h4 className="text-xs font-bold text-slate-900 line-clamp-2">{listing.title}</h4>
                   <p className="text-[11px] text-slate-500 flex items-center gap-1">
@@ -448,23 +455,37 @@ function CheckoutContent() {
               {/* Selected Dates and Unit */}
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Accommodation:</span>
+                  <span className="text-slate-500 font-medium">
+                    {isTour ? "Package / Seat Tier:" : "Accommodation:"}
+                  </span>
                   <span className="font-bold text-slate-800">{unit.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Dates:</span>
+                  <span className="text-slate-500 font-medium">
+                    {isTour ? "Tour Schedule:" : "Dates:"}
+                  </span>
                   <span className="font-bold text-slate-800">{startParam} to {endParam}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Duration:</span>
-                  <span className="font-bold text-slate-800">{nightsCount} Nights · {qty} Room</span>
+                  <span className="text-slate-500 font-medium">
+                    {isTour ? "Travelers:" : "Duration:"}
+                  </span>
+                  <span className="font-bold text-slate-800">
+                    {isTour 
+                      ? `${qty} ${qty > 1 ? "Travelers / Seats" : "Traveler / Seat"}`
+                      : `${nightsCount} Nights · ${qty} ${qty > 1 ? "Rooms" : "Room"}`}
+                  </span>
                 </div>
               </div>
 
               {/* Price Breakdown */}
               <div className="space-y-2 text-xs pt-2 border-t border-slate-100">
                 <div className="flex justify-between text-slate-600">
-                  <span>Room charges ({nightsCount} nights):</span>
+                  <span>
+                    {isTour 
+                      ? `Tour package (${qty} ${qty > 1 ? "travelers" : "traveler"}):`
+                      : `Room charges (${nightsCount} nights):`}
+                  </span>
                   <span>PKR {baseRate.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
@@ -496,7 +517,9 @@ function CheckoutContent() {
                 disabled={loading}
                 className="w-full py-3.5 bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm rounded-xl transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {loading ? "Processing Reservation..." : "Confirm & Book with Instant Voucher"}
+                {loading 
+                  ? (isTour ? "Processing Tour Booking..." : "Processing Reservation...") 
+                  : (isTour ? "Confirm & Book Tour" : "Confirm & Reserve Room")}
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -504,7 +527,11 @@ function CheckoutContent() {
                 <p className="flex items-center justify-center gap-1 text-green-700 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Instant Confirmation Voucher Generated
                 </p>
-                <p>By completing this booking you agree to property house rules.</p>
+                <p>
+                  {isTour
+                    ? "By completing this booking you agree to tour departure and guide guidelines."
+                    : "By completing this booking you agree to property house rules."}
+                </p>
               </div>
             </div>
           </div>

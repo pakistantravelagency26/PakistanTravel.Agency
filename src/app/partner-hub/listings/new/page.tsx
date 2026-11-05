@@ -29,7 +29,7 @@ export default function NewListingPage() {
     province: "Gilgit-Baltistan",
     address: "Islamabad / Gilgit Pickup",
     duration: "5 Days / 4 Nights",
-    basePrice: 55000,
+    basePrice: 45000,
     unitTitle: "Per Person Package (Twin Sharing)",
     maxGuests: 2,
     inventory: 10,
@@ -51,18 +51,71 @@ export default function NewListingPage() {
   const [createdSlug, setCreatedSlug] = useState("");
   const [error, setError] = useState("");
 
-  const availableAmenities = [
+  const tourAmenitiesList = [
     "Dedicated 4x4 Mountain Transport",
     "Certified Alpine Guide",
     "Daily Breakfast & Dinner Included",
     "Hotel / Resort Accommodations",
     "First Aid & Emergency Support",
-    "Airport Pick & Drop Included",
     "National Park & Sightseeing Permits",
-    "24/7 Power Generator & Room Heating",
     "Campfire & Cultural BBQ Night",
     "Photography & Drone Assistance",
+    "Airport Pick & Drop Included",
+    "Sleeping Bags & Alpine Huts",
   ];
+
+  const hotelAmenitiesList = [
+    "24/7 Power Generator & Room Heating",
+    "High-Speed Wi-Fi",
+    "Hot Water & Ensuite Bathroom",
+    "Complimentary Buffet Breakfast",
+    "24/7 Front Desk & Room Service",
+    "Free On-Site Secure Parking",
+    "Mountain & Valley View Balcony",
+    "Electric Kettle & Tea Bar",
+    "Daily Housekeeping Service",
+    "Bonfire & Lawn Garden Access",
+  ];
+
+  const isTour = formData.type === "TOUR";
+
+  function handleTypeSwitch(nextType: "TOUR" | "HOTEL") {
+    if (nextType === "TOUR") {
+      setFormData((prev) => ({
+        ...prev,
+        type: "TOUR",
+        title: prev.title.includes("Hotel") ? "" : prev.title,
+        unitTitle: "Per Person Package (Twin Sharing)",
+        duration: "5 Days / 4 Nights",
+        address: "Islamabad / Gilgit Pickup",
+        basePrice: prev.basePrice > 0 ? prev.basePrice : 45000,
+      }));
+      setAmenities([
+        "Dedicated 4x4 Mountain Transport",
+        "Certified Alpine Guide",
+        "Daily Breakfast & Dinner Included",
+        "Hotel / Resort Accommodations",
+        "First Aid & Emergency Support",
+      ]);
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        type: "HOTEL",
+        title: prev.title.includes("Tour") ? "" : prev.title,
+        unitTitle: "Deluxe Mountain View Room",
+        duration: "Per Night Stay",
+        address: `${prev.city || "Karimabad"}, Main Valley Road`,
+        basePrice: prev.basePrice > 0 ? prev.basePrice : 18000,
+      }));
+      setAmenities([
+        "24/7 Power Generator & Room Heating",
+        "High-Speed Wi-Fi",
+        "Hot Water & Ensuite Bathroom",
+        "Complimentary Buffet Breakfast",
+        "24/7 Front Desk & Room Service",
+      ]);
+    }
+  }
 
   const presetPhotos: { [key: string]: string[] } = {
     hunza: [
@@ -192,41 +245,126 @@ export default function NewListingPage() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 p-6 sm:p-8 space-y-8 text-slate-800">
-        {/* Section 1: Basic Info */}
+        {/* Step 1: Explicit Offering Type Confirmation (Tour vs Hotel) */}
+        <div className="space-y-4 pb-6 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 block">
+                Required Step 1 · Offering Confirmation
+              </span>
+              <h2 className="text-base sm:text-lg font-black text-slate-900">
+                Aap kya list kar rahe hain? (Select Hotel or Tour)
+              </h2>
+              <p className="text-xs text-slate-500">
+                Aap ke selection ke mutabiq public booking page par <strong>&quot;Book Tour&quot;</strong> ya <strong>&quot;Reserve Room&quot;</strong> aayega.
+              </p>
+            </div>
+            <span className={`text-xs font-black px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 self-start sm:self-auto ${
+              isTour ? "bg-orange-100 text-orange-800" : "bg-emerald-100 text-emerald-800"
+            }`}>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Confirmed: {isTour ? "Tour Package" : "Hotel & Stay"}</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* TOUR OPTION CARD */}
+            <button
+              type="button"
+              onClick={() => handleTypeSwitch("TOUR")}
+              className={`p-5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between ${
+                isTour
+                  ? "border-orange-500 bg-orange-50/60 shadow-md ring-2 ring-orange-500/20"
+                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold ${
+                    isTour ? "bg-orange-500 text-white shadow" : "bg-slate-100 text-slate-500"
+                  }`}>
+                    <Compass className="w-6 h-6" />
+                  </div>
+                  {isTour && (
+                    <span className="text-[10px] font-extrabold text-orange-700 bg-orange-200/80 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      Active Selection
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">Guided Tour Package</h3>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Multi-day northern trips, group itineraries, certified guide, 4x4 transport &amp; adventure treks.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-orange-200/60 mt-3 text-[11px] font-bold text-orange-800 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-orange-600" />
+                <span>Customer Button: <strong>&quot;Book Tour&quot; (Per Seat / Person)</strong></span>
+              </div>
+            </button>
+
+            {/* HOTEL OPTION CARD */}
+            <button
+              type="button"
+              onClick={() => handleTypeSwitch("HOTEL")}
+              className={`p-5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between ${
+                !isTour
+                  ? "border-emerald-600 bg-emerald-50/60 shadow-md ring-2 ring-emerald-600/20"
+                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold ${
+                    !isTour ? "bg-emerald-600 text-white shadow" : "bg-slate-100 text-slate-500"
+                  }`}>
+                    <Building2 className="w-6 h-6" />
+                  </div>
+                  {!isTour && (
+                    <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-200/80 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      Active Selection
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">Hotel &amp; Resort Stay</h3>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Hotel rooms, luxury mountain lodges, suites, glamping pods, guest houses &amp; per-night accommodations.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-emerald-200/60 mt-3 text-[11px] font-bold text-emerald-800 flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Customer Button: <strong>&quot;Reserve Room&quot; (Per Room / Night)</strong></span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Section 2: Basic Info */}
         <div className="space-y-4">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-3 border-b border-slate-100 flex items-center gap-2">
-            <Compass className="w-4 h-4 text-orange-500" /> 1. Tour / Stay Overview
+            <Compass className="w-4 h-4 text-orange-500" /> 2. {isTour ? "Tour Package Details" : "Hotel Property Details"}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Tour / Property Title *
+                {isTour ? "Tour Title / Trip Name *" : "Hotel / Resort Property Name *"}
               </label>
               <input
                 type="text"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g. 5-Day Hunza Autumn, Attabad Lake & Khunjerab Pass Expedition"
+                placeholder={
+                  isTour
+                    ? "e.g. 5-Day Hunza Autumn, Attabad Lake & Khunjerab Pass Expedition"
+                    : "e.g. Serena Hotel Hunza or Shangrila Resort Skardu"
+                }
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Offering Category *
-              </label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="TOUR">Tour Package (Guided Trip)</option>
-                <option value="HOTEL">Hotel & Mountain Resort</option>
-                <option value="RENTAL">4x4 Mountain Vehicle Rental</option>
-                <option value="ACTIVITY">Trek & Adventure Expedition</option>
-              </select>
             </div>
 
             <div>
@@ -238,17 +376,17 @@ export default function NewListingPage() {
                 onChange={(e) => handleDestinationChange(e.target.value)}
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
-                <option value="hunza">Hunza Valley & Attabad</option>
-                <option value="skardu">Skardu & Deosai Plains</option>
-                <option value="swat">Swat Valley & Kalam</option>
-                <option value="murree">Murree & Bhurban</option>
-                <option value="kumrat">Kumrat Valley & Dir</option>
+                <option value="hunza">Hunza Valley &amp; Attabad</option>
+                <option value="skardu">Skardu &amp; Deosai Plains</option>
+                <option value="swat">Swat Valley &amp; Kalam</option>
+                <option value="murree">Murree &amp; Bhurban</option>
+                <option value="kumrat">Kumrat Valley &amp; Dir</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Base City / Area
+                {isTour ? "Tour Base / Pickup City" : "City / Valley Town"}
               </label>
               <input
                 type="text"
@@ -261,7 +399,7 @@ export default function NewListingPage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Trip Duration (e.g. 5 Days / 4 Nights)
+                {isTour ? "Tour Duration (e.g. 5 Days / 4 Nights)" : "Stay Duration (e.g. Per Night Stay)"}
               </label>
               <input
                 type="text"
@@ -271,19 +409,32 @@ export default function NewListingPage() {
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                {isTour ? "Departure / Pickup Meeting Point" : "Hotel Physical Address"}
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Section 2: Pricing & Package Unit */}
+        {/* Section 3: Pricing & Package Unit */}
         <div className="space-y-4">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-3 border-b border-slate-100 flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-600" /> 2. Pricing & Booking Packages
+            <DollarSign className="w-4 h-4 text-emerald-600" /> 3. Vendor Demanded Pricing &amp; Unit
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Base Price (PKR) *
+                {isTour ? "Vendor Demanded Rate per Person (PKR) *" : "Vendor Rate per Room / Night (PKR) *"}
               </label>
               <input
                 type="number"
@@ -293,17 +444,21 @@ export default function NewListingPage() {
                 onChange={(e) => setFormData({ ...formData, basePrice: Number(e.target.value) })}
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
               />
+              <span className="text-[10px] text-slate-500 block mt-1">
+                Aapka net amount. Admin markup iske upar add hoga.
+              </span>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                Package Unit Title
+                {isTour ? "Tour Package Tier / Seat Title" : "Room Category / Unit Title"}
               </label>
               <input
                 type="text"
                 required
                 value={formData.unitTitle}
                 onChange={(e) => setFormData({ ...formData, unitTitle: e.target.value })}
+                placeholder={isTour ? "Standard Tour Seat" : "Deluxe Mountain View Room"}
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -324,14 +479,14 @@ export default function NewListingPage() {
           </div>
         </div>
 
-        {/* Section 3: Inclusions / Amenities */}
+        {/* Section 4: Inclusions / Amenities */}
         <div className="space-y-4">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-3 border-b border-slate-100 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-sky-600" /> 3. What&apos;s Included (Inclusions & Amenities)
+            <ShieldCheck className="w-4 h-4 text-sky-600" /> 4. {isTour ? "Tour Inclusions & Perks" : "Hotel Amenities & Facilities"}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {availableAmenities.map((a) => {
+            {(isTour ? tourAmenitiesList : hotelAmenitiesList).map((a) => {
               const checked = amenities.includes(a);
               return (
                 <button
@@ -340,14 +495,18 @@ export default function NewListingPage() {
                   onClick={() => toggleAmenity(a)}
                   className={`flex items-center gap-3 p-3 rounded-xl border text-xs font-semibold text-left transition ${
                     checked
-                      ? "bg-orange-50 border-orange-300 text-orange-900 font-bold"
+                      ? isTour
+                        ? "bg-orange-50 border-orange-300 text-orange-900 font-bold"
+                        : "bg-emerald-50 border-emerald-300 text-emerald-900 font-bold"
                       : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300"
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border ${
                       checked
-                        ? "bg-orange-500 border-orange-500 text-white"
+                        ? isTour
+                          ? "bg-orange-500 border-orange-500 text-white"
+                          : "bg-emerald-600 border-emerald-600 text-white"
                         : "border-slate-300 bg-white"
                     }`}
                   >
@@ -360,10 +519,10 @@ export default function NewListingPage() {
           </div>
         </div>
 
-        {/* Section 4: Photos & Description */}
+        {/* Section 5: Photos & Description */}
         <div className="space-y-4">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-3 border-b border-slate-100 flex items-center gap-2">
-            <ImageIcon className="w-4 h-4 text-purple-600" /> 4. High-Res Photos & Highlights
+            <ImageIcon className="w-4 h-4 text-purple-600" /> 5. High-Res Photos &amp; Highlights
           </h2>
 
           <div>
@@ -383,13 +542,17 @@ export default function NewListingPage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-              Detailed Description & Itinerary Highlights
+              {isTour ? "Detailed Itinerary & Highlights" : "Hotel Description & Property Rules"}
             </label>
             <textarea
               rows={4}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe key landmarks (e.g. Attabad Lake, Passu Cones, Eagle's Nest, local food, hotel amenities, road conditions)..."
+              placeholder={
+                isTour
+                  ? "Describe key landmarks (e.g. Attabad Lake, Passu Cones, Eagle's Nest, local food, tour transport, hiking guides)..."
+                  : "Describe hotel rooms, mountain views, room service, heating, breakfast buffet, front desk timings..."
+              }
               className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
@@ -407,10 +570,18 @@ export default function NewListingPage() {
           <button
             type="submit"
             disabled={loading}
-            className="px-7 py-3.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-sm transition shadow-lg shadow-orange-500/25 disabled:opacity-50 flex items-center gap-2"
+            className={`px-7 py-3.5 rounded-xl text-white font-extrabold text-sm transition shadow-lg disabled:opacity-50 flex items-center gap-2 ${
+              isTour
+                ? "bg-orange-500 hover:bg-orange-600 shadow-orange-500/25"
+                : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+            }`}
           >
             <Sparkles className="w-4 h-4" />
-            <span>{loading ? "Publishing Tour..." : "Publish Tour to Marketplace"}</span>
+            <span>
+              {loading
+                ? isTour ? "Submitting Tour..." : "Submitting Hotel..."
+                : isTour ? "Submit Tour for Review" : "Submit Hotel for Review"}
+            </span>
           </button>
         </div>
       </form>

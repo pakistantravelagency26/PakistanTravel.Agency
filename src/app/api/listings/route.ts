@@ -133,7 +133,9 @@ export async function POST(req: Request) {
       province: body.province || "Gilgit-Baltistan",
       address: body.address || `${body.city || "Karimabad"}, Pakistan`,
       city: body.city || "Karimabad",
+      vendorPrice: Number(body.basePrice),
       basePrice: Number(body.basePrice),
+      commissionRate: 12.0,
       avgRating: 5.0,
       totalReviews: 1,
       isFeatured: body.isFeatured ?? true,
@@ -159,7 +161,19 @@ export async function POST(req: Request) {
         joinedYear: 2024,
         rating: 4.95,
       },
-      units: [],
+      units: [
+        {
+          id: `${uniqueSlug}-unit-1`,
+          title: body.unitTitle || (body.type === "HOTEL" ? "Deluxe Mountain View Room" : "Standard Tour Seat Package"),
+          description: body.type === "HOTEL" ? "Spacious room with scenic mountain views and ensuite bathroom" : "Full package inclusion with guided mountain transport and stay",
+          maxGuests: Number(body.maxGuests || 2),
+          totalQuantity: Number(body.inventory || 10),
+          basePrice: Number(body.basePrice),
+          photos: photosList.slice(0, 2),
+          amenities: Array.isArray(body.amenities) ? body.amenities.slice(0, 4) : [],
+          bedType: body.type === "HOTEL" ? "Queen Bed / Room" : "Tour Seat / Per Person",
+        },
+      ],
       reviews: [],
     };
 
@@ -200,8 +214,25 @@ export async function POST(req: Request) {
             amenities: newListing.amenities,
             cancellationPolicy: newListing.cancellationPolicy,
             freeCancellationDays: newListing.freeCancellationDays,
+            vendorPrice: Number(body.basePrice),
             basePrice: newListing.basePrice,
+            commissionRate: 12.0,
             isFeatured: true,
+          },
+        });
+
+        // Also create unit in Neon DB
+        await prisma.listingUnit.create({
+          data: {
+            id: `${newListing.id}-unit-1`,
+            listingId: newListing.id,
+            title: body.unitTitle || (body.type === "HOTEL" ? "Deluxe Mountain View Room" : "Standard Tour Seat Package"),
+            description: body.type === "HOTEL" ? "Spacious room with scenic mountain views and ensuite bathroom" : "Full package inclusion with guided mountain transport and stay",
+            maxGuests: Number(body.maxGuests || 2),
+            totalQuantity: Number(body.inventory || 10),
+            basePrice: Number(body.basePrice),
+            photos: newListing.photos.slice(0, 2),
+            amenities: newListing.amenities.slice(0, 4),
           },
         });
       }
