@@ -30,6 +30,8 @@ export default function AdminListingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED">("PENDING_APPROVAL");
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [selectedVendorId, setSelectedVendorId] = useState<string>("ALL");
 
   // Deep Inspection Modal State
   const [selectedTour, setSelectedTour] = useState<ListingData | null>(null);
@@ -40,7 +42,20 @@ export default function AdminListingsPage() {
 
   useEffect(() => {
     fetchListings();
+    fetchVendors();
   }, []);
+
+  async function fetchVendors() {
+    try {
+      const res = await fetch("/api/admin/vendors");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.vendors)) {
+        setVendors(data.vendors);
+      }
+    } catch (err) {
+      console.error("Error fetching vendors:", err);
+    }
+  }
 
   async function fetchListings() {
     try {
@@ -99,6 +114,9 @@ export default function AdminListingsPage() {
 
   // Filter & Search
   const filteredListings = listings.filter((l) => {
+    if (selectedVendorId !== "ALL" && l.vendor?.id !== selectedVendorId) {
+      return false;
+    }
     const query = searchQuery.toLowerCase().trim();
     const matchSearch =
       !query ||
@@ -219,15 +237,30 @@ export default function AdminListingsPage() {
 
       {/* Filter Tabs & Search */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:w-96">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            placeholder="Search by tour title, vendor name, or destination..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto flex-1">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              placeholder="Search by tour title, vendor, or city..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <select
+            value={selectedVendorId}
+            onChange={(e) => setSelectedVendorId(e.target.value)}
+            className="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-slate-700 cursor-pointer"
+          >
+            <option value="ALL">All Partner Agencies ({vendors.length})</option>
+            {vendors.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.companyName} ({v.listingsCount} Tours)
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-2 self-stretch sm:self-auto overflow-x-auto pb-1 sm:pb-0">

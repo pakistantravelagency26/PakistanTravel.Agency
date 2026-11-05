@@ -105,7 +105,7 @@ export const VENDORS = {
 
 const VENDOR_KARAKORAM = VENDORS.KARAKORAM;
 
-export const MOCK_LISTINGS: ListingData[] = [
+const INITIAL_MOCK_LISTINGS: ListingData[] = [
   // -------------------------------------------------------------
   // TOUR 1: Skardu, Shigar, Khaplu & Deosai
   // -------------------------------------------------------------
@@ -867,6 +867,25 @@ export const MOCK_LISTINGS: ListingData[] = [
   }
 ];
 
+// Exactly 2 authentic tours per registered partner (Total 8 tours synced 1:1)
+const ALLOWED_INITIAL_IDS = new Set([
+  "skardu-7-day-tour",             // Karakoram Expeditions (Tour 1)
+  "kumrat-valley-katora-lake-tour", // Karakoram Expeditions (Tour 2)
+  "hunza-5-day-tour",              // Hunza Valley Adventures (Tour 1)
+  "neelum-valley-ratti-gali-tour",  // Hunza Valley Adventures (Tour 2)
+  "swat-kalam-4-day-tour",          // Swat & Kalam Alpine (Tour 1)
+  "gwadar-makran-coastal-tour",     // Swat & Kalam Alpine (Tour 2)
+  "serena-hunza-luxury-lodge",      // Serena Hotels & Lodges (Tour 1)
+  "skardu-luxury-honeymoon-package" // Serena Hotels & Lodges (Tour 2)
+]);
+
+export const MOCK_LISTINGS: ListingData[] = INITIAL_MOCK_LISTINGS.filter(l => {
+  if (l.id === "skardu-luxury-honeymoon-package") {
+    l.vendor = VENDORS.SERENA_HOTELS;
+  }
+  return ALLOWED_INITIAL_IDS.has(l.id);
+});
+
 export async function getListings(filters?: {
   destination?: string;
   type?: string;
@@ -976,7 +995,13 @@ export function deleteListingsByVendorId(vendorId: string): number {
 }
 
 export function getAllListingsForAdmin(): ListingData[] {
-  return [...MOCK_LISTINGS];
+  try {
+    const { VENDORS_STORE } = require("./vendor.service");
+    const validVendorIds = new Set(VENDORS_STORE.map((v: any) => v.id));
+    return MOCK_LISTINGS.filter((l) => validVendorIds.has(l.vendor?.id));
+  } catch {
+    return [...MOCK_LISTINGS];
+  }
 }
 
 export function moderateListing(

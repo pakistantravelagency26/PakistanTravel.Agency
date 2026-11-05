@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { getAllVendors, createVendorAccount } from "@/services/vendor.service";
-import { MOCK_LISTINGS } from "@/services/listing.service";
+import { getAllListingsForAdmin } from "@/services/listing.service";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const vendors = getAllVendors();
-    // compute dynamic listings count for each vendor
+    const allListings = getAllListingsForAdmin();
+
+    // compute dynamic listings count for each vendor in real-time
     const vendorsWithCounts = vendors.map((v) => {
-      const count = MOCK_LISTINGS.filter((l) => l.vendor.id === v.id).length;
+      const count = allListings.filter((l) => l.vendor?.id === v.id).length;
       return {
         ...v,
         listingsCount: count,
