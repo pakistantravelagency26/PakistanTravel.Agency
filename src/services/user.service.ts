@@ -51,12 +51,21 @@ const USERS_STORE: LocalUser[] = [
 
   // 2. SUPER ADMIN (Controls entire website, vendors & payouts)
   {
+    id: "user-admin-emraan",
+    name: "Emraan Irshad",
+    email: "emraanirshad88@gmail.com",
+    username: "emraanirshad88",
+    phone: "03000000001",
+    passwordHash: "$2a$10$ZygBAZkFLLWER1He200Vxe/OT8NT8AWVal1ESwkZNFChzPVBi1kzi", // Emra@91173259
+    role: "ADMIN",
+  },
+  {
     id: "user-admin-1",
     name: "Super Admin Pakistan",
     email: "admin@pakistantravel.agency",
     username: "admin",
     phone: "03000000001",
-    passwordHash: "$2a$10$NbaS/Qa/0IeOAKKw73m6MukJBeTcGOucNEQdYPxgodGG8klJJ/AVa", // admin123
+    passwordHash: "$2a$10$ZygBAZkFLLWER1He200Vxe/OT8NT8AWVal1ESwkZNFChzPVBi1kzi", // Emra@91173259
     role: "ADMIN",
   },
   {
@@ -64,7 +73,7 @@ const USERS_STORE: LocalUser[] = [
     name: "Super Admin",
     email: "admin@tours.pk",
     phone: "03000000001",
-    passwordHash: "$2a$10$NbaS/Qa/0IeOAKKw73m6MukJBeTcGOucNEQdYPxgodGG8klJJ/AVa", // admin123
+    passwordHash: "$2a$10$ZygBAZkFLLWER1He200Vxe/OT8NT8AWVal1ESwkZNFChzPVBi1kzi",
     role: "ADMIN",
   },
 
