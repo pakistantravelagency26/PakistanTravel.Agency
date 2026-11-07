@@ -4,28 +4,7 @@ import { useState } from "react";
 import { ArrowDownToLine, CheckCircle2, ShieldCheck, Clock } from "lucide-react";
 
 export default function AdminPayoutsPage() {
-  const [payoutRequests, setPayoutRequests] = useState([
-    {
-      id: "PO-REQ-101",
-      partner: "Hunza Serena Hospitality Ltd",
-      bank: "Meezan Bank Limited",
-      iban: "PK36MEZN0001234567890123",
-      amount: 1332000,
-      bookingsCount: 28,
-      status: "PENDING_APPROVAL",
-      requestedAt: "Nov 04, 2026",
-    },
-    {
-      id: "PO-REQ-102",
-      partner: "Karakoram Expeditions Pakistan",
-      bank: "Habib Bank Limited (HBL)",
-      iban: "PK82HABB0009876543210987",
-      amount: 572000,
-      bookingsCount: 11,
-      status: "PENDING_APPROVAL",
-      requestedAt: "Nov 03, 2026",
-    },
-  ]);
+  const [payoutRequests, setPayoutRequests] = useState<any[]>([]);
 
   function handleDisburse(id: string) {
     setPayoutRequests((prev) =>
@@ -57,8 +36,15 @@ export default function AdminPayoutsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/60 text-slate-300 font-medium">
-              {payoutRequests.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-700/30 transition">
+              {payoutRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    No pending partner payout requests.
+                  </td>
+                </tr>
+              ) : (
+                payoutRequests.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-700/30 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-slate-400">{p.id}</td>
                   <td className="py-3.5 px-4 font-bold text-white text-sm">{p.partner}</td>
                   <td className="py-3.5 px-4">
@@ -95,7 +81,7 @@ export default function AdminPayoutsPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

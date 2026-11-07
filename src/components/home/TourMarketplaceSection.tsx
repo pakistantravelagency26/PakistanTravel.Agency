@@ -160,7 +160,26 @@ export function TourMarketplaceSection({ initialListings }: Props) {
       </div>
 
       {/* 4 Tours/Hotels per row Grid */}
-      {filteredListings.length === 0 ? (
+      {initialListings.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200/80 p-8 space-y-4 max-w-xl mx-auto shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto">
+            <Compass className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Marketplace Ready for Listings</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Vendors and partners can log in to the Partner Hub to publish verified tours, hotels, and expeditions.
+            </p>
+          </div>
+          <Link
+            href="/partner-hub/login"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition"
+          >
+            <span>Partner Login / Add Tour</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      ) : filteredListings.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 space-y-3">
           <p className="text-sm font-bold text-slate-700">No experiences match your filter.</p>
           <button

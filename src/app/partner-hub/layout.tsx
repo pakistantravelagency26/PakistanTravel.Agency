@@ -64,9 +64,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  const businessTitle = session?.user?.name?.includes("Karakoram") || session?.user?.email?.includes("karakoram")
-    ? "Karakoram Expeditions"
-    : (session?.user?.name || "Verified Partner");
+  const businessTitle = session?.user?.name || "Verified Partner";
 
   const navItems = [
     { href: "/partner-hub/dashboard", label: "Dashboard", icon: LayoutDashboard },

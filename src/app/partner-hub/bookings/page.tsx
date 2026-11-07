@@ -1,63 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Printer, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function VendorBookingsListPage() {
+  const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [bookings, setBookings] = useState([
-    {
-      id: "bk-101",
-      number: "PKT-2026-89421",
-      guest: "Usman Tariq",
-      email: "customer@pakistantravel.agency",
-      phone: "03001234567",
-      dates: "Nov 10 – Nov 13, 2026 (3 Nights)",
-      unit: "Deluxe Mountain View Room",
-      amount: 97500,
-      paymentMethod: "JazzCash",
-      status: "CONFIRMED",
-    },
-    {
-      id: "bk-102",
-      number: "PKT-2026-92144",
-      guest: "Hamza Sheikh",
-      email: "hamza@example.pk",
-      phone: "03215556677",
-      dates: "Nov 14 – Nov 17, 2026 (3 Nights)",
-      unit: "Executive Heritage Suite",
-      amount: 144000,
-      paymentMethod: "Card (Stripe)",
-      status: "PENDING",
-    },
-    {
-      id: "bk-103",
-      number: "PKT-2026-78119",
-      guest: "Dr. Fatima Zahra",
-      email: "fatima.z@example.pk",
-      phone: "03459998811",
-      dates: "Nov 20 – Nov 22, 2026 (2 Nights)",
-      unit: "Deluxe Mountain View Room",
-      amount: 65000,
-      paymentMethod: "Cash on Arrival",
-      status: "CONFIRMED",
-    },
-    {
-      id: "bk-104",
-      number: "PKT-2026-66321",
-      guest: "Zubair Ahmad",
-      email: "zubair@example.pk",
-      phone: "03334445566",
-      dates: "Oct 25 – Oct 28, 2026",
-      unit: "Deluxe Mountain View Room",
-      amount: 97500,
-      paymentMethod: "EasyPaisa",
-      status: "CANCELLED",
-    },
-  ]);
+  useEffect(() => {
+    fetch("/api/bookings")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && Array.isArray(d.bookings)) {
+          const vendorId = (session?.user as any)?.vendorId;
+          const list = vendorId ? d.bookings.filter((b: any) => b.vendorId === vendorId) : d.bookings;
+          setBookings(list.map((b: any) => ({
+            id: b.id,
+            number: b.bookingNumber || b.id,
+            guest: b.guestName || "Guest",
+            email: b.guestEmail || "",
+            phone: b.guestPhone || "",
+            dates: `${b.startDate || ""} – ${b.endDate || ""}`,
+            unit: b.unitTitle || b.listingTitle || "Reserved Experience",
+            amount: b.totalAmount || 0,
+            paymentMethod: b.paymentMethod || "Direct",
+            status: b.status || "CONFIRMED",
+          })));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [session]);
 
   function setStatus(id: string, s: string) {
     setBookings((prev) =>
@@ -130,8 +108,15 @@ export default function VendorBookingsListPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {filtered.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-50/70 transition">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                    {loading ? "Loading bookings from database..." : "No customer bookings received yet. Your reservations will appear here."}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((b) => (
+                  <tr key={b.id} className="hover:bg-slate-50/70 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-brand-emerald">
                     {b.number}
                   </td>
@@ -178,7 +163,7 @@ export default function VendorBookingsListPage() {
                     </Link>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

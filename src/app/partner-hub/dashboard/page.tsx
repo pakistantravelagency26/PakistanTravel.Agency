@@ -17,38 +17,7 @@ import {
 } from "lucide-react";
 
 export default function VendorDashboardPage() {
-  const [recentBookings, setRecentBookings] = useState([
-    {
-      id: "bk-101",
-      number: "PKT-2026-89421",
-      guest: "Usman Tariq",
-      phone: "03001234567",
-      dates: "Nov 10 – Nov 13, 2026",
-      room: "Deluxe Mountain View Room",
-      amount: 97500,
-      status: "CONFIRMED",
-    },
-    {
-      id: "bk-102",
-      number: "PKT-2026-92144",
-      guest: "Hamza Sheikh",
-      phone: "03215556677",
-      dates: "Nov 14 – Nov 17, 2026",
-      room: "Executive Heritage Suite",
-      amount: 144000,
-      status: "PENDING",
-    },
-    {
-      id: "bk-103",
-      number: "PKT-2026-78119",
-      guest: "Dr. Fatima Zahra",
-      phone: "03459998811",
-      dates: "Nov 20 – Nov 22, 2026",
-      room: "Deluxe Mountain View Room",
-      amount: 65000,
-      status: "CONFIRMED",
-    },
-  ]);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
 
   function updateStatus(id: string, newStatus: string) {
     setRecentBookings((prev) =>
@@ -63,7 +32,7 @@ export default function VendorDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Partner Dashboard Overview</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Welcome back! Here is how your Hunza & Northern properties are performing.
+            Welcome to your partner extranet. Manage listings, rates, and incoming reservations.
           </p>
         </div>
 
@@ -93,20 +62,18 @@ export default function VendorDashboardPage() {
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">PKR 1,480,000</p>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-semibold">
-            <ArrowUpRight className="w-3.5 h-3.5" /> +18.4% from last month
-          </div>
+          <p className="text-2xl font-extrabold text-slate-900">PKR 0</p>
+          <p className="text-[11px] text-slate-400">Total customer payments captured</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <div className="flex justify-between items-center text-slate-500">
-            <span className="text-xs font-semibold uppercase tracking-wider">Net Earnings (After 10%)</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Net Earnings</span>
             <span className="p-2 rounded-lg bg-blue-50 text-brand-navy">
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-extrabold text-brand-navy">PKR 1,332,000</p>
+          <p className="text-2xl font-extrabold text-brand-navy">PKR 0</p>
           <p className="text-[11px] text-slate-400">Available for next Raast/Bank payout</p>
         </div>
 
@@ -117,19 +84,19 @@ export default function VendorDashboardPage() {
               <Calendar className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">42 Stays</p>
-          <p className="text-[11px] text-slate-500">89% Room Occupancy rate</p>
+          <p className="text-2xl font-extrabold text-slate-900">0 Stays</p>
+          <p className="text-[11px] text-slate-400">Confirmed customer reservations</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <div className="flex justify-between items-center text-slate-500">
-            <span className="text-xs font-semibold uppercase tracking-wider">Property Rating</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Partner Status</span>
             <span className="p-2 rounded-lg bg-amber-50 text-amber-500">
               <Star className="w-4 h-4 fill-amber-400" />
             </span>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">4.9 / 5.0</p>
-          <p className="text-[11px] text-slate-500">Based on 248 verified guest reviews</p>
+          <p className="text-2xl font-extrabold text-slate-900">Active</p>
+          <p className="text-[11px] text-slate-400">Verified Partner Extranet</p>
         </div>
       </div>
 
@@ -159,8 +126,15 @@ export default function VendorDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {recentBookings.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-50/70 transition">
+              {recentBookings.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                    No customer reservations yet. Click &apos;Add New Listing&apos; to publish your tours or rooms.
+                  </td>
+                </tr>
+              ) : (
+                recentBookings.map((b) => (
+                  <tr key={b.id} className="hover:bg-slate-50/70 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-brand-emerald">{b.number}</td>
                   <td className="py-3.5 px-4">
                     <span className="font-bold text-slate-900 block">{b.guest}</span>
@@ -205,7 +179,7 @@ export default function VendorDashboardPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

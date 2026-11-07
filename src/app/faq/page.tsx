@@ -40,7 +40,7 @@ export default function FAQPage() {
     },
     {
       q: "Are the tour guides and 4x4 drivers certified?",
-      a: "Yes. All tours provided by Karakoram Expeditions are led by certified mountain drivers and alpine guides licensed by the Department of Tourist Services Pakistan.",
+      a: "Yes. All tours provided by partner operators on PakistanTravel.Agency are led by certified mountain drivers and alpine guides licensed by the Department of Tourist Services Pakistan.",
     },
     {
       q: "Is electricity and heating available in Northern hotels during autumn/winter?",

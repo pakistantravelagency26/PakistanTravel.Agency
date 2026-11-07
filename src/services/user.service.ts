@@ -15,41 +15,7 @@ export interface LocalUser {
 
 // In-memory persistent user repository with pre-configured authentic bcrypt credentials
 export const USERS_STORE: LocalUser[] = [
-  // 1. TOUR VENDOR (Controls the 10 Northern Tours)
-  {
-    id: "user-vend-karakoram",
-    name: "Karakoram Expeditions Partner",
-    email: "vendor@pakistantravel.agency",
-    username: "vendor",
-    phone: "03001118687",
-    passwordHash: "$2a$10$tAlFLX/X1mF3cdcZMx.HJ.qFKlTl3slAfnMSgt87UWa8kxCYqyZzC", // vendor123
-    role: "VENDOR",
-    vendorId: "v-karakoram-expeditions",
-    businessName: "Karakoram Expeditions & Northern Tours",
-  },
-  {
-    id: "user-vend-alias-1",
-    name: "Karakoram Expeditions Partner",
-    email: "vendor@tours.pk",
-    username: "karakoram",
-    phone: "03001118687",
-    passwordHash: "$2a$10$tAlFLX/X1mF3cdcZMx.HJ.qFKlTl3slAfnMSgt87UWa8kxCYqyZzC", // vendor123
-    role: "VENDOR",
-    vendorId: "v-karakoram-expeditions",
-    businessName: "Karakoram Expeditions & Northern Tours",
-  },
-  {
-    id: "user-vend-alias-2",
-    name: "Karakoram Expeditions Partner",
-    email: "karakoram@tours.pk",
-    phone: "03001118687",
-    passwordHash: "$2a$10$tAlFLX/X1mF3cdcZMx.HJ.qFKlTl3slAfnMSgt87UWa8kxCYqyZzC", // vendor123
-    role: "VENDOR",
-    vendorId: "v-karakoram-expeditions",
-    businessName: "Karakoram Expeditions & Northern Tours",
-  },
-
-  // 2. SUPER ADMIN (Controls entire website, vendors & payouts)
+  // SUPER ADMIN (Controls entire website, vendors & payouts)
   {
     id: "user-admin-emraan",
     name: "Emraan Irshad",
@@ -68,25 +34,6 @@ export const USERS_STORE: LocalUser[] = [
     passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS", // Emra@91173259
     role: "ADMIN",
   },
-  {
-    id: "user-admin-alias",
-    name: "Super Admin",
-    email: "admin@tours.pk",
-    phone: "03000000001",
-    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS",
-    role: "ADMIN",
-  },
-
-  // 3. CUSTOMER / TRAVELER
-  {
-    id: "user-cust-1",
-    name: "Usman Tariq",
-    email: "customer@pakistantravel.agency",
-    username: "customer",
-    phone: "03001234567",
-    passwordHash: "$2a$10$LmlPHpPmMiF6JcCRl7fX.eegs4Ttbm90hDYi5atwEHbUotWwciUri", // customer123
-    role: "CUSTOMER",
-  },
 ];
 
 export async function findUserByIdentifier(identifier: string): Promise<LocalUser | null> {
@@ -96,12 +43,6 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
   // 1. Direct username shortcuts:
   if (query === "admin" || query === "administrator") {
     return USERS_STORE.find((u) => u.role === "ADMIN") || null;
-  }
-  if (query === "vendor" || query === "karakoram" || query === "operator") {
-    return USERS_STORE.find((u) => u.role === "VENDOR") || null;
-  }
-  if (query === "customer" || query === "user" || query === "traveler") {
-    return USERS_STORE.find((u) => u.role === "CUSTOMER") || null;
   }
 
   // 2. Check Database first if online
@@ -130,8 +71,8 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
         phone: dbUser.phone || "",
         passwordHash: dbUser.passwordHash || "",
         role: dbUser.role as any,
-        vendorId: dbUser.vendorProfile?.id || (dbUser.role === "VENDOR" ? "v-karakoram-expeditions" : null),
-        businessName: dbUser.vendorProfile?.businessName || (dbUser.role === "VENDOR" ? "Karakoram Expeditions & Northern Tours" : undefined),
+        vendorId: dbUser.vendorProfile?.id || null,
+        businessName: dbUser.vendorProfile?.businessName || undefined,
       };
     }
   } catch (err) {

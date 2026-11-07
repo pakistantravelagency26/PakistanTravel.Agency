@@ -14,53 +14,10 @@ import {
 
 export default function VendorEarningsPage() {
   const [requested, setRequested] = useState(false);
-
-  const [payouts, setPayouts] = useState([
-    {
-      id: "PO-9921",
-      date: "Oct 28, 2026",
-      amount: 450000,
-      bank: "Meezan Bank (IBAN ...0123)",
-      method: "State Bank Raast / 1LINK",
-      status: "PAID",
-      refCode: "RAAST-882194821",
-    },
-    {
-      id: "PO-9844",
-      date: "Oct 15, 2026",
-      amount: 620000,
-      bank: "Meezan Bank (IBAN ...0123)",
-      method: "State Bank Raast / 1LINK",
-      status: "PAID",
-      refCode: "RAAST-771928391",
-    },
-    {
-      id: "PO-9712",
-      date: "Sep 30, 2026",
-      amount: 262000,
-      bank: "Meezan Bank (IBAN ...0123)",
-      method: "State Bank Raast / 1LINK",
-      status: "PAID",
-      refCode: "RAAST-661298412",
-    },
-  ]);
+  const [payouts, setPayouts] = useState<any[]>([]);
 
   function handleRequestPayout() {
-    setRequested(true);
-    setTimeout(() => {
-      setPayouts((prev) => [
-        {
-          id: `PO-${Math.floor(1000 + Math.random() * 9000)}`,
-          date: "Today (Nov 04, 2026)",
-          amount: 1332000,
-          bank: "Meezan Bank (IBAN ...0123)",
-          method: "State Bank Raast / 1LINK",
-          status: "PROCESSING",
-          refCode: "RAAST-PENDING",
-        },
-        ...prev,
-      ]);
-    }, 1000);
+    alert("No net available balance to withdraw. Complete bookings to earn revenue.");
   }
 
   return (
@@ -75,23 +32,13 @@ export default function VendorEarningsPage() {
 
         <button
           onClick={handleRequestPayout}
-          disabled={requested}
-          className="px-5 py-2.5 rounded-xl bg-brand-emerald hover:bg-brand-emeraldDark disabled:opacity-50 text-white font-bold text-xs transition shadow-md flex items-center gap-2 self-start"
+          disabled={true}
+          className="px-5 py-2.5 rounded-xl bg-slate-300 text-slate-500 font-bold text-xs cursor-not-allowed flex items-center gap-2 self-start"
         >
           <ArrowDownToLine className="w-4 h-4" />
-          <span>{requested ? "Payout Request Submitted" : "Request Payout (PKR 1,332,000)"}</span>
+          <span>Request Payout (PKR 0)</span>
         </button>
       </div>
-
-      {requested && (
-        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
-          <div>
-            <span className="font-bold block">Payout Request Dispatched to State Bank Raast!</span>
-            Funds are settled directly to your Meezan Bank account within 2-4 banking hours.
-          </div>
-        </div>
-      )}
 
       {/* Financial Split Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -99,15 +46,15 @@ export default function VendorEarningsPage() {
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
             Total Gross Bookings
           </span>
-          <p className="text-2xl font-extrabold text-slate-900">PKR 1,480,000</p>
+          <p className="text-2xl font-extrabold text-slate-900">PKR 0</p>
           <p className="text-[11px] text-slate-400">Total customer payments captured</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
-            Platform Commission (10%)
+            Platform Commission (12%)
           </span>
-          <p className="text-2xl font-extrabold text-amber-600">- PKR 148,000</p>
+          <p className="text-2xl font-extrabold text-amber-600">PKR 0</p>
           <p className="text-[11px] text-slate-400">Fixed contracted partner rate</p>
         </div>
 
@@ -115,8 +62,8 @@ export default function VendorEarningsPage() {
           <span className="text-xs font-bold text-brand-emerald uppercase tracking-wider block">
             Net Available Balance
           </span>
-          <p className="text-2xl font-extrabold text-brand-emerald">PKR 1,332,000</p>
-          <p className="text-[11px] text-emerald-700 font-medium">Ready for withdrawal to Meezan Bank</p>
+          <p className="text-2xl font-extrabold text-brand-emerald">PKR 0</p>
+          <p className="text-[11px] text-emerald-700 font-medium">Ready for withdrawal to linked bank</p>
         </div>
       </div>
 
@@ -169,8 +116,15 @@ export default function VendorEarningsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {payouts.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/70 transition">
+              {payouts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400 text-xs">
+                    No payout settlement history yet.
+                  </td>
+                </tr>
+              ) : (
+                payouts.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50/70 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-brand-navy">{p.id}</td>
                   <td className="py-3.5 px-4">{p.date}</td>
                   <td className="py-3.5 px-4 font-extrabold text-slate-900">
@@ -192,7 +146,7 @@ export default function VendorEarningsPage() {
                     </span>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

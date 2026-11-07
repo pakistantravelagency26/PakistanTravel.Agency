@@ -1,50 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BookOpenCheck, Search, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function AdminBookingsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [bookings, setBookings] = useState([
-    {
-      id: "bk-101",
-      number: "PKT-2026-89421",
-      guest: "Usman Tariq",
-      vendor: "Hunza Serena Inn",
-      dates: "Nov 10 – Nov 13, 2026",
-      gross: 97500,
-      fee: 9750,
-      vendorNet: 87750,
-      paymentMethod: "JazzCash",
-      status: "CONFIRMED",
-    },
-    {
-      id: "bk-102",
-      number: "PKT-2026-94210",
-      guest: "Zainab Chaudhry",
-      vendor: "Karakoram Expeditions",
-      dates: "Nov 18 – Nov 25, 2026",
-      gross: 65000,
-      fee: 7800,
-      vendorNet: 57200,
-      paymentMethod: "Card (Stripe)",
-      status: "CONFIRMED",
-    },
-    {
-      id: "bk-103",
-      number: "PKT-2026-66321",
-      guest: "Zubair Ahmad",
-      vendor: "Hunza Serena Inn",
-      dates: "Oct 25 – Oct 28, 2026",
-      gross: 97500,
-      fee: 0,
-      vendorNet: 0,
-      paymentMethod: "EasyPaisa",
-      status: "REFUNDED",
-    },
-  ]);
+  useEffect(() => {
+    fetch("/api/bookings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.bookings)) {
+          setBookings(data.bookings.map((b: any) => ({
+            id: b.id,
+            number: b.bookingNumber || b.id,
+            guest: b.guestName || "Guest",
+            vendor: b.listingTitle || "Travel Package",
+            dates: `${b.startDate || ""} – ${b.endDate || ""}`,
+            gross: b.totalAmount || 0,
+            fee: Math.round((b.totalAmount || 0) * 0.12),
+            vendorNet: (b.totalAmount || 0) - Math.round((b.totalAmount || 0) * 0.12),
+            paymentMethod: b.paymentMethod || "Direct",
+            status: b.status || "CONFIRMED",
+          })));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   function handleRefund(id: string) {
     if (!confirm("Are you sure you want to trigger a full refund for this booking?")) return;
@@ -97,8 +83,15 @@ export default function AdminBookingsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/60 text-slate-300 font-medium">
-              {filtered.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-700/30 transition">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                    {loading ? "Loading bookings from database..." : "No customer bookings found in the database."}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((b) => (
+                  <tr key={b.id} className="hover:bg-slate-700/30 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{b.number}</td>
                   <td className="py-3.5 px-4 font-bold text-white">{b.guest}</td>
                   <td className="py-3.5 px-4 text-slate-300">{b.vendor}</td>
@@ -129,7 +122,7 @@ export default function AdminBookingsPage() {
                     )}
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

@@ -77,53 +77,7 @@ export interface ListingData {
   }[];
 }
 
-// Multi-Vendor Network (Verified Tour & Hotel Operators across Pakistan)
-export const VENDORS = {
-  KARAKORAM: {
-    id: "v-karakoram-expeditions",
-    businessName: "Karakoram Expeditions & Northern Tours",
-    verified: true,
-    joinedYear: 2019,
-    rating: 4.95,
-  },
-  HUNZA_ADVENTURES: {
-    id: "v-hunza-adventures",
-    businessName: "Hunza Valley Adventures & Treks",
-    verified: true,
-    joinedYear: 2020,
-    rating: 4.92,
-  },
-  SERENA_HOTELS: {
-    id: "v-serena-hotels",
-    businessName: "Serena Hotels & Heritage Lodges",
-    verified: true,
-    joinedYear: 2018,
-    rating: 4.98,
-  },
-  SWAT_ALPINE: {
-    id: "v-swat-alpine",
-    businessName: "Swat & Kalam Alpine Travels",
-    verified: true,
-    joinedYear: 2021,
-    rating: 4.88,
-  },
-  FAIRY_MEADOWS_GUIDES: {
-    id: "v-fairy-meadows-guides",
-    businessName: "Nanga Parbat Treks & Fairy Meadows",
-    verified: true,
-    joinedYear: 2020,
-    rating: 4.94,
-  },
-  PEARL_CONTINENTAL: {
-    id: "v-pc-resorts",
-    businessName: "Pearl Continental Resorts & Stays",
-    verified: true,
-    joinedYear: 2019,
-    rating: 4.91,
-  },
-};
-
-// No hardcoded mock tours - All listings are strictly queried from Neon PostgreSQL DB
+// No hardcoded mock tours or vendors - All listings and vendors are strictly queried from Neon PostgreSQL DB
 export const MOCK_LISTINGS: ListingData[] = [];
 
 export async function getListings(filters?: {

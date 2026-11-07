@@ -4,30 +4,7 @@ import { useState } from "react";
 import { Star, MessageSquare, CheckCircle2, CornerDownRight } from "lucide-react";
 
 export default function VendorReviewsPage() {
-  const [reviews, setReviews] = useState([
-    {
-      id: "rev-1",
-      guest: "Kamran Shah",
-      city: "Lahore, Pakistan",
-      rating: 5,
-      date: "October 2026",
-      stay: "Deluxe Mountain View Room (3 Nights)",
-      comment: "Unbelievable view of Rakaposhi right from the bedroom terrace! Staff was extraordinarily courteous and food in Osho Maraka restaurant was top tier.",
-      reply: "Thank you Kamran! It was an absolute delight hosting you during the autumn blossom season. We look forward to welcoming you back next summer.",
-      isReplying: false,
-    },
-    {
-      id: "rev-2",
-      guest: "Ayesha Malik",
-      city: "Karachi, Pakistan",
-      rating: 5,
-      date: "September 2026",
-      stay: "Executive Heritage Suite (2 Nights)",
-      comment: "24/7 electricity and room heaters worked flawlessly even when outside temperature dropped below zero. Best luxury stay in Gilgit-Baltistan.",
-      reply: "",
-      isReplying: false,
-    },
-  ]);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   const [replyText, setReplyText] = useState("");
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
@@ -51,7 +28,16 @@ export default function VendorReviewsPage() {
       </div>
 
       <div className="space-y-4">
-        {reviews.map((rev) => (
+        {reviews.length === 0 ? (
+          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-2">
+            <MessageSquare className="w-10 h-10 text-slate-300 mx-auto" />
+            <h3 className="font-bold text-slate-800 text-sm">No guest reviews yet</h3>
+            <p className="text-xs text-slate-400">
+              Only verified customers who have completed a stay or tour can leave a review.
+            </p>
+          </div>
+        ) : (
+          reviews.map((rev) => (
           <div
             key={rev.id}
             className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4"
@@ -119,7 +105,7 @@ export default function VendorReviewsPage() {
               </button>
             )}
           </div>
-        ))}
+        )))}
       </div>
     </div>
   );

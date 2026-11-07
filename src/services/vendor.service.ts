@@ -18,68 +18,7 @@ export interface VendorAccount {
 }
 
 // Global persistent store for vendor accounts across the platform
-export const VENDORS_STORE: VendorAccount[] = [
-  {
-    id: "v-karakoram-expeditions",
-    companyName: "Karakoram Expeditions & Northern Tours",
-    city: "Skardu",
-    tourismLicense: "DTS-GB-2024-0129",
-    phone1: "03001118687",
-    phone2: "03451122334",
-    phone3: "03129988776",
-    email: "vendor@pakistantravel.agency",
-    loginId: "vendor",
-    passwordPlain: "vendor123",
-    status: "ENABLED",
-    commissionRate: 12.0,
-    createdAt: "2024-01-15T10:00:00Z",
-  },
-  {
-    id: "v-hunza-adventures",
-    companyName: "Hunza Valley Adventures & Treks",
-    city: "Karimabad, Hunza",
-    tourismLicense: "DTS-HUN-2023-402",
-    phone1: "03551234567",
-    phone2: "03005556677",
-    phone3: "03468899001",
-    email: "hunza@pakistantravel.agency",
-    loginId: "hunza_adventures",
-    passwordPlain: "hunza123",
-    status: "ENABLED",
-    commissionRate: 12.0,
-    createdAt: "2024-02-10T14:30:00Z",
-  },
-  {
-    id: "v-swat-alpine",
-    companyName: "Swat & Kalam Alpine Travels",
-    city: "Kalam, Swat",
-    tourismLicense: "DTS-KPK-2024-881",
-    phone1: "03017778899",
-    phone2: "03459988112",
-    phone3: "03335544332",
-    email: "swat@pakistantravel.agency",
-    loginId: "swat_alpine",
-    passwordPlain: "swat123",
-    status: "ENABLED",
-    commissionRate: 10.0,
-    createdAt: "2024-03-01T09:15:00Z",
-  },
-  {
-    id: "v-serena-hotels",
-    companyName: "Serena Hotels & Heritage Lodges",
-    city: "Hunza / Gilgit",
-    tourismLicense: "DTS-FED-55910",
-    phone1: "03008899112",
-    phone2: "03157788990",
-    phone3: "03214455667",
-    email: "serena@pakistantravel.agency",
-    loginId: "serena_lodges",
-    passwordPlain: "serena123",
-    status: "ENABLED",
-    commissionRate: 10.0,
-    createdAt: "2024-01-20T11:45:00Z",
-  },
-];
+export const VENDORS_STORE: VendorAccount[] = [];
 
 export function getAllVendors(): VendorAccount[] {
   return [...VENDORS_STORE];

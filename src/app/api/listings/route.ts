@@ -95,8 +95,15 @@ export async function POST(req: Request) {
       .replace(/^-+|-+$/g, "");
     const uniqueSlug = `${cleanSlug}-${Date.now().toString().slice(-4)}`;
 
-    const vendorBusiness = session?.user?.name || "Karakoram Expeditions Partner";
-    const vendorId = (session?.user as any)?.vendorId || "v-karakoram-expeditions";
+    const vendorBusiness = session?.user?.name || body.vendorName || "Partner Agency";
+    const vendorId = (session?.user as any)?.vendorId || body.vendorId;
+
+    if (!vendorId) {
+      return NextResponse.json(
+        { success: false, error: "Please log in to your vendor account to add listings." },
+        { status: 401 }
+      );
+    }
 
     let photosList: string[] = [];
     if (Array.isArray(body.photos)) {
