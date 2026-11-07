@@ -50,18 +50,18 @@ function CheckoutContent() {
   }, [listingId]);
 
   // Form State
-  const [guestName, setGuestName] = useState("Usman Tariq");
-  const [guestEmail, setGuestEmail] = useState("customer@pakistantravel.agency");
-  const [guestPhone, setGuestPhone] = useState("03001234567");
-  const [cnicOrPassport, setCnicOrPassport] = useState("37405-1234567-1");
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [cnicOrPassport, setCnicOrPassport] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"JAZZCASH" | "EASYPAISA" | "STRIPE" | "CASH_ON_ARRIVAL">("JAZZCASH");
 
   // Payment specific inputs
-  const [walletPhone, setWalletPhone] = useState("03001234567");
-  const [cardNumber, setCardNumber] = useState("4242 •••• •••• 4242");
-  const [cardExpiry, setCardExpiry] = useState("12/28");
-  const [cardCvc, setCardCvc] = useState("123");
+  const [walletPhone, setWalletPhone] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
 
   // Promo code
   const [promoCode, setPromoCode] = useState("");

@@ -21,6 +21,7 @@ export async function GET() {
         email: true,
         phone: true,
         staffRole: true,
+        permissions: true,
         createdAt: true,
       },
       orderBy: { createdAt: "asc" },
@@ -28,15 +29,20 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      team: members.map((m) => ({
-        id: m.id,
-        name: m.name,
-        email: m.email,
-        phone: m.phone || "N/A",
-        staffRole: m.staffRole || (m.email === "emraanirshad88@gmail.com" ? "SUPER_ADMIN" : "STAFF"),
-        createdAt: m.createdAt.toISOString(),
-        isProtected: m.email === "emraanirshad88@gmail.com",
-      })),
+      team: members.map((m) => {
+        const isSuperAdmin = m.email === "emraanirshad88@gmail.com";
+        const permissionsStr = isSuperAdmin ? "ALL" : (m.permissions || m.staffRole || "BOOKINGS");
+        return {
+          id: m.id,
+          name: m.name,
+          email: m.email,
+          phone: m.phone || "N/A",
+          staffRole: isSuperAdmin ? "SUPER_ADMIN" : (m.staffRole || "CUSTOM_STAFF"),
+          permissions: permissionsStr,
+          createdAt: m.createdAt.toISOString(),
+          isProtected: isSuperAdmin,
+        };
+      }),
     });
   } catch (error: any) {
     console.error("Team fetch error:", error);
@@ -52,7 +58,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, email, password, phone, staffRole } = body;
+    const { name, email, password, phone, permissions, staffRole } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -75,7 +81,16 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await bcrypt.hash(password.trim(), 10);
-    const validRole = staffRole || "BOOKINGS_MANAGER";
+
+    // Format permissions: either array or string
+    let formattedPermissions = "BOOKINGS";
+    if (Array.isArray(permissions)) {
+      formattedPermissions = permissions.join(",");
+    } else if (typeof permissions === "string" && permissions.trim().length > 0) {
+      formattedPermissions = permissions.trim();
+    }
+
+    const assignedStaffRole = staffRole || (formattedPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF");
 
     const newStaff = await prisma.user.create({
       data: {
@@ -84,7 +99,8 @@ export async function POST(req: Request) {
         phone: phone ? phone.trim() : null,
         passwordHash,
         role: "ADMIN",
-        staffRole: validRole,
+        staffRole: assignedStaffRole,
+        permissions: formattedPermissions,
       },
     });
 
@@ -95,6 +111,7 @@ export async function POST(req: Request) {
         name: newStaff.name,
         email: newStaff.email,
         staffRole: newStaff.staffRole,
+        permissions: newStaff.permissions,
         createdAt: newStaff.createdAt.toISOString(),
       },
     });

@@ -6,6 +6,7 @@ declare module "next-auth" {
       id: string;
       role: "CUSTOMER" | "VENDOR" | "ADMIN";
       staffRole?: string | null;
+      permissions?: string | null;
       vendorId?: string | null;
       phone?: string | null;
     } & DefaultSession["user"];
@@ -15,6 +16,7 @@ declare module "next-auth" {
     id: string;
     role: "CUSTOMER" | "VENDOR" | "ADMIN";
     staffRole?: string | null;
+    permissions?: string | null;
     vendorId?: string | null;
     phone?: string | null;
   }
@@ -25,6 +27,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: "CUSTOMER" | "VENDOR" | "ADMIN";
     staffRole?: string | null;
+    permissions?: string | null;
     vendorId?: string | null;
     phone?: string | null;
   }

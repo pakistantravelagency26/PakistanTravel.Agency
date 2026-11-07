@@ -12,6 +12,7 @@ export async function GET() {
     const dbVendors = await prisma.vendor.findMany({
       include: {
         listings: true,
+        user: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -26,7 +27,7 @@ export async function GET() {
         phone1: details.phone1 || v.phone,
         phone2: details.phone2 || "",
         phone3: details.phone3 || "",
-        email: details.email || `${v.id}@pakistantravel.agency`,
+        email: v.user?.email || details.email || "N/A",
         loginId: details.loginId || v.id.replace("v-", ""),
         passwordPlain: details.passwordPlain || "vendor123",
         status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),

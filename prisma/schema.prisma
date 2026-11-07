@@ -83,6 +83,7 @@ model User {
   image         String?
   role          Role      @default(CUSTOMER)
   staffRole     String?   @default("SUPER_ADMIN") // SUPER_ADMIN | BOOKINGS_MANAGER | BILLING_FINANCE | LISTING_MODERATOR
+  permissions   String?   @default("ALL") // Comma-separated: "BOOKINGS,FINANCE,LISTINGS,VENDORS,DESTINATIONS,COUPONS,TEAM" or "ALL"
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

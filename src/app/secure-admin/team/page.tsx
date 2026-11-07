@@ -14,9 +14,83 @@ import {
   BookOpenCheck,
   CreditCard,
   Building2,
-  Headphones,
-  Key
+  MapPin,
+  Tag,
+  Key,
+  Edit,
+  X,
+  Loader2,
+  CheckSquare,
+  Square
 } from "lucide-react";
+
+interface PermissionOption {
+  key: string;
+  label: string;
+  department: string;
+  description: string;
+  badgeColor: string;
+  icon: any;
+}
+
+const PERMISSION_OPTIONS: PermissionOption[] = [
+  {
+    key: "BOOKINGS",
+    label: "Bookings & Refunds",
+    department: "Reservations Desk",
+    description: "Manage customer tour bookings, cancel departures, and process traveler refunds.",
+    badgeColor: "bg-sky-50 text-sky-700 border-sky-200",
+    icon: BookOpenCheck,
+  },
+  {
+    key: "FINANCE",
+    label: "Billing & Raast Payouts",
+    department: "Accounts & Finance",
+    description: "Audit vendor net commissions, execute Raast/IBFT disbursements, and view financial ledger.",
+    badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+    icon: CreditCard,
+  },
+  {
+    key: "LISTINGS",
+    label: "Listing Moderation",
+    department: "Quality & Catalog",
+    description: "Approve or reject vendor submitted tours & hotel packages, set per-tour commission %.",
+    badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+    icon: Building2,
+  },
+  {
+    key: "VENDORS",
+    label: "Partner Agencies",
+    department: "Vendor Operations",
+    description: "Create partner vendor accounts, edit bank details, enable or disable partner login access.",
+    badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    icon: Users,
+  },
+  {
+    key: "DESTINATIONS",
+    label: "Destinations & Valleys",
+    department: "Tourism Content",
+    description: "Add northern valleys, edit regional guides, and toggle featured tourist destinations.",
+    badgeColor: "bg-teal-50 text-teal-700 border-teal-200",
+    icon: MapPin,
+  },
+  {
+    key: "COUPONS",
+    label: "Coupons & Promos",
+    department: "Marketing & Growth",
+    description: "Issue discount promo voucher codes, set minimum spends and validity dates.",
+    badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+    icon: Tag,
+  },
+  {
+    key: "TEAM",
+    label: "Team & Staff Access",
+    department: "Administration",
+    description: "Create staff sub-accounts and configure granular department permissions.",
+    badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    icon: ShieldCheck,
+  },
+];
 
 interface TeamMember {
   id: string;
@@ -24,58 +98,28 @@ interface TeamMember {
   email: string;
   phone: string;
   staffRole: string;
+  permissions: string;
   createdAt: string;
   isProtected?: boolean;
 }
 
-const ROLE_CONFIG: Record<string, { label: string; description: string; color: string; icon: any }> = {
-  SUPER_ADMIN: {
-    label: "Super Admin",
-    description: "Unrestricted access across all platform operations, payouts, vendors, and staff accounts.",
-    color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    icon: ShieldCheck,
-  },
-  BOOKINGS_MANAGER: {
-    label: "Bookings Manager",
-    description: "Responsible for managing traveler reservations, issuing vouchers, and processing cancellations.",
-    color: "bg-sky-500/20 text-sky-300 border-sky-500/30",
-    icon: BookOpenCheck,
-  },
-  BILLING_FINANCE: {
-    label: "Billing & Finance",
-    description: "Responsible for auditing vendor net balances, commissions, and bank disbursements.",
-    color: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    icon: CreditCard,
-  },
-  LISTING_MODERATOR: {
-    label: "Listing Moderator",
-    description: "Responsible for reviewing new tours, hotel rooms, vendor licenses, and itinerary quality.",
-    color: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-    icon: Building2,
-  },
-  CUSTOMER_SUPPORT: {
-    label: "Customer Support",
-    description: "Responsible for traveler inquiries, WhatsApp desk messages, and booking assistance.",
-    color: "bg-teal-500/20 text-teal-300 border-teal-500/30",
-    icon: Headphones,
-  },
-};
-
 export default function AdminTeamPage() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [formLoading, setFormLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    staffRole: "BOOKINGS_MANAGER",
-  });
+  // New staff form state
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(["BOOKINGS"]);
+
+  // Edit staff permissions modal state
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [editPermissions, setEditPermissions] = useState<string[]>([]);
+  const [updatingPermissions, setUpdatingPermissions] = useState(false);
 
   useEffect(() => {
     fetchTeam();
@@ -86,362 +130,578 @@ export default function AdminTeamPage() {
       setLoading(true);
       const res = await fetch("/api/admin/team");
       const data = await res.json();
-      if (data.success && Array.isArray(data.team)) {
+      if (data.success) {
         setTeam(data.team);
+      } else {
+        setStatusMessage({ type: "error", text: data.error || "Failed to load team." });
       }
     } catch (err: any) {
-      console.error("Team load error:", err);
+      setStatusMessage({ type: "error", text: "Network error loading team members." });
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleCreateMember(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSuccessMsg("");
-    setSubmitting(true);
+  function togglePermission(key: string, isEdit = false) {
+    if (isEdit) {
+      if (key === "ALL") {
+        if (editPermissions.includes("ALL")) {
+          setEditPermissions(["BOOKINGS"]);
+        } else {
+          setEditPermissions(["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)]);
+        }
+        return;
+      }
 
+      setEditPermissions((prev) => {
+        const withoutAll = prev.filter((p) => p !== "ALL");
+        const exists = withoutAll.includes(key);
+        const updated = exists ? withoutAll.filter((p) => p !== key) : [...withoutAll, key];
+        if (updated.length === PERMISSION_OPTIONS.length) {
+          return ["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)];
+        }
+        return updated.length === 0 ? [key] : updated;
+      });
+    } else {
+      if (key === "ALL") {
+        if (selectedPermissions.includes("ALL")) {
+          setSelectedPermissions(["BOOKINGS"]);
+        } else {
+          setSelectedPermissions(["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)]);
+        }
+        return;
+      }
+
+      setSelectedPermissions((prev) => {
+        const withoutAll = prev.filter((p) => p !== "ALL");
+        const exists = withoutAll.includes(key);
+        const updated = exists ? withoutAll.filter((p) => p !== key) : [...withoutAll, key];
+        if (updated.length === PERMISSION_OPTIONS.length) {
+          return ["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)];
+        }
+        return updated.length === 0 ? [key] : updated;
+      });
+    }
+  }
+
+  async function handleCreateStaff(e: React.FormEvent) {
+    e.preventDefault();
+    setStatusMessage(null);
+
+    if (selectedPermissions.length === 0) {
+      setStatusMessage({ type: "error", text: "Please select at least one permission check for this account." });
+      return;
+    }
+
+    setFormLoading(true);
     try {
       const res = await fetch("/api/admin/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+          phone: phone.trim() || undefined,
+          permissions: selectedPermissions,
+          staffRole: selectedPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF",
+        }),
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create staff member.");
+      if (data.success) {
+        setStatusMessage({
+          type: "success",
+          text: `Staff account "${data.member.name}" successfully created with ${selectedPermissions.length} assigned permissions!`,
+        });
+        setName("");
+        setEmail("");
+        setPassword("");
+        setPhone("");
+        setSelectedPermissions(["BOOKINGS"]);
+        fetchTeam();
+      } else {
+        setStatusMessage({ type: "error", text: data.error || "Could not create staff account." });
       }
-
-      setSuccessMsg(`Staff account for ${formData.name} created successfully!`);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        phone: "",
-        staffRole: "BOOKINGS_MANAGER",
-      });
-      setIsModalOpen(false);
-      fetchTeam();
     } catch (err: any) {
-      setError(err.message || "An error occurred.");
+      setStatusMessage({ type: "error", text: "Error creating staff account: " + err.message });
     } finally {
-      setSubmitting(false);
+      setFormLoading(false);
     }
   }
 
-  async function handleDeleteMember(member: TeamMember) {
-    if (member.isProtected) {
-      alert("The primary Super Admin account cannot be deleted.");
-      return;
-    }
+  async function handleUpdatePermissions(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingMember) return;
 
-    if (!confirm(`Are you sure you want to delete staff account "${member.name}" (${member.email})?`)) {
+    setUpdatingPermissions(true);
+    try {
+      const res = await fetch(`/api/admin/team/${editingMember.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          permissions: editPermissions,
+          staffRole: editPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setStatusMessage({
+          type: "success",
+          text: `Permissions updated successfully for ${editingMember.name}!`,
+        });
+        setEditingMember(null);
+        fetchTeam();
+      } else {
+        alert(data.error || "Failed to update permissions.");
+      }
+    } catch (err: any) {
+      alert("Error updating permissions: " + err.message);
+    } finally {
+      setUpdatingPermissions(false);
+    }
+  }
+
+  async function handleDelete(id: string, memberName: string) {
+    if (!confirm(`Are you sure you want to delete staff account "${memberName}"? They will permanently lose access.`)) {
       return;
     }
 
     try {
-      const res = await fetch(`/api/admin/team/${member.id}`, {
+      const res = await fetch(`/api/admin/team/${id}`, {
         method: "DELETE",
       });
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to delete staff member.");
+      if (data.success) {
+        setStatusMessage({ type: "success", text: data.message });
+        fetchTeam();
+      } else {
+        setStatusMessage({ type: "error", text: data.error || "Failed to delete account." });
       }
-
-      setTeam((prev) => prev.filter((m) => m.id !== member.id));
     } catch (err: any) {
-      alert(err.message || "Failed to delete account.");
+      setStatusMessage({ type: "error", text: "Error deleting staff member: " + err.message });
     }
   }
 
-  const superAdminCount = team.filter((m) => m.staffRole === "SUPER_ADMIN" || m.isProtected).length;
-  const bookingsCount = team.filter((m) => m.staffRole === "BOOKINGS_MANAGER").length;
-  const billingCount = team.filter((m) => m.staffRole === "BILLING_FINANCE").length;
+  function openEditModal(m: TeamMember) {
+    setEditingMember(m);
+    const perms = (m.permissions || "").split(",").map((p) => p.trim()).filter(Boolean);
+    setEditPermissions(perms.length > 0 ? perms : ["BOOKINGS"]);
+  }
 
   return (
     <div className="space-y-8">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Staff Accounts & Role-Based Access</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Create logins for your team members and assign specific departmental permissions (Bookings, Billing, Listing Moderation).
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold mb-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Role & Department Permission Controller</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Team & Department Staff Access
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Assign custom job roles with granular checkboxes. Give one staff member 2 tasks (e.g. Bookings + Billing) and another 3 tasks (e.g. Listings + Destinations + Promos).
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setError("");
-            setIsModalOpen(true);
-          }}
-          className="px-4 py-2.5 rounded-xl bg-brand-emerald hover:bg-brand-emeraldDark text-white text-xs font-bold transition shadow-md shadow-brand-emerald/20 flex items-center gap-2 self-start"
+        <a
+          href="#create-staff-form"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition shrink-0"
         >
           <UserPlus className="w-4 h-4" />
-          <span>Add New Staff Account</span>
-        </button>
+          <span>+ Create Staff Member</span>
+        </a>
       </div>
 
-      {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <span>{successMsg}</span>
+      {statusMessage && (
+        <div
+          className={`p-4 rounded-2xl border text-xs flex items-center gap-3 transition ${
+            statusMessage.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+              : "bg-red-50 border-red-200 text-red-900"
+          }`}
+        >
+          {statusMessage.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+          )}
+          <span className="font-semibold">{statusMessage.text}</span>
         </div>
       )}
 
-      {/* Team Breakdown Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-slate-500">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Staff Accounts</span>
-            <Users className="w-4 h-4 text-emerald-600" />
+      {/* Team Directory */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center font-bold text-sm">
+              <Users className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-slate-900">Current Staff Members</h2>
+              <p className="text-xs text-slate-400">Accounts authorized with departmental dashboard access</p>
+            </div>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">{team.length} Members</p>
-          <p className="text-[11px] text-slate-400">Active team members with dashboard access</p>
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            {team.length} Active {team.length === 1 ? "Account" : "Accounts"}
+          </span>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-slate-500">
-            <span className="text-xs font-semibold uppercase tracking-wider">Bookings Desk</span>
-            <BookOpenCheck className="w-4 h-4 text-sky-600" />
+        {loading ? (
+          <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+            <span className="text-xs font-semibold">Loading team members...</span>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">{bookingsCount} Managers</p>
-          <p className="text-[11px] text-slate-400">Dedicated to reservations and vouchers</p>
-        </div>
+        ) : team.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 text-xs">
+            No staff accounts found. Create your first team member below.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {team.map((member) => {
+              const isSuper = member.isProtected || member.email === "emraanirshad88@gmail.com" || member.permissions?.includes("ALL");
+              const memberPerms = isSuper 
+                ? PERMISSION_OPTIONS.map((p) => p.key) 
+                : (member.permissions || "").split(",").map((s) => s.trim()).filter(Boolean);
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div className="flex justify-between items-center text-slate-500">
-            <span className="text-xs font-semibold uppercase tracking-wider">Finance & Billing</span>
-            <CreditCard className="w-4 h-4 text-amber-600" />
+              return (
+                <div
+                  key={member.id}
+                  className="p-5 rounded-2xl border border-slate-200 hover:border-slate-300 transition bg-slate-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-5"
+                >
+                  <div className="space-y-2 max-w-md">
+                    <div className="flex items-center gap-3">
+                      <span className="font-extrabold text-slate-900 text-sm">{member.name}</span>
+                      {member.isProtected && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          Primary Super Admin
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{member.email}</span>
+                      </div>
+                      {member.phone && member.phone !== "N/A" && (
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{member.phone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Assigned Granular Permissions Pills */}
+                  <div className="flex-1 lg:px-4">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Assigned Permissions ({memberPerms.length} {memberPerms.length === 1 ? "Module" : "Modules"})
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {isSuper ? (
+                        <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white shadow-sm flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Full Super Admin Access (All 7 Modules)</span>
+                        </span>
+                      ) : (
+                        memberPerms.map((permKey) => {
+                          const option = PERMISSION_OPTIONS.find((p) => p.key === permKey);
+                          if (!option) return null;
+                          const Icon = option.icon;
+                          return (
+                            <span
+                              key={permKey}
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${option.badgeColor}`}
+                            >
+                              <Icon className="w-3 h-3" />
+                              <span>{option.label}</span>
+                            </span>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {!member.isProtected && (
+                      <>
+                        <button
+                          onClick={() => openEditModal(member)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold transition"
+                        >
+                          <Edit className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Edit Tasks</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(member.id, member.name)}
+                          className="p-1.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition"
+                          title="Delete staff account"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">{billingCount} Accountants</p>
-          <p className="text-[11px] text-slate-400">Dedicated to partner payouts & commissions</p>
-        </div>
+        )}
       </div>
 
-      {/* Staff Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">Configured Staff & Roles</h2>
-          <span className="text-xs text-slate-400 font-medium">Logged-in staff only see sections permitted to their role</span>
+      {/* Create New Staff Member with Granular Checkboxes Form */}
+      <div id="create-staff-form" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <UserPlus className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-extrabold text-slate-900">Create New Staff Account</h2>
+            <p className="text-xs text-slate-500">
+              Provide credentials and check off the exact tasks this staff member will handle
+            </p>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
-              <tr>
-                <th className="py-3 px-4">Staff Member</th>
-                <th className="py-3 px-4">Assigned Department / Role</th>
-                <th className="py-3 px-4">Contact Phone</th>
-                <th className="py-3 px-4">Created Date</th>
-                <th className="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
-                    Loading team accounts...
-                  </td>
-                </tr>
-              ) : team.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
-                    No staff accounts created yet.
-                  </td>
-                </tr>
-              ) : (
-                team.map((member) => {
-                  const roleConfig = ROLE_CONFIG[member.staffRole] || ROLE_CONFIG.BOOKINGS_MANAGER;
-                  const Icon = roleConfig.icon;
-
-                  return (
-                    <tr key={member.id} className="hover:bg-slate-50/70 transition">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs uppercase">
-                            {member.name.charAt(0)}
-                          </div>
-                          <div>
-                            <span className="font-bold text-slate-900 block">{member.name}</span>
-                            <span className="text-[11px] text-slate-400 font-mono">{member.email}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="space-y-0.5">
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${roleConfig.color}`}>
-                            <Icon className="w-3 h-3" />
-                            {roleConfig.label}
-                          </span>
-                          <p className="text-[10px] text-slate-400">{roleConfig.description}</p>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-600 font-mono text-[11px]">
-                        {member.phone}
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-500 text-[11px]">
-                        {member.createdAt.split("T")[0]}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        {member.isProtected ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            <ShieldCheck className="w-3 h-3" /> Primary Owner
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleDeleteMember(member)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
-                            title="Delete staff account"
-                            aria-label={`Delete staff account ${member.name}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Add New Staff Account Modal */}
-      {isModalOpen && (
-        <div 
-          role="dialog" 
-          aria-modal="true" 
-          aria-labelledby="modal-staff-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
-        >
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-100 text-slate-800">
-            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-              <div>
-                <span className="text-[10px] font-bold text-brand-emerald uppercase tracking-wider flex items-center gap-1">
-                  <Key className="w-3.5 h-3.5" /> Access Delegation
-                </span>
-                <h2 id="modal-staff-title" className="text-xl font-bold text-slate-900 mt-0.5">Create Staff Account</h2>
-                <p className="text-xs text-slate-500">Give your team member login access to manage their specific department.</p>
-              </div>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                aria-label="Close modal"
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-              >
-                ✕
-              </button>
+        <form onSubmit={handleCreateStaff} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Staff Member Full Name *
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Tariq Mehmood"
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
             </div>
 
-            {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Staff Email (Login Username) *
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. tariq@travel.com"
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+            </div>
 
-            <form onSubmit={handleCreateMember} className="space-y-4 text-xs">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Initial Password *
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Secure alphanumeric password"
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Direct Contact Phone (Optional)
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="0300-1234567"
+                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+
+          {/* Granular Permission Checkboxes Section */}
+          <div className="pt-4 border-t border-slate-100 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <label htmlFor="staff-name" className="block font-bold text-slate-700 uppercase mb-1">
-                  Staff Member Full Name
-                </label>
-                <input
-                  id="staff-name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Asad Malik"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-emerald text-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="staff-email" className="block font-bold text-slate-700 uppercase mb-1">
-                    Login Email
-                  </label>
-                  <input
-                    id="staff-email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="staff@pakistantravel.agency"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-emerald text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="staff-password" className="block font-bold text-slate-700 uppercase mb-1">
-                    Login Password
-                  </label>
-                  <input
-                    id="staff-password"
-                    type="text"
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Enter secure password"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-emerald text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="staff-phone" className="block font-bold text-slate-700 uppercase mb-1">
-                  Phone / WhatsApp (Optional)
-                </label>
-                <input
-                  id="staff-phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="03221234567"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-emerald text-sm"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="staff-role" className="block font-bold text-slate-700 uppercase mb-1">
-                  Department / Role Permission
-                </label>
-                <select
-                  id="staff-role"
-                  value={formData.staffRole}
-                  onChange={(e) => setFormData({ ...formData, staffRole: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-emerald font-semibold text-slate-800 text-sm"
-                >
-                  <option value="BOOKINGS_MANAGER">Bookings Manager (Only Bookings, Vouchers & Guest Queries)</option>
-                  <option value="BILLING_FINANCE">Billing & Finance (Only Payouts, Commissions & Bank Ledgers)</option>
-                  <option value="LISTING_MODERATOR">Listing Moderator (Only Tour & Hotel Approvals, Vendors)</option>
-                  <option value="CUSTOMER_SUPPORT">Customer Support Desk (General Inquiries & WhatsApp)</option>
-                  <option value="SUPER_ADMIN">Super Admin (Full Platform Control)</option>
-                </select>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  The staff member will log in at the admin portal and access the tools permitted by their department.
+                <h3 className="font-extrabold text-slate-900 text-sm">
+                  Department Permissions & Module Access Checkboxes
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Select which dashboard tabs this account can view and manage ({selectedPermissions.length} selected)
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              {/* Quick Select Helpers */}
+              <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 font-bold text-slate-700 text-xs"
+                  onClick={() => setSelectedPermissions(PERMISSION_OPTIONS.map((p) => p.key))}
+                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                >
+                  Select All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPermissions(["BOOKINGS"])}
+                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                >
+                  Bookings Only
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPermissions(["BOOKINGS", "FINANCE"])}
+                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                >
+                  Bookings + Billing (2 Tasks)
+                </button>
+              </div>
+            </div>
+
+            {/* Checkboxes Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {PERMISSION_OPTIONS.map((option) => {
+                const isChecked = selectedPermissions.includes(option.key) || selectedPermissions.includes("ALL");
+                const Icon = option.icon;
+
+                return (
+                  <div
+                    key={option.key}
+                    onClick={() => togglePermission(option.key, false)}
+                    className={`p-4 rounded-2xl border cursor-pointer transition flex items-start gap-3.5 ${
+                      isChecked
+                        ? "bg-emerald-50/60 border-emerald-300 shadow-sm"
+                        : "bg-white border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="mt-0.5 text-emerald-600">
+                      {isChecked ? (
+                        <CheckSquare className="w-5 h-5 fill-emerald-600 text-white" />
+                      ) : (
+                        <Square className="w-5 h-5 text-slate-300" />
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${isChecked ? "text-emerald-700" : "text-slate-400"}`} />
+                        <span className="font-extrabold text-xs text-slate-900">{option.label}</span>
+                        <span className="text-[10px] font-semibold text-slate-400">({option.department})</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        {option.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 flex justify-end">
+            <button
+              type="submit"
+              disabled={formLoading}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50"
+            >
+              {formLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <UserPlus className="w-4 h-4" />
+              )}
+              <span>Create Staff Member ({selectedPermissions.length} Tasks)</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Edit Permissions Modal */}
+      {editingMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setEditingMember(null)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Edit className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 text-base">
+                  Edit Permissions for {editingMember.name}
+                </h3>
+                <p className="text-xs text-slate-500">{editingMember.email}</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleUpdatePermissions} className="space-y-5">
+              <div className="text-xs text-slate-600">
+                Check or uncheck the departments and tasks this staff member should be assigned:
+              </div>
+
+              <div className="space-y-2.5">
+                {PERMISSION_OPTIONS.map((option) => {
+                  const isChecked = editPermissions.includes(option.key) || editPermissions.includes("ALL");
+                  const Icon = option.icon;
+
+                  return (
+                    <div
+                      key={option.key}
+                      onClick={() => togglePermission(option.key, true)}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-start gap-3 ${
+                        isChecked
+                          ? "bg-emerald-50/60 border-emerald-300 shadow-sm"
+                          : "bg-white border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="mt-0.5 text-emerald-600">
+                        {isChecked ? (
+                          <CheckSquare className="w-5 h-5 fill-emerald-600 text-white" />
+                        ) : (
+                          <Square className="w-5 h-5 text-slate-300" />
+                        )}
+                      </div>
+
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <Icon className={`w-3.5 h-3.5 ${isChecked ? "text-emerald-700" : "text-slate-400"}`} />
+                          <span className="font-extrabold text-xs text-slate-900">{option.label}</span>
+                          <span className="text-[10px] text-slate-400">({option.department})</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          {option.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setEditingMember(null)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-brand-emerald hover:bg-brand-emeraldDark disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-brand-emerald/20 flex items-center gap-1.5"
+                  disabled={updatingPermissions}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm disabled:opacity-50 flex items-center gap-2"
                 >
-                  <UserPlus className="w-4 h-4" />
-                  <span>{submitting ? "Creating Account..." : "Create Staff Account"}</span>
+                  {updatingPermissions && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Permissions ({editPermissions.length} Tasks)</span>
                 </button>
               </div>
             </form>

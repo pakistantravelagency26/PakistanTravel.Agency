@@ -14,7 +14,8 @@ import {
   Download, 
   ShieldCheck, 
   Compass,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from "lucide-react";
 import type { BookingRecord } from "@/services/booking.service";
 
@@ -36,45 +37,38 @@ export default function ConfirmationPage() {
           return;
         }
       } catch (e) {
-        console.warn("Could not fetch remote booking, using fallback:", e);
+        console.warn("Could not fetch remote booking:", e);
       }
 
-      // Fallback demo mock
-      setBooking({
-        id: bookingId,
-        bookingNumber: bookingId.startsWith("PKT") ? bookingId : `PKT-2026-89421`,
-        listingId: "hunza-serena-inn",
-        listingTitle: "Hunza Serena Inn & Heritage Lodge",
-        listingPhoto: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80",
-        unitTitle: "Deluxe Mountain View Room",
-        destination: "Karimabad, Hunza Valley",
-        startDate: "2026-11-10",
-        endDate: "2026-11-13",
-        nightsCount: 3,
-        guestsCount: 2,
-        unitsCount: 1,
-        totalAmount: 102375,
-        depositAmount: 25593,
-        balanceDue: 76782,
-        paymentMethod: "JAZZCASH",
-        paymentStatus: "PAID",
-        status: "CONFIRMED",
-        guestName: "Usman Tariq",
-        guestEmail: "customer@pakistantravel.agency",
-        guestPhone: "03001234567",
-        cnicOrPassport: "37405-1234567-1",
-        specialRequests: "Upper floor room with direct view of Rakaposhi peak.",
-        createdAt: new Date().toISOString(),
-      });
       setLoading(false);
     }
     load();
   }, [bookingId]);
 
-  if (loading || !booking) {
+  if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-emerald"></div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-3">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800">Booking Reference Not Found</h2>
+        <p className="text-xs text-slate-500 mt-1 max-w-sm">
+          We could not locate any active reservation matching reference &quot;{bookingId}&quot;. Please verify your booking link or contact traveler support.
+        </p>
+        <Link
+          href="/search"
+          className="mt-5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition"
+        >
+          Explore Verified Tours
+        </Link>
       </div>
     );
   }

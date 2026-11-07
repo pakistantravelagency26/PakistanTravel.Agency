@@ -241,32 +241,38 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            {destinations.map((dest) => (
-              <div
-                key={dest.name}
-                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
-                    <MapPin className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-xs text-slate-900 block">{dest.name}</span>
-                    <span className="text-[10px] text-slate-500">{dest.count} Tour Packages</span>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs font-extrabold text-slate-700">{dest.percent}%</span>
-                  <div className="w-16 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-600 rounded-full"
-                      style={{ width: `${dest.percent}%` }}
-                    />
-                  </div>
-                </div>
+            {destinations.length === 0 ? (
+              <div className="col-span-1 sm:col-span-2 py-8 text-center text-xs text-slate-400">
+                No tour packages published yet. Destinations coverage will appear automatically as partner listings are approved.
               </div>
-            ))}
+            ) : (
+              destinations.map((dest) => (
+                <div
+                  key={dest.name}
+                  className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                      <MapPin className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-xs text-slate-900 block">{dest.name}</span>
+                      <span className="text-[10px] text-slate-500">{dest.count} Tour Packages</span>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-xs font-extrabold text-slate-700">{dest.percent}%</span>
+                    <div className="w-16 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-600 rounded-full"
+                        style={{ width: `${dest.percent}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
