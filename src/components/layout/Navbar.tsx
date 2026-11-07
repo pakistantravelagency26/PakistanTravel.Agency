@@ -142,7 +142,7 @@ export function Navbar() {
                 <span className="text-slate-300">/</span>
                 <Link
                   href="/login"
-                  className="text-[#FD4621] hover:text-[#e03a18] font-black transition"
+                  className="text-orange-600 hover:text-orange-700 font-extrabold transition"
                 >
                   Sign in
                 </Link>
@@ -157,7 +157,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo - Anchor text is brand name only */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-md shadow-slate-900/10 group-hover:scale-105 transition shrink-0">
+            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-md shadow-sky-600/15 group-hover:scale-105 transition shrink-0">
               <Image
                 src="/logo.png"
                 alt="PakistanTravel.Agency Logo"
@@ -167,31 +167,31 @@ export function Navbar() {
                 priority
               />
             </div>
-            <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-950">
-              Pakistan<span className="text-[#059669]">Travel</span><span className="text-[#FD4621]">.Agency</span>
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+              Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-black text-slate-700">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
             {navLinks.map((link) => (
               <Link
                 key={link.id || link.url}
                 href={link.url}
-                className="hover:text-[#FD4621] transition"
+                className="hover:text-sky-600 transition"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          {/* Right Action: Turie Explore Catalog button */}
+          {/* Right Action: Explore Catalog button */}
           <div className="hidden sm:flex items-center gap-3">
             <Link
               href="/search"
-              className="px-5 py-2.5 rounded-full bg-slate-950 hover:bg-[#FD4621] text-white text-xs font-black transition flex items-center gap-2 shadow-md"
+              className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
             >
-              <Compass className="w-4 h-4 text-amber-400" />
+              <Compass className="w-4 h-4 text-sky-600" />
               <span>Explore All</span>
             </Link>
           </div>
