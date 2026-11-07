@@ -26,7 +26,8 @@ import {
   Compass,
   CreditCard,
   Headphones,
-  Check
+  Check,
+  Menu
 } from "lucide-react";
 import type { 
   GeneralSettings, 
@@ -40,12 +41,16 @@ import type {
   PageTermsSettings, 
   PagePrivacySettings,
   PageDestinationsSettings,
-  PageBlogSettings
+  PageBlogSettings,
+  NavLinkItem,
+  FooterLinkItem
 } from "@/services/siteSettings.service";
+import { DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
 
 export default function AdminWebsiteManagerPage() {
   const [activeTab, setActiveTab] = useState<
     | "general" 
+    | "navigation"
     | "hero" 
     | "announcement" 
     | "marketplace" 
@@ -62,7 +67,10 @@ export default function AdminWebsiteManagerPage() {
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Form states for all 11 sections
+  // Form states for all sections
+  const [navLinks, setNavLinks] = useState<NavLinkItem[]>(DEFAULT_SITE_SETTINGS.NAVBAR_LINKS);
+  const [newNavLabel, setNewNavLabel] = useState("");
+  const [newNavUrl, setNewNavUrl] = useState("");
   const [general, setGeneral] = useState<GeneralSettings>({
     siteName: "",
     tagline: "",
@@ -112,18 +120,13 @@ export default function AdminWebsiteManagerPage() {
     emptyStateDesc: "",
   });
 
-  const [footer, setFooter] = useState<FooterSettings>({
-    aboutText: "",
-    copyrightNotice: "",
-    emergencyPhone: "",
-    headOfficeText: "",
-    card1Title: "",
-    card1Desc: "",
-    card2Title: "",
-    card2Desc: "",
-    card3Title: "",
-    card3Desc: "",
-  });
+  const [footer, setFooter] = useState<FooterSettings>(DEFAULT_SITE_SETTINGS.FOOTER);
+  const [newCol1Label, setNewCol1Label] = useState("");
+  const [newCol1Url, setNewCol1Url] = useState("");
+  const [newCol2Label, setNewCol2Label] = useState("");
+  const [newCol2Url, setNewCol2Url] = useState("");
+  const [newCol3Label, setNewCol3Label] = useState("");
+  const [newCol3Url, setNewCol3Url] = useState("");
 
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [newFaqQ, setNewFaqQ] = useState("");
@@ -180,10 +183,27 @@ export default function AdminWebsiteManagerPage() {
       const data = await res.json();
       if (data.success && data.settings) {
         if (data.settings.GENERAL) setGeneral(data.settings.GENERAL);
+        if (data.settings.NAVBAR_LINKS && Array.isArray(data.settings.NAVBAR_LINKS) && data.settings.NAVBAR_LINKS.length > 0) {
+          setNavLinks(data.settings.NAVBAR_LINKS);
+        } else {
+          setNavLinks(DEFAULT_SITE_SETTINGS.NAVBAR_LINKS);
+        }
         if (data.settings.HERO) setHero(data.settings.HERO);
         if (data.settings.ANNOUNCEMENT) setAnnouncement(data.settings.ANNOUNCEMENT);
         if (data.settings.MARKETPLACE_SECTION) setMarketplace(data.settings.MARKETPLACE_SECTION);
-        if (data.settings.FOOTER) setFooter(data.settings.FOOTER);
+        if (data.settings.FOOTER) {
+          setFooter({
+            ...DEFAULT_SITE_SETTINGS.FOOTER,
+            ...data.settings.FOOTER,
+            col1Title: data.settings.FOOTER.col1Title || DEFAULT_SITE_SETTINGS.FOOTER.col1Title,
+            col1Links: data.settings.FOOTER.col1Links && data.settings.FOOTER.col1Links.length > 0 ? data.settings.FOOTER.col1Links : DEFAULT_SITE_SETTINGS.FOOTER.col1Links,
+            col2Title: data.settings.FOOTER.col2Title || DEFAULT_SITE_SETTINGS.FOOTER.col2Title,
+            col2Links: data.settings.FOOTER.col2Links && data.settings.FOOTER.col2Links.length > 0 ? data.settings.FOOTER.col2Links : DEFAULT_SITE_SETTINGS.FOOTER.col2Links,
+            col3Title: data.settings.FOOTER.col3Title || DEFAULT_SITE_SETTINGS.FOOTER.col3Title,
+            col3Links: data.settings.FOOTER.col3Links && data.settings.FOOTER.col3Links.length > 0 ? data.settings.FOOTER.col3Links : DEFAULT_SITE_SETTINGS.FOOTER.col3Links,
+            col4Title: data.settings.FOOTER.col4Title || DEFAULT_SITE_SETTINGS.FOOTER.col4Title,
+          });
+        }
         if (data.settings.FAQS) setFaqs(data.settings.FAQS);
         if (data.settings.PAGE_VERIFICATION) setVerification(data.settings.PAGE_VERIFICATION);
         if (data.settings.PAGE_ABOUT) setAbout(data.settings.PAGE_ABOUT);
@@ -262,6 +282,7 @@ export default function AdminWebsiteManagerPage() {
 
   const subTabs = [
     { id: "general", label: "General & Contact Desk", icon: Settings },
+    { id: "navigation", label: "Header Navbar Menu", icon: Menu },
     { id: "hero", label: "Homepage Hero & Badges", icon: Sparkles },
     { id: "announcement", label: "Top Announcement Bar", icon: Megaphone },
     { id: "marketplace", label: "Marketplace Catalog", icon: Building2 },
@@ -487,6 +508,159 @@ export default function AdminWebsiteManagerPage() {
                 </button>
               </div>
             </form>
+          )}
+
+          {/* TAB: HEADER NAVBAR MENU */}
+          {activeTab === "navigation" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">Header Navbar Menu Links</h2>
+                  <p className="text-xs text-slate-500">
+                    Customize the top navigation menu displayed on every page (Hunza, Skardu, Swat, Kumrat, Tours, Hotels, Blog, etc.)
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSave("NAVBAR_LINKS", navLinks)}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Save Header Menu Links</span>
+                </button>
+              </div>
+
+              {/* Existing Navigation Links */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Active Header Menu Items ({navLinks.length})
+                </h3>
+                {navLinks.map((item, idx) => (
+                  <div key={item.id || idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 font-extrabold text-xs flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                          Display Label
+                        </label>
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const updated = [...navLinks];
+                            updated[idx] = { ...updated[idx], label: e.target.value };
+                            setNavLinks(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                          Target URL Link
+                        </label>
+                        <input
+                          type="text"
+                          value={item.url}
+                          onChange={(e) => {
+                            const updated = [...navLinks];
+                            updated[idx] = { ...updated[idx], url: e.target.value };
+                            setNavLinks(updated);
+                          }}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-700"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navLinks.length <= 1) {
+                          alert("You must keep at least 1 navigation link.");
+                          return;
+                        }
+                        const updated = navLinks.filter((_, i) => i !== idx);
+                        setNavLinks(updated);
+                      }}
+                      className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition self-end sm:self-center"
+                      title="Remove this menu link"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add New Header Item Box */}
+              <div className="p-5 bg-white rounded-2xl border-2 border-dashed border-slate-200 space-y-4">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Plus className="w-4 h-4 text-emerald-600" />
+                  <span>Add New Menu Item</span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Menu Label (e.g. Murree, Gilgit, Stays)
+                    </label>
+                    <input
+                      type="text"
+                      value={newNavLabel}
+                      onChange={(e) => setNewNavLabel(e.target.value)}
+                      placeholder="e.g. Murree"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Target URL (e.g. /destinations/murree)
+                    </label>
+                    <input
+                      type="text"
+                      value={newNavUrl}
+                      onChange={(e) => setNewNavUrl(e.target.value)}
+                      placeholder="/destinations/murree"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newNavLabel.trim() || !newNavUrl.trim()) {
+                        alert("Please fill in both label and URL.");
+                        return;
+                      }
+                      const updated = [
+                        ...navLinks,
+                        { id: `nav-${Date.now()}`, label: newNavLabel.trim(), url: newNavUrl.trim() },
+                      ];
+                      setNavLinks(updated);
+                      setNewNavLabel("");
+                      setNewNavUrl("");
+                      handleSave("NAVBAR_LINKS", updated);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Item to Header</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => handleSave("NAVBAR_LINKS", navLinks)}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition disabled:opacity-50"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Save Header Menu Links</span>
+                </button>
+              </div>
+            </div>
           )}
 
           {/* TAB 2: HOMEPAGE HERO & BADGES */}
@@ -968,6 +1142,320 @@ export default function AdminWebsiteManagerPage() {
                       onChange={(e) => setFooter({ ...footer, headOfficeText: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
+                  </div>
+                </div>
+
+                {/* 4 Footer Navigation Columns */}
+                <div className="pt-6 border-t border-slate-100 space-y-6">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-slate-900">
+                      Footer Link Columns (Popular Destinations, Categories, Guarantees)
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Customize column titles and add, edit, or delete links inside each footer column
+                    </p>
+                  </div>
+
+                  {/* Column 1: Popular Destinations */}
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-bold text-sky-700 uppercase tracking-wider mb-1">
+                          Column 1 Title (e.g. Popular Destinations)
+                        </label>
+                        <input
+                          type="text"
+                          value={footer.col1Title || ""}
+                          onChange={(e) => setFooter({ ...footer, col1Title: e.target.value })}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
+                          placeholder="Popular Destinations"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Column 1 Links ({footer.col1Links?.length || 0})
+                      </label>
+                      {(footer.col1Links || []).map((link, idx) => (
+                        <div key={link.id || idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={(e) => {
+                              const updated = [...(footer.col1Links || [])];
+                              updated[idx] = { ...updated[idx], label: e.target.value };
+                              setFooter({ ...footer, col1Links: updated });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold"
+                            placeholder="Link Label"
+                          />
+                          <input
+                            type="text"
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...(footer.col1Links || [])];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setFooter({ ...footer, col1Links: updated });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-700"
+                            placeholder="/destinations/..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (footer.col1Links || []).filter((_, i) => i !== idx);
+                              setFooter({ ...footer, col1Links: updated });
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50"
+                            title="Delete link"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add to Column 1 */}
+                    <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={newCol1Label}
+                        onChange={(e) => setNewCol1Label(e.target.value)}
+                        placeholder="New destination label..."
+                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs"
+                      />
+                      <input
+                        type="text"
+                        value={newCol1Url}
+                        onChange={(e) => setNewCol1Url(e.target.value)}
+                        placeholder="/destinations/..."
+                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newCol1Label.trim() || !newCol1Url.trim()) return;
+                          const updated = [
+                            ...(footer.col1Links || []),
+                            { id: `col1-${Date.now()}`, label: newCol1Label.trim(), url: newCol1Url.trim() },
+                          ];
+                          setFooter({ ...footer, col1Links: updated });
+                          setNewCol1Label("");
+                          setNewCol1Url("");
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shrink-0"
+                      >
+                        + Add Link
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Column 2: Experience Categories */}
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-bold text-orange-700 uppercase tracking-wider mb-1">
+                          Column 2 Title (e.g. Experience Categories)
+                        </label>
+                        <input
+                          type="text"
+                          value={footer.col2Title || ""}
+                          onChange={(e) => setFooter({ ...footer, col2Title: e.target.value })}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
+                          placeholder="Experience Categories"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Column 2 Links ({footer.col2Links?.length || 0})
+                      </label>
+                      {(footer.col2Links || []).map((link, idx) => (
+                        <div key={link.id || idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={(e) => {
+                              const updated = [...(footer.col2Links || [])];
+                              updated[idx] = { ...updated[idx], label: e.target.value };
+                              setFooter({ ...footer, col2Links: updated });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold"
+                            placeholder="Link Label"
+                          />
+                          <input
+                            type="text"
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...(footer.col2Links || [])];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setFooter({ ...footer, col2Links: updated });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-700"
+                            placeholder="/search?..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (footer.col2Links || []).filter((_, i) => i !== idx);
+                              setFooter({ ...footer, col2Links: updated });
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50"
+                            title="Delete link"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add to Column 2 */}
+                    <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={newCol2Label}
+                        onChange={(e) => setNewCol2Label(e.target.value)}
+                        placeholder="New category label..."
+                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs"
+                      />
+                      <input
+                        type="text"
+                        value={newCol2Url}
+                        onChange={(e) => setNewCol2Url(e.target.value)}
+                        placeholder="/search?..."
+                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newCol2Label.trim() || !newCol2Url.trim()) return;
+                          const updated = [
+                            ...(footer.col2Links || []),
+                            { id: `col2-${Date.now()}`, label: newCol2Label.trim(), url: newCol2Url.trim() },
+                          ];
+                          setFooter({ ...footer, col2Links: updated });
+                          setNewCol2Label("");
+                          setNewCol2Url("");
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shrink-0"
+                      >
+                        + Add Link
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Traveler Guarantees */}
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-bold text-teal-700 uppercase tracking-wider mb-1">
+                          Column 3 Title (e.g. Traveler Guarantees)
+                        </label>
+                        <input
+                          type="text"
+                          value={footer.col3Title || ""}
+                          onChange={(e) => setFooter({ ...footer, col3Title: e.target.value })}
+                          className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
+                          placeholder="Traveler Guarantees"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Column 3 Links ({footer.col3Links?.length || 0})
+                      </label>
+                      {(footer.col3Links || []).map((link, idx) => (
+                        <div key={link.id || idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={(e) => {
+                              const updated = [...(footer.col3Links || [])];
+                              updated[idx] = { ...updated[idx], label: e.target.value };
+                              setFooter({ ...footer, col3Links: updated });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold"
+                            placeholder="Link Label"
+                          />
+                          <input
+                            type="text"
+                            value={link.url}
+                            onChange={(e) => {
+                              const updated = [...(footer.col3Links || [])];
+                              updated[idx] = { ...updated[idx], url: e.target.value };
+                              setFooter({ ...footer, col3Links: updated });
+                            }}
+                            className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-700"
+                            placeholder="/how-we-verify-partners"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (footer.col3Links || []).filter((_, i) => i !== idx);
+                              setFooter({ ...footer, col3Links: updated });
+                            }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50"
+                            title="Delete link"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add to Column 3 */}
+                    <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={newCol3Label}
+                        onChange={(e) => setNewCol3Label(e.target.value)}
+                        placeholder="New policy/link label..."
+                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs"
+                      />
+                      <input
+                        type="text"
+                        value={newCol3Url}
+                        onChange={(e) => setNewCol3Url(e.target.value)}
+                        placeholder="/terms"
+                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newCol3Label.trim() || !newCol3Url.trim()) return;
+                          const updated = [
+                            ...(footer.col3Links || []),
+                            { id: `col3-${Date.now()}`, label: newCol3Label.trim(), url: newCol3Url.trim() },
+                          ];
+                          setFooter({ ...footer, col3Links: updated });
+                          setNewCol3Label("");
+                          setNewCol3Url("");
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shrink-0"
+                      >
+                        + Add Link
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Column 4 Title */}
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    <label className="block text-[11px] font-bold text-emerald-700 uppercase tracking-wider mb-1">
+                      Column 4 Title (e.g. Direct Support)
+                    </label>
+                    <input
+                      type="text"
+                      value={footer.col4Title || ""}
+                      onChange={(e) => setFooter({ ...footer, col4Title: e.target.value })}
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
+                      placeholder="Direct Support"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      (The phone, WhatsApp, email, and address in this column are automatically linked to your General Settings.)
+                    </p>
                   </div>
                 </div>
               </div>

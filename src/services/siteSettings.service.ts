@@ -49,6 +49,18 @@ export interface MarketplaceSectionSettings {
   emptyStateDesc: string;
 }
 
+export interface NavLinkItem {
+  id: string;
+  label: string;
+  url: string;
+}
+
+export interface FooterLinkItem {
+  id: string;
+  label: string;
+  url: string;
+}
+
 export interface FooterSettings {
   aboutText: string;
   copyrightNotice: string;
@@ -60,6 +72,13 @@ export interface FooterSettings {
   card2Desc: string;
   card3Title: string;
   card3Desc: string;
+  col1Title: string;
+  col1Links: FooterLinkItem[];
+  col2Title: string;
+  col2Links: FooterLinkItem[];
+  col3Title: string;
+  col3Links: FooterLinkItem[];
+  col4Title: string;
 }
 
 export interface FaqItem {
@@ -152,6 +171,16 @@ export const DEFAULT_SITE_SETTINGS = {
     badge3Sub: "WhatsApp & Phone Desk",
   } as HeroSettings,
 
+  NAVBAR_LINKS: [
+    { id: "nav-1", label: "Hunza", url: "/destinations/hunza" },
+    { id: "nav-2", label: "Skardu", url: "/destinations/skardu" },
+    { id: "nav-3", label: "Swat", url: "/destinations/swat" },
+    { id: "nav-4", label: "Kumrat", url: "/destinations/kumrat" },
+    { id: "nav-5", label: "Tours", url: "/search?type=TOUR" },
+    { id: "nav-6", label: "Hotels", url: "/search?type=HOTEL" },
+    { id: "nav-7", label: "Blog", url: "/blog" },
+  ] as NavLinkItem[],
+
   ANNOUNCEMENT: {
     isEnabled: true,
     text: "Autumn & Early Winter 2026 Season Booking Open across Skardu, Hunza & Swat!",
@@ -178,6 +207,33 @@ export const DEFAULT_SITE_SETTINGS = {
     card2Desc: "Zero hassle local Pakistani payments with instant PDF check-in voucher issuance.",
     card3Title: "24/7 Online Assistance",
     card3Desc: "Dedicated on-ground emergency and route coordinators active during your journeys.",
+    col1Title: "Popular Destinations",
+    col1Links: [
+      { id: "c1-1", label: "Hunza Valley & Attabad Lake", url: "/destinations/hunza" },
+      { id: "c1-2", label: "Skardu & Deosai Plains", url: "/destinations/skardu" },
+      { id: "c1-3", label: "Swat Valley & Kalam", url: "/destinations/swat" },
+      { id: "c1-4", label: "Kumrat Valley & Dir", url: "/destinations/kumrat" },
+      { id: "c1-5", label: "Murree & Bhurban Resorts", url: "/destinations/murree" },
+      { id: "c1-6", label: "Neelum Valley (Azad Kashmir)", url: "/destinations/neelum" },
+    ],
+    col2Title: "Experience Categories",
+    col2Links: [
+      { id: "c2-1", label: "Luxury Hotels & Resorts", url: "/search?type=HOTEL" },
+      { id: "c2-2", label: "Guided Northern Tours", url: "/search?type=TOUR" },
+      { id: "c2-3", label: "Hunza Valley Packages", url: "/destinations/hunza" },
+      { id: "c2-4", label: "Skardu Expeditions", url: "/destinations/skardu" },
+      { id: "c2-5", label: "Northern Travel Guides & Tips", url: "/blog" },
+    ],
+    col3Title: "Traveler Guarantees",
+    col3Links: [
+      { id: "c3-1", label: "How We Verify Partners", url: "/how-we-verify-partners" },
+      { id: "c3-2", label: "Direct Operator Rates Policy", url: "/faq" },
+      { id: "c3-3", label: "Flexible Cancellation Policy", url: "/terms" },
+      { id: "c3-4", label: "About PakistanTravel.Agency", url: "/about" },
+      { id: "c3-5", label: "Customer Care & WhatsApp", url: "/contact" },
+      { id: "c3-6", label: "Travel Blog & Insights", url: "/blog" },
+    ],
+    col4Title: "Direct Support",
   } as FooterSettings,
 
   FAQS: [

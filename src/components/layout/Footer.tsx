@@ -85,42 +85,54 @@ export function Footer() {
         {/* Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 text-sm">
           <div>
-            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-sky-400">Popular Destinations</p>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-sky-400">
+              {footer.col1Title || "Popular Destinations"}
+            </p>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li><Link href="/destinations/hunza" className="hover:text-white transition">Hunza Valley & Attabad Lake</Link></li>
-              <li><Link href="/destinations/skardu" className="hover:text-white transition">Skardu & Deosai Plains</Link></li>
-              <li><Link href="/destinations/swat" className="hover:text-white transition">Swat Valley & Kalam</Link></li>
-              <li><Link href="/destinations/kumrat" className="hover:text-white transition">Kumrat Valley & Dir</Link></li>
-              <li><Link href="/destinations/murree" className="hover:text-white transition">Murree & Bhurban Resorts</Link></li>
-              <li><Link href="/destinations/neelum" className="hover:text-white transition">Neelum Valley (Azad Kashmir)</Link></li>
+              {(footer.col1Links && footer.col1Links.length > 0 ? footer.col1Links : DEFAULT_SITE_SETTINGS.FOOTER.col1Links).map((link) => (
+                <li key={link.id || link.url}>
+                  <Link href={link.url} className="hover:text-white transition">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-orange-400">Experience Categories</p>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-orange-400">
+              {footer.col2Title || "Experience Categories"}
+            </p>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li><Link href="/search?type=HOTEL" className="hover:text-white transition">Luxury Hotels & Resorts</Link></li>
-              <li><Link href="/search?type=TOUR" className="hover:text-white transition">Guided Northern Tours</Link></li>
-              <li><Link href="/destinations/hunza" className="hover:text-white transition">Hunza Valley Packages</Link></li>
-              <li><Link href="/destinations/skardu" className="hover:text-white transition">Skardu Expeditions</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition">Northern Travel Guides & Tips</Link></li>
+              {(footer.col2Links && footer.col2Links.length > 0 ? footer.col2Links : DEFAULT_SITE_SETTINGS.FOOTER.col2Links).map((link) => (
+                <li key={link.id || link.url}>
+                  <Link href={link.url} className="hover:text-white transition">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-teal-400">Traveler Guarantees</p>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-teal-400">
+              {footer.col3Title || "Traveler Guarantees"}
+            </p>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li><Link href="/how-we-verify-partners" className="hover:text-white transition">How We Verify Partners</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition">Direct Operator Rates Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-white transition">Flexible Cancellation Policy</Link></li>
-              <li><Link href="/about" className="hover:text-white transition">About PakistanTravel.Agency</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition">Customer Care &amp; WhatsApp</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition">Travel Blog &amp; Insights</Link></li>
+              {(footer.col3Links && footer.col3Links.length > 0 ? footer.col3Links : DEFAULT_SITE_SETTINGS.FOOTER.col3Links).map((link) => (
+                <li key={link.id || link.url}>
+                  <Link href={link.url} className="hover:text-white transition">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">Direct Support</p>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">
+              {footer.col4Title || "Direct Support"}
+            </p>
             <div className="space-y-2.5 text-xs text-slate-400">
               <a
                 href={`https://wa.me/${general.whatsappNumber.replace(/[^0-9]/g, "")}?text=Hi%20PakistanTravel.Agency%20Support`}

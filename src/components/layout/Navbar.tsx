@@ -16,6 +16,7 @@ import {
   Phone
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { NavLinkItem, DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -23,13 +24,19 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [whatsapp, setWhatsapp] = useState("+92 322 2327096");
+  const [navLinks, setNavLinks] = useState<NavLinkItem[]>(DEFAULT_SITE_SETTINGS.NAVBAR_LINKS);
 
   useEffect(() => {
-    fetch("/api/settings?key=GENERAL")
+    fetch("/api/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.settings?.whatsappNumber) {
-          setWhatsapp(data.settings.whatsappNumber);
+        if (data.success && data.settings) {
+          if (data.settings.GENERAL?.whatsappNumber) {
+            setWhatsapp(data.settings.GENERAL.whatsappNumber);
+          }
+          if (data.settings.NAVBAR_LINKS && Array.isArray(data.settings.NAVBAR_LINKS) && data.settings.NAVBAR_LINKS.length > 0) {
+            setNavLinks(data.settings.NAVBAR_LINKS);
+          }
         }
       })
       .catch(() => {});
@@ -167,13 +174,15 @@ export function Navbar() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
-            <Link href="/destinations/hunza" className="hover:text-sky-600 transition">Hunza</Link>
-            <Link href="/destinations/skardu" className="hover:text-sky-600 transition">Skardu</Link>
-            <Link href="/destinations/swat" className="hover:text-sky-600 transition">Swat</Link>
-            <Link href="/destinations/kumrat" className="hover:text-sky-600 transition">Kumrat</Link>
-            <Link href="/search?type=TOUR" className="hover:text-sky-600 transition">Tours</Link>
-            <Link href="/search?type=HOTEL" className="hover:text-sky-600 transition">Hotels</Link>
-            <Link href="/blog" className="hover:text-sky-600 transition">Blog</Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.id || link.url}
+                href={link.url}
+                className="hover:text-sky-600 transition"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           {/* Right Action: Explore Catalog button */}
@@ -213,19 +222,19 @@ export function Navbar() {
             </Link>
 
             <div className="pt-2 pb-1 border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider px-3">
-              Destinations
+              Navigation
             </div>
             <div className="grid grid-cols-2 gap-2 px-1 text-xs">
-              <Link href="/destinations/hunza" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Hunza Valley</Link>
-              <Link href="/destinations/skardu" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Skardu</Link>
-              <Link href="/destinations/swat" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Swat Valley</Link>
-              <Link href="/destinations/kumrat" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Kumrat Valley</Link>
-            </div>
-
-            <div className="pt-2 flex flex-col gap-1 text-xs">
-              <Link href="/search?type=TOUR" onClick={() => setIsMenuOpen(false)} className="py-2 px-3 hover:bg-slate-50 rounded-lg text-slate-700 font-semibold">Guided Tours</Link>
-              <Link href="/search?type=HOTEL" onClick={() => setIsMenuOpen(false)} className="py-2 px-3 hover:bg-slate-50 rounded-lg text-slate-700 font-semibold">Hotels & Resorts</Link>
-              <Link href="/blog" onClick={() => setIsMenuOpen(false)} className="py-2 px-3 hover:bg-slate-50 rounded-lg text-slate-700 font-semibold">Travel Guides & Blog</Link>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.id || link.url}
+                  href={link.url}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium truncate"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
