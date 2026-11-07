@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpCircle, ArrowLeft } from "lucide-react";
+import { getSiteSettings, type FaqItem } from "@/services/siteSettings.service";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Pakistan Travel FAQs & Trip Guide | PakistanTravel.Agency",
@@ -16,33 +19,12 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Pakistan Travel FAQs & Trip Guide | PakistanTravel.Agency",
-    description: "Find answers to frequent questions about traveling to Hunza and Skardu, local payments, cancellation rules, and booking trips in northern Pakistan.",
+    description: "Find answers to frequent questions about traveling to northern Pakistan.",
   },
 };
 
-export default function FAQPage() {
-  const faqs = [
-    {
-      q: "What documents are required to travel to Hunza & Skardu?",
-      a: "All Pakistani citizens must carry their original CNIC. Overseas Pakistanis (NICOP) and international tourists should carry valid original passports and relevant visas. Security checkpoints at Babusar Top, Diamer, and Gilgit require verification.",
-    },
-    {
-      q: "How does payment work on PakistanTravel.Agency?",
-      a: "We support JazzCash, EasyPaisa, Pakistani Credit/Debit cards (Visa/MasterCard via Stripe), and Cash on Arrival. Instant electronic vouchers are generated as soon as your booking is placed.",
-    },
-    {
-      q: "Can I cancel my tour or hotel booking for free?",
-      a: "Yes! Every listing clearly specifies its free cancellation window (typically between 48 hours to 7 days before trip start date). If you cancel within the free window, you receive a full 100% refund.",
-    },
-    {
-      q: "Are the tour guides and 4x4 drivers certified?",
-      a: "Yes. All tours provided by partner operators on PakistanTravel.Agency are led by certified mountain drivers and alpine guides licensed by the Department of Tourist Services Pakistan.",
-    },
-    {
-      q: "Is electricity and heating available in Northern hotels during autumn/winter?",
-      a: "Yes. Verified partners on our platform maintain 24/7 power backup generators and room heating arrangements suited for Northern mountain temperatures.",
-    },
-  ];
+export default async function FAQPage() {
+  const faqs: FaqItem[] = await getSiteSettings("FAQS");
 
   const faqJsonLd = {
     "@context": "https://schema.org",

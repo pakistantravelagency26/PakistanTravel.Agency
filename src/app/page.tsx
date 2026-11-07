@@ -157,8 +157,12 @@ export default async function HomePage() {
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block group-hover:text-emerald-700">Licensed Local Operators</span>
-              <span className="text-[11px] text-slate-400">DTS & SECP Vetted · How we verify</span>
+              <span className="font-bold text-slate-900 block group-hover:text-emerald-700">
+                {hero?.badge1Title || "Licensed Local Operators"}
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {hero?.badge1Sub || "DTS & SECP Vetted · How we verify"}
+              </span>
             </div>
           </Link>
 
@@ -167,8 +171,12 @@ export default async function HomePage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">JazzCash & EasyPaisa</span>
-              <span className="text-[11px] text-slate-400">Plus Credit Cards & Bank Transfer</span>
+              <span className="font-bold text-slate-900 block">
+                {hero?.badge2Title || "JazzCash & EasyPaisa"}
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {hero?.badge2Sub || "Plus Credit Cards & Bank Transfer"}
+              </span>
             </div>
           </div>
 
@@ -177,15 +185,22 @@ export default async function HomePage() {
               <Headphones className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">24/7 Online Support</span>
-              <span className="text-[11px] text-slate-400">WhatsApp & Phone Desk</span>
+              <span className="font-bold text-slate-900 block">
+                {hero?.badge3Title || "24/7 Online Support"}
+              </span>
+              <span className="text-[11px] text-slate-400">
+                {hero?.badge3Sub || "WhatsApp & Phone Desk"}
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Multi-Vendor Marketplace Catalog: 4 items per row with Filter running on top */}
-      <TourMarketplaceSection initialListings={listings} />
+      {/* Main Multi-Vendor Marketplace Catalog */}
+      <TourMarketplaceSection 
+        initialListings={listings} 
+        customSettings={settings.MARKETPLACE_SECTION}
+      />
     </div>
   );
 }

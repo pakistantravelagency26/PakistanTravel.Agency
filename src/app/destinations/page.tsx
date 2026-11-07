@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, ArrowRight, Compass } from "lucide-react";
 import { destinationsData } from "@/data/destinationData";
+import { getSiteSettings, type PageDestinationsSettings } from "@/services/siteSettings.service";
 
 export const revalidate = 60;
 
@@ -18,8 +19,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DestinationsIndexPage() {
+export default async function DestinationsIndexPage() {
   const destinations = Object.values(destinationsData);
+  const settings: PageDestinationsSettings = await getSiteSettings("PAGE_DESTINATIONS");
 
   return (
     <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
@@ -27,13 +29,13 @@ export default function DestinationsIndexPage() {
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold">
             <Compass className="w-3.5 h-3.5 text-orange-500" />
-            <span>Discover Northern Pakistan</span>
+            <span>{settings.badgeText || "Discover Northern Pakistan"}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Top Travel Destinations in Pakistan
+            {settings.heading || "Top Travel Destinations in Pakistan"}
           </h1>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            Explore comprehensive destination guides, seasonal advice, approximate costs, and verified tours curated by local mountain experts.
+            {settings.subheading || "Explore comprehensive destination guides, seasonal advice, approximate costs, and verified tours curated by local mountain experts."}
           </p>
         </div>
 

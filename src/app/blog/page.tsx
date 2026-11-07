@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock, User, ArrowRight, Sparkles } from "lucide-react";
 import { blogPosts } from "@/data/blogData";
+import { getSiteSettings, type PageBlogSettings } from "@/services/siteSettings.service";
 
 export const revalidate = 60;
 
@@ -24,7 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogIndexPage() {
+export default async function BlogIndexPage() {
+  const settings: PageBlogSettings = await getSiteSettings("PAGE_BLOG");
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
 
   const blogJsonLd = {
@@ -59,13 +61,13 @@ export default function BlogIndexPage() {
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-50 text-sky-700 text-xs font-bold border border-sky-100">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>Northern Travel Insights &amp; Guides</span>
+            <span>{settings.badgeText || "Northern Travel Insights & Guides"}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Pakistan Travel Blog &amp; Expeditions
+            {settings.heading || "Pakistan Travel Blog & Expeditions"}
           </h1>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            Essential trip planning advice, real seasonal costs, route conditions, and gear checklists curated by certified mountain guides.
+            {settings.subheading || "Essential trip planning advice, real seasonal costs, route conditions, and gear checklists curated by certified mountain guides."}
           </p>
         </div>
 

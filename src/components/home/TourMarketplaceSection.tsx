@@ -16,12 +16,14 @@ import {
   Sparkles
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
+import type { MarketplaceSectionSettings } from "@/services/siteSettings.service";
 
 interface Props {
   initialListings: ListingData[];
+  customSettings?: MarketplaceSectionSettings;
 }
 
-export function TourMarketplaceSection({ initialListings }: Props) {
+export function TourMarketplaceSection({ initialListings, customSettings }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -97,13 +99,13 @@ export function TourMarketplaceSection({ initialListings }: Props) {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>Multi-Vendor Tourism Marketplace</span>
+            <span>{customSettings?.badgeText || "Multi-Vendor Tourism Marketplace"}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Explore Northern Tours & Luxury Stays
+            {customSettings?.title || "Explore Northern Tours & Luxury Stays"}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Compare tour packages and mountain resorts from verified local operators across Pakistan
+            {customSettings?.subtitle || "Compare tour packages and mountain resorts from verified local operators across Pakistan"}
           </p>
         </div>
 
@@ -166,9 +168,11 @@ export function TourMarketplaceSection({ initialListings }: Props) {
             <Compass className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">Marketplace Ready for Listings</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              {customSettings?.emptyStateTitle || "Marketplace Ready for Listings"}
+            </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Vendors and partners can log in to the Partner Hub to publish verified tours, hotels, and expeditions.
+              {customSettings?.emptyStateDesc || "Vendors and partners can log in to the Partner Hub to publish verified tours, hotels, and expeditions."}
             </p>
           </div>
           <Link

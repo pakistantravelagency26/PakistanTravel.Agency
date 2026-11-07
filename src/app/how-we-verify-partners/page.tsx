@@ -11,6 +11,9 @@ import {
   Building2,
   Compass
 } from "lucide-react";
+import { getSiteSettings, type PageVerificationSettings } from "@/services/siteSettings.service";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "How We Verify Travel Partners | Pakistan Travel Agency",
@@ -25,39 +28,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HowWeVerifyPartnersPage() {
-  const steps = [
-    {
-      step: "01",
-      icon: FileCheck2,
-      title: "Government Registration & DTS Licensing",
-      desc: "Every operator must provide valid registration with the Department of Tourist Services (DTS) Pakistan or SECP corporate registration. We verify business NTNs and licensing credentials before onboarding."
-    },
-    {
-      step: "02",
-      icon: Building2,
-      title: "Established Regional Operating Base",
-      desc: "Partners must operate an established physical office or recognized hospitality base in northern hubs (Gilgit, Skardu, Karimabad, Swat, or Islamabad), ensuring local accountability."
-    },
-    {
-      step: "03",
-      icon: Car,
-      title: "Vehicle Roadworthiness & Driver Safety",
-      desc: "For guided expeditions and 4x4 mountain tracks, vehicles must pass annual mechanical fitness checks, and drivers must possess certified hill-driving experience across the Karakoram and Hindu Kush ranges."
-    },
-    {
-      step: "04",
-      icon: CreditCard,
-      title: "Escrow Deposit & Transparent Payouts",
-      desc: "Customer deposits are held securely through our platform. Operator payouts are released on an agreed schedule, ensuring travelers receive promised services or timely refunds if issues arise."
-    },
-    {
-      step: "05",
-      icon: Star,
-      title: "Continuous Review & Performance Auditing",
-      desc: "We strictly gate reviews to travelers with completed bookings. Operators that fail to maintain minimum customer satisfaction standards or violate safety protocols are removed from the marketplace."
-    }
-  ];
+export default async function HowWeVerifyPartnersPage() {
+  const verification: PageVerificationSettings = await getSiteSettings("PAGE_VERIFICATION");
+  const stepIcons = [FileCheck2, Building2, Car, CreditCard, Star, ShieldCheck];
 
   return (
     <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8 text-slate-800">
@@ -70,17 +43,17 @@ export default function HowWeVerifyPartnersPage() {
             Quality &amp; Trust Standards
           </span>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mt-1">
-            How We Verify Travel Partners
+            {verification.heading}
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mt-2 leading-relaxed">
-            Our multi-step verification process ensures that every tour operator and mountain hotel listed on PakistanTravel.Agency holds authentic licensing, regional experience, and customer safety compliance.
+            {verification.subheading}
           </p>
         </div>
 
-        {/* 5-Step Process Cards */}
+        {/* Dynamic Verification Process Cards */}
         <div className="space-y-6">
-          {steps.map((s) => {
-            const Icon = s.icon;
+          {verification.steps.map((s, idx) => {
+            const Icon = stepIcons[idx % stepIcons.length] || ShieldCheck;
             return (
               <div key={s.step} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start gap-5">
                 <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">

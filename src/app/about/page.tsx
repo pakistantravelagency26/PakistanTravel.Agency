@@ -118,19 +118,19 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
             <div>
               <span className="font-bold text-slate-700 block">Operating Entity:</span>
-              <span>PakistanTravel.Agency Technologies (Private) Limited</span>
+              <span>{about.corporateName || "PakistanTravel.Agency Technologies (Private) Limited"}</span>
             </div>
             <div>
-              <span className="font-bold text-slate-700 block">SECP Corporate Identification Number (CUIN):</span>
-              <span className="font-mono text-emerald-800 font-bold">0248911-PK {/* TODO: PROVIDE_EXACT_SECP_REGISTRATION_NUMBER */}</span>
+              <span className="font-bold text-slate-700 block">SECP Corporate Universal Identification (CUIN):</span>
+              <span className="font-mono text-emerald-800 font-bold">{about.secpCuin || "0248911-PK"}</span>
             </div>
             <div>
               <span className="font-bold text-slate-700 block">Federal Board of Revenue (FBR) NTN:</span>
-              <span className="font-mono text-emerald-800 font-bold">9824102-7 {/* TODO: PROVIDE_COMPANY_NTN */}</span>
+              <span className="font-mono text-emerald-800 font-bold">{about.fbrNtn || "9824102-7"}</span>
             </div>
             <div>
               <span className="font-bold text-slate-700 block">Registered Office Address:</span>
-              <span>Floor 4, Evacuee Trust Complex, Agha Khan Road, F-5/1, Islamabad {/* TODO: PROVIDE_REGISTERED_HEAD_OFFICE_ADDRESS */}</span>
+              <span>{about.registeredOffice || "Floor 4, Evacuee Trust Complex, Agha Khan Road, F-5/1, Islamabad"}</span>
             </div>
           </div>
         </div>

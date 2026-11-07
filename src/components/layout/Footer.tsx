@@ -49,9 +49,9 @@ export function Footer() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Vetted Northern Partners</p>
+              <p className="font-bold text-white text-sm">{footer.card1Title || "Vetted Northern Partners"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                Operators are verified against DTS licenses and SECP registration records.{" "}
+                {footer.card1Desc || "Operators are verified against DTS licenses and SECP registration records."}{" "}
                 <Link href="/how-we-verify-partners" className="text-sky-400 hover:underline">Learn how</Link>
               </p>
             </div>
@@ -62,9 +62,9 @@ export function Footer() {
               <CreditCard className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">JazzCash, EasyPaisa & Cards</p>
+              <p className="font-bold text-white text-sm">{footer.card2Title || "JazzCash, EasyPaisa & Cards"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                Zero hassle local Pakistani payments with instant PDF check-in voucher issuance.
+                {footer.card2Desc || "Zero hassle local Pakistani payments with instant PDF check-in voucher issuance."}
               </p>
             </div>
           </div>
@@ -74,9 +74,9 @@ export function Footer() {
               <Headphones className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">24/7 Online Assistance</p>
+              <p className="font-bold text-white text-sm">{footer.card3Title || "24/7 Online Assistance"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                Dedicated on-ground emergency and route coordinators active during your journeys.
+                {footer.card3Desc || "Dedicated on-ground emergency and route coordinators active during your journeys."}
               </p>
             </div>
           </div>
