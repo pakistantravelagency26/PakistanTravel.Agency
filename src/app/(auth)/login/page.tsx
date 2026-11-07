@@ -14,9 +14,16 @@ function CustomerLoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const errorParam = searchParams.get("error");
 
+  let initialError = "";
+  if (errorParam === "OAuthSignin" || errorParam === "OAuthCallback" || errorParam === "Configuration") {
+    initialError = "Google / Facebook Sign-In requires valid API credentials in Vercel. Please configure GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET or sign in with your Email / Mobile below.";
+  } else if (errorParam) {
+    initialError = "Access denied or session expired. Please sign in again.";
+  }
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(errorParam ? "Access denied or session expired" : "");
+  const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
   const [socialNotice, setSocialNotice] = useState<string | null>(null);
 
@@ -49,11 +56,14 @@ function CustomerLoginForm() {
 
   function handleSocialClick(provider: string) {
     setError("");
+    setSocialNotice(null);
     if (provider === "Google") {
       signIn("google", { callbackUrl });
+    } else if (provider === "Facebook") {
+      signIn("facebook", { callbackUrl });
     } else {
       setSocialNotice(
-        `${provider} Single Sign-On requires official Meta OAuth App credentials. For now, please sign in using your registered Email, Mobile number, or Username below.`
+        `${provider} Single Sign-On requires official API credentials. Please sign in using your registered Email, Mobile number, or Username below.`
       );
     }
   }

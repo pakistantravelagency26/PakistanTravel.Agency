@@ -1,6 +1,8 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
+import { prisma } from "@/lib/prisma";
 import { findUserByIdentifier } from "@/services/user.service";
 import { verifyPassword } from "@/lib/password";
 
@@ -17,6 +19,12 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "dummy-client-id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy-client-secret",
+      allowDangerousEmailAccountLinking: true,
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID || "dummy-fb-id",
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "dummy-fb-secret",
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -94,6 +102,44 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" || account?.provider === "facebook") {
+        if (!user.email) {
+          return false;
+        }
+        try {
+          // Check if user already exists in Neon database
+          let dbUser = await prisma.user.findUnique({
+            where: { email: user.email.toLowerCase().trim() },
+          });
+
+          if (!dbUser) {
+            // Auto-create customer account in Neon DB
+            dbUser = await prisma.user.create({
+              data: {
+                email: user.email.toLowerCase().trim(),
+                name: user.name || user.email.split("@")[0],
+                role: "CUSTOMER",
+                passwordHash: null,
+                phone: null,
+              },
+            });
+          }
+
+          user.id = dbUser.id;
+          (user as any).role = dbUser.role;
+          (user as any).staffRole = dbUser.staffRole || "CUSTOMER";
+          (user as any).permissions = (dbUser as any).permissions || "NONE";
+          (user as any).vendorId = (dbUser as any).vendorId || null;
+          (user as any).phone = dbUser.phone || null;
+          return true;
+        } catch (err) {
+          console.error("OAuth signIn error:", err);
+          return true;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
