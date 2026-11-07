@@ -9,6 +9,7 @@ export interface LocalUser {
   username?: string;
   passwordHash: string;
   role: "CUSTOMER" | "VENDOR" | "ADMIN";
+  staffRole?: string | null;
   vendorId?: string | null;
   businessName?: string;
 }
@@ -21,15 +22,6 @@ export const USERS_STORE: LocalUser[] = [
     name: "Emraan Irshad",
     email: "emraanirshad88@gmail.com",
     username: "emraanirshad88",
-    phone: "03000000001",
-    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS", // Emra@91173259
-    role: "ADMIN",
-  },
-  {
-    id: "user-admin-1",
-    name: "Super Admin Pakistan",
-    email: "admin@pakistantravel.agency",
-    username: "admin",
     phone: "03000000001",
     passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS", // Emra@91173259
     role: "ADMIN",
@@ -71,6 +63,7 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
         phone: dbUser.phone || "",
         passwordHash: dbUser.passwordHash || "",
         role: dbUser.role as any,
+        staffRole: (dbUser as any).staffRole || "SUPER_ADMIN",
         vendorId: dbUser.vendorProfile?.id || null,
         businessName: dbUser.vendorProfile?.businessName || undefined,
       };

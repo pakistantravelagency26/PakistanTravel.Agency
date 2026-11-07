@@ -85,6 +85,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           image: null,
           role: user.role,
+          staffRole: user.staffRole || "SUPER_ADMIN",
           vendorId: user.vendorId || null,
           phone: user.phone,
         };
@@ -96,6 +97,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.staffRole = user.staffRole;
         token.vendorId = user.vendorId;
         token.phone = user.phone;
       }
@@ -103,6 +105,7 @@ export const authOptions: NextAuthOptions = {
       if (trigger === "update" && session) {
         token.name = session.name || token.name;
         token.role = session.role || token.role;
+        token.staffRole = session.staffRole ?? token.staffRole;
         token.vendorId = session.vendorId ?? token.vendorId;
       }
 
@@ -112,6 +115,7 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as "CUSTOMER" | "VENDOR" | "ADMIN";
+        session.user.staffRole = (token.staffRole as string) || "SUPER_ADMIN";
         session.user.vendorId = token.vendorId as string | null;
         session.user.phone = token.phone as string | null;
       }
