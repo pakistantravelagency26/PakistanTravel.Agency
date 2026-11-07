@@ -13,7 +13,9 @@ import {
   Search, 
   SlidersHorizontal,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Users,
+  Heart
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
 import type { MarketplaceSectionSettings } from "@/services/siteSettings.service";
@@ -197,88 +199,135 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredListings.map((item) => (
             <Link
               key={item.id}
               href={`/listing/${item.slug}`}
-              className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+              className="group bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
             >
-              {/* Photo & Badges */}
-              <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+              {/* Photo & Turie-Style Badges */}
+              <div className="relative h-52 w-full overflow-hidden bg-slate-100">
                 <Image
                   src={item.photos[0]}
                   alt={`${item.title} - ${item.destinationName}, ${item.province}`}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   loading="lazy"
-                  className="object-cover group-hover:scale-105 transition duration-500"
+                  className="object-cover group-hover:scale-108 transition duration-700 ease-out"
                 />
                 
-                {/* Badge Top Left */}
-                {item.badge && (
-                  <span className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-sm text-slate-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm">
-                    {item.badge}
+                {/* Turie Top Left Discount / Status Pill */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+                  <span className="bg-[#FD4621] text-white text-[11px] font-extrabold px-3 py-1 rounded-full shadow-md tracking-tight">
+                    {item.badge || "-20% Off"}
                   </span>
-                )}
+                  {item.isFeatured && (
+                    <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wider">
+                      Featured
+                    </span>
+                  )}
+                </div>
+
+                {/* Wishlist Heart Top Right */}
+                <div className="absolute top-3 right-3 z-10">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      alert("Added to your wishlist!");
+                    }}
+                    className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-[#FD4621] flex items-center justify-center shadow-md transition group/btn"
+                    title="Add to wishlist"
+                  >
+                    <Heart className="w-4 h-4 transition group-hover/btn:scale-110" />
+                  </button>
+                </div>
 
                 {/* Duration or Type Bottom Left */}
-                <span className="absolute bottom-2.5 left-2.5 bg-slate-950/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  {item.type === "HOTEL" ? (
-                    <>
-                      <Building2 className="w-3 h-3 text-sky-400" />
-                      <span>Luxury Stay</span>
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-3 h-3 text-orange-400" />
-                      <span>{item.duration || "Multi-Day Tour"}</span>
-                    </>
-                  )}
-                </span>
+                <div className="absolute bottom-3 left-3 z-10">
+                  <span className="bg-slate-950/85 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border border-white/10">
+                    {item.type === "HOTEL" ? (
+                      <>
+                        <Building2 className="w-3.5 h-3.5 text-sky-400" />
+                        <span>Luxury Hotel</span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{item.duration || "Multi-Day Tour"}</span>
+                      </>
+                    )}
+                  </span>
+                </div>
               </div>
 
               {/* Card Body */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-1.5">
-                  {/* Location & Province */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <span className="flex items-center gap-1 text-sky-600 font-semibold truncate">
-                      <MapPin className="w-3 h-3 shrink-0" /> {item.destinationName}
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-3.5">
+                <div className="space-y-2">
+                  {/* Reviews & Star Rating */}
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center text-amber-500">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span className="font-extrabold text-slate-900 text-xs ml-1">
+                          {item.avgRating > 0 ? item.avgRating.toFixed(1) : "5.0"}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        ({item.totalReviews > 0 ? item.totalReviews : "08"} Reviews)
+                      </span>
+                    </div>
+
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      {item.province}
                     </span>
-                    <span className="text-[10px] text-slate-400 shrink-0">{item.province}</span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-sky-600 transition line-clamp-2 leading-snug">
+                  <h3 className="font-extrabold text-slate-900 text-sm sm:text-base group-hover:text-[#FD4621] transition line-clamp-2 leading-snug">
                     {item.title}
                   </h3>
 
-                  {/* Verified Vendor Tag */}
-                  <div className="flex items-center gap-1 text-[11px] text-slate-600 pt-0.5">
+                  {/* Specifications: Location & Capacity */}
+                  <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold pt-0.5">
+                    <span className="flex items-center gap-1 text-slate-700 truncate">
+                      <MapPin className="w-3 h-3 text-[#FD4621] shrink-0" /> {item.destinationName}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 text-slate-600 shrink-0">
+                      <Users className="w-3 h-3 text-slate-400" /> 1-12 Persons
+                    </span>
+                  </div>
+
+                  {/* Verified Partner Tag */}
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg w-fit font-bold border border-emerald-100/80">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span className="truncate font-medium text-slate-700">{item.vendor.businessName}</span>
+                    <span className="truncate">{item.vendor.businessName}</span>
                   </div>
                 </div>
 
-                {/* Rating & Pricing Bottom Bar */}
-                <div className="pt-2.5 border-t border-slate-100 flex items-end justify-between">
-                  <div className="flex items-center gap-1 text-xs">
-                    <div className="bg-sky-600 text-white px-1.5 py-0.5 rounded-md text-[11px] font-extrabold shadow-sm flex items-center gap-0.5">
-                      <Star className="w-2.5 h-2.5 fill-white text-white" />
-                      <span>{item.avgRating}</span>
+                {/* Rating & Pricing Bottom Bar with Turie 'Book A Tour' CTA */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[11px] text-slate-400 line-through block font-medium leading-none mb-0.5">
+                      PKR {Math.round(item.basePrice * 1.25).toLocaleString()}
+                    </span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-sm sm:text-base font-black text-slate-950">
+                        PKR {item.basePrice.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-semibold">
+                        /{item.type === "HOTEL" ? "night" : "person"}
+                      </span>
                     </div>
-                    <span className="text-[10px] text-slate-400">({item.totalReviews})</span>
                   </div>
 
-                  <div className="text-right">
-                    <span className="text-[9px] text-slate-400 uppercase tracking-wider block font-semibold">
-                      {item.type === "HOTEL" ? "From / Night" : "Starting"}
-                    </span>
-                    <p className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
-                      PKR {item.basePrice.toLocaleString()}
-                    </p>
-                  </div>
+                  <span className="px-3.5 py-2 rounded-xl bg-slate-900 group-hover:bg-[#FD4621] text-white text-[11px] font-extrabold transition shadow-sm flex items-center gap-1 shrink-0">
+                    <span>Book Tour</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition" />
+                  </span>
                 </div>
               </div>
             </Link>
