@@ -13,11 +13,15 @@ import {
 } from "lucide-react";
 import { getActiveDbListings } from "@/services/serverListing.service";
 import { TourMarketplaceSection } from "@/components/home/TourMarketplaceSection";
+import { getSiteSettings } from "@/services/siteSettings.service";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
   const listings = await getActiveDbListings();
+  const settings = await getSiteSettings();
+  const hero = settings.HERO;
+  const announcement = settings.ANNOUNCEMENT;
 
   // Filter dropdown destinations and experience types strictly by real available listings
   const activeDestinationSlugs = new Set(listings.map((l) => l.destinationSlug));
@@ -40,20 +44,35 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-12 pb-20 bg-slate-50/50">
-      {/* Light & Modern Hero Banner (Musandam Tours style) */}
+      {/* Dynamic Top Announcement Banner */}
+      {announcement?.isEnabled && announcement?.text && (
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-700 text-white text-xs py-2.5 px-4 text-center font-semibold shadow-sm flex items-center justify-center gap-2">
+          <span>{announcement.text}</span>
+          {announcement.linkUrl && (
+            <Link
+              href={announcement.linkUrl}
+              className="underline font-bold hover:text-white/80 transition ml-1"
+            >
+              {announcement.linkText || "Learn More →"}
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Light & Modern Hero Banner */}
       <section className="relative pt-12 pb-20 md:pb-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-sky-50/80 via-white to-slate-50">
         <div className="max-w-6xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-sky-800 text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>Pakistan&apos;s Verified Multi-Vendor Travel Network</span>
+            <span>{hero?.badgeText || "Pakistan's Verified Multi-Vendor Travel Network"}</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">
-            Discover Pakistan&apos;s Majestic <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-teal-600">Mountains & Valleys</span>
+            {hero?.title || "Discover Pakistan's Majestic Mountains & Valleys"}
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Discover Pakistan&apos;s breathtaking destinations, explore tours from local operators, and book your perfect adventure—all in one place.
+            {hero?.subtitle || "Discover Pakistan's breathtaking destinations, explore tours from local operators, and book your perfect adventure—all in one place."}
           </p>
         </div>
 

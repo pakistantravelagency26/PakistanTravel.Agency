@@ -21,7 +21,8 @@ import {
   X,
   Loader2,
   CheckSquare,
-  Square
+  Square,
+  Globe
 } from "lucide-react";
 
 interface PermissionOption {
@@ -81,6 +82,14 @@ const PERMISSION_OPTIONS: PermissionOption[] = [
     description: "Issue discount promo voucher codes, set minimum spends and validity dates.",
     badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
     icon: Tag,
+  },
+  {
+    key: "WEBSITE",
+    label: "Website Content & CMS",
+    department: "CMS Editor",
+    description: "Edit website announcements, hero banner text, contact info, and legal policy pages.",
+    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+    icon: Globe,
   },
   {
     key: "TEAM",

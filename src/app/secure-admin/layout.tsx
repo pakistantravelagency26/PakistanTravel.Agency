@@ -14,6 +14,7 @@ import {
   ArrowDownToLine, 
   MapPin, 
   Tag, 
+  Globe,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -80,6 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/secure-admin/vendors", label: "Partner Hub (Vendors)", icon: Users, perm: "VENDORS" },
     { href: "/secure-admin/destinations", label: "Destinations & Valleys", icon: MapPin, perm: "DESTINATIONS" },
     { href: "/secure-admin/coupons", label: "Coupons & Promos", icon: Tag, perm: "COUPONS" },
+    { href: "/secure-admin/website", label: "Website CMS & Content", icon: Globe, perm: "WEBSITE" },
     { href: "/secure-admin/team", label: "Team & Staff Access", icon: ShieldCheck, perm: "TEAM" },
   ];
 

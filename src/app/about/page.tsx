@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Compass, ShieldCheck, Heart, Award, Users } from "lucide-react";
+import { Compass, ShieldCheck, Heart, Award, Users, Target, Eye, BookOpen } from "lucide-react";
+import { getSiteSettings } from "@/services/siteSettings.service";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "About Us | Verified Pakistan Travel Agency & Tours",
@@ -15,7 +18,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const settings = await getSiteSettings();
+  const about = settings.PAGE_ABOUT;
+  const general = settings.GENERAL;
+
   return (
     <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-12">
@@ -23,11 +30,47 @@ export default function AboutPage() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 text-sky-700 text-xs font-bold border border-sky-100">
             <Compass className="w-4 h-4" /> Built for Pakistan Tourism
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Connecting the World to Pakistan&apos;s Wonder
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+            {about.heading}
           </h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            PakistanTravel.Agency is the trusted multi-vendor travel marketplace dedicated to making the Northern Areas, historic cities, and scenic coastal highways accessible, reliable, and effortless to book.
+            {about.subheading}
+          </p>
+        </div>
+
+        {/* Mission & Vision Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <Target className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-slate-900 text-lg">Our Mission</h2>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              {about.mission}
+            </p>
+          </div>
+
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+              <Eye className="w-5 h-5" />
+            </div>
+            <h2 className="font-bold text-slate-900 text-lg">Our Vision</h2>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              {about.vision}
+            </p>
+          </div>
+        </div>
+
+        {/* Our Story */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
+              <BookOpen className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Our Origin Story</h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {about.story}
           </p>
         </div>
 

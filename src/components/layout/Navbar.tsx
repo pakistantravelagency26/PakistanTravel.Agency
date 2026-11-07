@@ -15,13 +15,25 @@ import {
   MessageCircle,
   Phone
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [whatsapp, setWhatsapp] = useState("+92 322 2327096");
+
+  useEffect(() => {
+    fetch("/api/settings?key=GENERAL")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.settings?.whatsappNumber) {
+          setWhatsapp(data.settings.whatsappNumber);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Completely hide the public website header on all Admin and Vendor portal routes
   if (
@@ -50,13 +62,13 @@ export function Navbar() {
             </span>
             <span className="text-slate-300 hidden md:inline">|</span>
             <a
-              href="https://wa.me/923222327096?text=Hi%20PakistanTravel.Agency%20Support"
+              href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}?text=Hi%20PakistanTravel.Agency%20Support`}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold transition"
             >
               <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-              <span>WhatsApp: +92 322 2327096</span>
+              <span>WhatsApp: {whatsapp}</span>
             </a>
           </div>
 

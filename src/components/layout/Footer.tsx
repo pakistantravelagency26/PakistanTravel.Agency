@@ -1,11 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass, ShieldCheck, CreditCard, Mail, Headphones, Phone } from "lucide-react";
+import { DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
 
 export function Footer() {
   const pathname = usePathname();
+  const [settings, setSettings] = useState(DEFAULT_SITE_SETTINGS);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.settings) {
+          setSettings((prev) => ({
+            ...prev,
+            ...data.settings,
+          }));
+        }
+      })
+      .catch((err) => console.warn("Failed to load footer settings:", err));
+  }, []);
 
   // Completely hide the public website footer on all Admin and Vendor portal routes
   if (
@@ -18,6 +35,9 @@ export function Footer() {
   ) {
     return null;
   }
+
+  const general = settings.GENERAL;
+  const footer = settings.FOOTER;
 
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
@@ -103,20 +123,20 @@ export function Footer() {
             <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">Direct Support</p>
             <div className="space-y-2.5 text-xs text-slate-400">
               <a
-                href="https://wa.me/923222327096?text=Hi%20PakistanTravel.Agency%20Support"
+                href={`https://wa.me/${general.whatsappNumber.replace(/[^0-9]/g, "")}?text=Hi%20PakistanTravel.Agency%20Support`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 hover:text-white transition text-emerald-400 font-bold"
               >
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+92 322 2327096 (WhatsApp / Call)</span>
+                <span>{general.whatsappNumber} (WhatsApp / Helpline)</span>
               </a>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>pakistantravel.agency26@gmail.com</span>
+                <span>{general.supportEmail}</span>
               </p>
               <p className="pt-1 text-[11px] text-slate-500">
-                Floor 4, Evacuee Trust Complex, Blue Area, Islamabad, Pakistan
+                {general.address}
               </p>
               <p className="pt-1">
                 <Link href="/how-we-verify-partners" className="text-sky-400 hover:text-white transition text-xs font-semibold">
@@ -129,7 +149,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} PakistanTravel.Agency. Designed with pride for Pakistan Tourism.</p>
+          <p>{footer.copyrightNotice}</p>
           <div className="flex flex-wrap items-center gap-5 font-medium">
             <Link href="/about" className="hover:text-white transition">About Us</Link>
             <Link href="/blog" className="hover:text-white transition">Blog</Link>
