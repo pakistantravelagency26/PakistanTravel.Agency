@@ -26,10 +26,6 @@ export const metadata: Metadata = {
   publisher: "PakistanTravel.Agency",
   alternates: {
     canonical: siteUrl,
-    languages: {
-      "en-PK": siteUrl,
-      "ur-PK": `${siteUrl}/ur`,
-    },
   },
   openGraph: {
     type: "website",

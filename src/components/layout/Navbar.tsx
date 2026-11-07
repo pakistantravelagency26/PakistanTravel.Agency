@@ -60,14 +60,10 @@ export function Navbar() {
             </a>
           </div>
 
-          {/* Right items: Currency, Language & Customer Sign In / Up */}
+          {/* Right items: Currency & Customer Sign In / Up */}
           <div className="flex items-center gap-3">
             <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
             <span className="text-slate-300 hidden sm:inline">|</span>
-            <span className="text-slate-800 font-bold">English</span>
-            <span className="text-slate-300">/</span>
-            <Link href="/ur" className="text-slate-600 hover:text-sky-600 font-medium">اردو</Link>
-            <span className="text-slate-300">|</span>
 
             {isCustomerLoggedIn ? (
               <div className="relative">

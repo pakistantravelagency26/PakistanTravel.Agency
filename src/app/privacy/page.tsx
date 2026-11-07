@@ -7,10 +7,6 @@ export const metadata: Metadata = {
   description: "Learn how PakistanTravel.Agency collects, encrypts, and protects your personal information and transaction details when booking tours in Pakistan.",
   alternates: {
     canonical: "/privacy",
-    languages: {
-      "en-PK": "/privacy",
-      "ur-PK": "/ur/privacy",
-    },
   },
 };
 

@@ -7,10 +7,6 @@ export const metadata: Metadata = {
   description: "Read the terms of service, payment policies, cancellation guidelines, and traveler guarantees for booking trips with PakistanTravel.Agency.",
   alternates: {
     canonical: "/terms",
-    languages: {
-      "en-PK": "/terms",
-      "ur-PK": "/ur/terms",
-    },
   },
 };
 

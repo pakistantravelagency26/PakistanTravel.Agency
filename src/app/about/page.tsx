@@ -7,10 +7,6 @@ export const metadata: Metadata = {
   description: "Learn about PakistanTravel.Agency, our mission to support local northern tour operators, verified mountain stays, and seamless tourism bookings.",
   alternates: {
     canonical: "/about",
-    languages: {
-      "en-PK": "/about",
-      "ur-PK": "/ur/about",
-    },
   },
   openGraph: {
     title: "About Us | Verified Pakistan Travel Agency & Tours",

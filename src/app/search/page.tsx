@@ -20,10 +20,6 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
     description: "Search and compare verified travel packages, guided tours in Hunza, Skardu, Swat, and Kumrat, luxury mountain hotels, and 4x4 rentals across Pakistan.",
     alternates: {
       canonical: `${siteUrl}/search`,
-      languages: {
-        "en-PK": `${siteUrl}/search`,
-        "ur-PK": `${siteUrl}/ur/search`,
-      },
     },
     robots: {
       index: !isFiltered,

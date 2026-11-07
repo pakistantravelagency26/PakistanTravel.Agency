@@ -67,10 +67,6 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
     description,
     alternates: {
       canonical: canonicalUrl,
-      languages: {
-        "en-PK": canonicalUrl,
-        "ur-PK": `${siteUrl}/ur/listing/${listing.slug}`,
-      },
     },
     openGraph: {
       type: "website",

@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   description: "Contact PakistanTravel.Agency customer support for tour inquiries, hotel reservations, road condition updates, and custom northern packages.",
   alternates: {
     canonical: "/contact",
-    languages: {
-      "en-PK": "/contact",
-      "ur-PK": "/ur/contact",
-    },
   },
   openGraph: {
     title: "Contact Us | Pakistan Travel Agency Support Desk",

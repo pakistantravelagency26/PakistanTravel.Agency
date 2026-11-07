@@ -35,10 +35,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     description: post.metaDescription,
     alternates: {
       canonical: canonicalUrl,
-      languages: {
-        "en-PK": canonicalUrl,
-        "ur-PK": `${siteUrl}/ur/blog/${post.slug}`,
-      },
     },
     openGraph: {
       type: "article",

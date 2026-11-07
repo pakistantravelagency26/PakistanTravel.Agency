@@ -11,10 +11,6 @@ export const metadata: Metadata = {
   description: "Read expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat in northern Pakistan.",
   alternates: {
     canonical: "/blog",
-    languages: {
-      "en-PK": "/blog",
-      "ur-PK": "/ur/blog",
-    },
   },
   openGraph: {
     title: "Pakistan Travel Blog & Guides | Pakistan Travel Agency",

@@ -50,10 +50,6 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
     description: dest.seoDescription,
     alternates: {
       canonical: canonicalUrl,
-      languages: {
-        "en-PK": canonicalUrl,
-        "ur-PK": `${siteUrl}/ur/destinations/${dest.slug}`,
-      },
     },
     openGraph: {
       type: "website",

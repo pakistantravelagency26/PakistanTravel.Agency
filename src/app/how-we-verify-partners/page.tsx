@@ -17,10 +17,6 @@ export const metadata: Metadata = {
   description: "Learn how PakistanTravel.Agency verifies northern tour operators and hotels through DTS licensing, vehicle checks, and quality compliance standards.",
   alternates: {
     canonical: "/how-we-verify-partners",
-    languages: {
-      "en-PK": "/how-we-verify-partners",
-      "ur-PK": "/ur/how-we-verify-partners",
-    },
   },
   openGraph: {
     title: "How We Verify Travel Partners | Pakistan Travel Agency",

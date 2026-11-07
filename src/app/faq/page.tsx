@@ -7,10 +7,6 @@ export const metadata: Metadata = {
   description: "Find answers to frequent questions about traveling to Hunza and Skardu, local payments, cancellation rules, and booking trips in northern Pakistan.",
   alternates: {
     canonical: "/faq",
-    languages: {
-      "en-PK": "/faq",
-      "ur-PK": "/ur/faq",
-    },
   },
   openGraph: {
     title: "Pakistan Travel FAQs & Trip Guide | PakistanTravel.Agency",
