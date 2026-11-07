@@ -11,7 +11,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  Heart
+  Heart,
+  MessageCircle,
+  Phone
 } from "lucide-react";
 import { useState } from "react";
 
@@ -46,13 +48,25 @@ export function Navbar() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Pakistan&apos;s Verified Tourism Marketplace
             </span>
+            <span className="text-slate-300 hidden md:inline">|</span>
+            <a
+              href="https://wa.me/923222327096?text=Hi%20PakistanTravel.Agency%20Support"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold transition"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+              <span>WhatsApp: +92 322 2327096</span>
+            </a>
           </div>
 
           {/* Right items: Currency, Language & Customer Sign In / Up */}
           <div className="flex items-center gap-3">
             <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
             <span className="text-slate-300 hidden sm:inline">|</span>
-            <span className="text-slate-600">English</span>
+            <span className="text-slate-800 font-bold">English</span>
+            <span className="text-slate-300">/</span>
+            <Link href="/ur" className="text-slate-600 hover:text-sky-600 font-medium">اردو</Link>
             <span className="text-slate-300">|</span>
 
             {isCustomerLoggedIn ? (
@@ -126,7 +140,7 @@ export function Navbar() {
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
+          {/* Logo - Anchor text is brand name only */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-md shadow-sky-600/15 group-hover:scale-105 transition shrink-0">
               <Image
@@ -138,15 +152,21 @@ export function Navbar() {
                 priority
               />
             </div>
-            <div>
-              <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
-                Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
-              </span>
-              <p className="text-[11px] text-slate-500 font-medium hidden lg:block max-w-md line-clamp-1">
-                Discover Pakistan&apos;s breathtaking destinations, explore tours from local operators, and book your perfect adventure—all in one place.
-              </p>
-            </div>
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+              Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
+            </span>
           </Link>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+            <Link href="/destinations/hunza" className="hover:text-sky-600 transition">Hunza</Link>
+            <Link href="/destinations/skardu" className="hover:text-sky-600 transition">Skardu</Link>
+            <Link href="/destinations/swat" className="hover:text-sky-600 transition">Swat</Link>
+            <Link href="/destinations/kumrat" className="hover:text-sky-600 transition">Kumrat</Link>
+            <Link href="/search?type=TOUR" className="hover:text-sky-600 transition">Tours</Link>
+            <Link href="/search?type=HOTEL" className="hover:text-sky-600 transition">Hotels</Link>
+            <Link href="/blog" className="hover:text-sky-600 transition">Blog</Link>
+          </nav>
 
           {/* Right Action: Explore Catalog button */}
           <div className="hidden sm:flex items-center gap-3">
@@ -155,7 +175,7 @@ export function Navbar() {
               className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
             >
               <Compass className="w-4 h-4 text-sky-600" />
-              <span>Explore Tours & Hotels</span>
+              <span>Explore All</span>
             </Link>
           </div>
 
@@ -183,6 +203,22 @@ export function Navbar() {
               <span>Search Tours & Hotels Catalog</span>
               <Compass className="w-4 h-4 text-orange-500" />
             </Link>
+
+            <div className="pt-2 pb-1 border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider px-3">
+              Destinations
+            </div>
+            <div className="grid grid-cols-2 gap-2 px-1 text-xs">
+              <Link href="/destinations/hunza" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Hunza Valley</Link>
+              <Link href="/destinations/skardu" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Skardu</Link>
+              <Link href="/destinations/swat" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Swat Valley</Link>
+              <Link href="/destinations/kumrat" onClick={() => setIsMenuOpen(false)} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium">Kumrat Valley</Link>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-1 text-xs">
+              <Link href="/search?type=TOUR" onClick={() => setIsMenuOpen(false)} className="py-2 px-3 hover:bg-slate-50 rounded-lg text-slate-700 font-semibold">Guided Tours</Link>
+              <Link href="/search?type=HOTEL" onClick={() => setIsMenuOpen(false)} className="py-2 px-3 hover:bg-slate-50 rounded-lg text-slate-700 font-semibold">Hotels & Resorts</Link>
+              <Link href="/blog" onClick={() => setIsMenuOpen(false)} className="py-2 px-3 hover:bg-slate-50 rounded-lg text-slate-700 font-semibold">Travel Guides & Blog</Link>
+            </div>
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex gap-2">

@@ -12,7 +12,7 @@ import {
   Compass,
   ArrowRight
 } from "lucide-react";
-import { BookingRecord, getAllBookings } from "@/services/booking.service";
+import type { BookingRecord } from "@/services/booking.service";
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
@@ -21,9 +21,17 @@ export default function MyBookingsPage() {
 
   useEffect(() => {
     async function load() {
-      const data = await getAllBookings();
-      setBookings(data);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/bookings");
+        const data = await res.json();
+        if (data.bookings) {
+          setBookings(data.bookings);
+        }
+      } catch (err) {
+        console.error("Error loading bookings:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);

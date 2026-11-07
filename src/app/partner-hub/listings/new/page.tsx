@@ -15,7 +15,11 @@ import {
   Calendar,
   Compass,
   Clock,
-  Sparkles
+  Sparkles,
+  Upload,
+  Plus,
+  Trash2,
+  Loader2
 } from "lucide-react";
 
 export default function NewListingPage() {
@@ -28,8 +32,12 @@ export default function NewListingPage() {
     city: "Karimabad",
     province: "Gilgit-Baltistan",
     address: "Islamabad / Gilgit Pickup",
+    durationDays: 5,
+    durationNights: 4,
     duration: "5 Days / 4 Nights",
     basePrice: 45000,
+    singleSupplement: 12000,
+    depositPercent: 25,
     unitTitle: "Per Person Package (Twin Sharing)",
     maxGuests: 2,
     inventory: 10,
@@ -37,6 +45,13 @@ export default function NewListingPage() {
     photos: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop&q=80,https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&auto=format&fit=crop&q=80",
     description: "",
   });
+
+  const [departures, setDepartures] = useState<{ startDate: string; seatsTotal: number }[]>([
+    { startDate: "2026-11-15", seatsTotal: 12 },
+    { startDate: "2026-11-22", seatsTotal: 12 },
+    { startDate: "2026-11-29", seatsTotal: 12 },
+  ]);
+  const [uploading, setUploading] = useState(false);
 
   const [amenities, setAmenities] = useState<string[]>([
     "Dedicated 4x4 Mountain Transport",
@@ -86,7 +101,9 @@ export default function NewListingPage() {
         type: "TOUR",
         title: prev.title.includes("Hotel") ? "" : prev.title,
         unitTitle: "Per Person Package (Twin Sharing)",
-        duration: "5 Days / 4 Nights",
+        durationDays: 5,
+    durationNights: 4,
+    duration: "5 Days / 4 Nights",
         address: "Islamabad / Gilgit Pickup",
         basePrice: prev.basePrice > 0 ? prev.basePrice : 45000,
       }));
@@ -142,6 +159,58 @@ export default function NewListingPage() {
     );
   }
 
+  function addDeparture() {
+    const lastDate = departures.length > 0 ? new Date(departures[departures.length - 1].startDate) : new Date();
+    const nextDate = new Date(lastDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+    setDepartures([...departures, { startDate: nextDate.toISOString().split("T")[0], seatsTotal: 12 }]);
+  }
+
+  function removeDeparture(index: number) {
+    setDepartures(departures.filter((_, i) => i !== index));
+  }
+
+  function updateDeparture(index: number, field: "startDate" | "seatsTotal", val: any) {
+    setDepartures(departures.map((d, i) => (i === index ? { ...d, [field]: val } : d)));
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    setError("");
+    try {
+      const uploadForm = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        uploadForm.append("files", files[i]);
+      }
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadForm,
+      });
+      const data = await res.json();
+      if (data.success && data.urls?.length) {
+        const existing = formData.photos ? formData.photos.split(",").map((s) => s.trim()).filter(Boolean) : [];
+        setFormData((prev) => ({
+          ...prev,
+          photos: [...existing, ...data.urls].join(","),
+        }));
+      } else {
+        setError(data.error || "Failed to upload images");
+      }
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError("Failed to upload files: " + (err.message || "Network error"));
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removePhoto(urlToRemove: string) {
+    const existing = formData.photos ? formData.photos.split(",").map((s) => s.trim()).filter(Boolean) : [];
+    const updated = existing.filter((url) => url !== urlToRemove);
+    setFormData((prev) => ({ ...prev, photos: updated.join(",") }));
+  }
+
   function handleDestinationChange(dest: string) {
     let city = "Karimabad";
     let province = "Gilgit-Baltistan";
@@ -176,12 +245,27 @@ export default function NewListingPage() {
     setLoading(true);
 
     try {
+      const calculatedDepartures = isTour
+        ? departures.map((d) => {
+            const start = new Date(d.startDate);
+            const end = new Date(start.getTime() + (Number(formData.durationDays) || 5) * 24 * 60 * 60 * 1000);
+            return {
+              startDate: d.startDate,
+              endDate: end.toISOString().split("T")[0],
+              seatsTotal: Number(d.seatsTotal || 12),
+              seatsLeft: Number(d.seatsTotal || 12),
+              price: Number(formData.basePrice),
+            };
+          })
+        : [];
+
       const res = await fetch("/api/listings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           amenities,
+          departures: calculatedDepartures,
         }),
       });
 
@@ -397,18 +481,64 @@ export default function NewListingPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                {isTour ? "Tour Duration (e.g. 5 Days / 4 Nights)" : "Stay Duration (e.g. Per Night Stay)"}
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
+            {isTour ? (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                    Duration Days *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={formData.durationDays}
+                    onChange={(e) => {
+                      const days = Math.max(1, Number(e.target.value));
+                      const nights = Math.max(0, days - 1);
+                      setFormData({
+                        ...formData,
+                        durationDays: days,
+                        durationNights: nights,
+                        duration: `${days} Days / ${nights} Nights`,
+                      });
+                    }}
+                    className="w-full px-3 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                    Nights *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={formData.durationNights}
+                    onChange={(e) => {
+                      const nights = Math.max(0, Number(e.target.value));
+                      setFormData({
+                        ...formData,
+                        durationNights: nights,
+                        duration: `${formData.durationDays} Days / ${nights} Nights`,
+                      });
+                    }}
+                    className="w-full px-3 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  Stay Duration
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  value="Per Night Stay"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-slate-50 text-slate-600 focus:outline-none"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
@@ -428,10 +558,10 @@ export default function NewListingPage() {
         {/* Section 3: Pricing & Package Unit */}
         <div className="space-y-4">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-3 border-b border-slate-100 flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-600" /> 3. Vendor Demanded Pricing &amp; Unit
+            <DollarSign className="w-4 h-4 text-emerald-600" /> 3. Vendor Demanded Pricing &amp; Deposit
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
                 {isTour ? "Vendor Demanded Rate per Person (PKR) *" : "Vendor Rate per Room / Night (PKR) *"}
@@ -449,18 +579,39 @@ export default function NewListingPage() {
               </span>
             </div>
 
+            {isTour && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  Single Supplement (PKR)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={formData.singleSupplement}
+                  onChange={(e) => setFormData({ ...formData, singleSupplement: Number(e.target.value) })}
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
+                />
+                <span className="text-[10px] text-slate-500 block mt-1">
+                  Charged to solo travelers booking twin-share tour.
+                </span>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                {isTour ? "Tour Package Tier / Seat Title" : "Room Category / Unit Title"}
+                Online Deposit (%)
               </label>
               <input
-                type="text"
-                required
-                value={formData.unitTitle}
-                onChange={(e) => setFormData({ ...formData, unitTitle: e.target.value })}
-                placeholder={isTour ? "Standard Tour Seat" : "Deluxe Mountain View Room"}
-                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                type="number"
+                min={10}
+                max={100}
+                value={formData.depositPercent}
+                onChange={(e) => setFormData({ ...formData, depositPercent: Number(e.target.value) })}
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
               />
+              <span className="text-[10px] text-slate-500 block mt-1">
+                Default 25%. Remaining balance paid on arrival.
+              </span>
             </div>
 
             <div>
@@ -475,9 +626,90 @@ export default function NewListingPage() {
                 onChange={(e) => setFormData({ ...formData, freeCancellationDays: Number(e.target.value) })}
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
+              <span className="text-[10px] text-slate-500 block mt-1">
+                Full refund window before start date.
+              </span>
             </div>
           </div>
         </div>
+
+        {/* Section 3B: Fixed Departures Schedule (Tours only) */}
+        {isTour && (
+          <div className="space-y-4 bg-orange-50/50 p-5 rounded-2xl border border-orange-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-orange-600" /> Fixed Departure Dates &amp; Seat Limits
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Tours are booked only on fixed departures. Each departure prevents overbooking automatically.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addDeparture}
+                className="px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Date</span>
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {departures.map((dep, idx) => {
+                const start = new Date(dep.startDate);
+                const end = new Date(start.getTime() + (Number(formData.durationDays) || 5) * 24 * 60 * 60 * 1000);
+                const endDateStr = isNaN(end.getTime()) ? "" : end.toISOString().split("T")[0];
+
+                return (
+                  <div key={idx} className="flex flex-wrap sm:flex-nowrap items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 text-xs">
+                    <div className="flex-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Start Date</label>
+                      <input
+                        type="date"
+                        required
+                        value={dep.startDate}
+                        onChange={(e) => updateDeparture(idx, "startDate", e.target.value)}
+                        className="w-full p-2 rounded-lg border border-slate-300 font-semibold text-slate-900"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">End Date (Auto)</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={endDateStr}
+                        className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 font-semibold"
+                      />
+                    </div>
+                    <div className="w-28">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Max Seats</label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        required
+                        value={dep.seatsTotal}
+                        onChange={(e) => updateDeparture(idx, "seatsTotal", Number(e.target.value))}
+                        className="w-full p-2 rounded-lg border border-slate-300 font-semibold text-slate-900 text-center"
+                      />
+                    </div>
+                    {departures.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeDeparture(idx)}
+                        className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg self-end mb-0.5"
+                        title="Remove departure"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Section 4: Inclusions / Amenities */}
         <div className="space-y-4">
@@ -525,9 +757,57 @@ export default function NewListingPage() {
             <ImageIcon className="w-4 h-4 text-purple-600" /> 5. High-Res Photos &amp; Highlights
           </h2>
 
+          {/* Photo File Upload Box */}
+          <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-5 text-center space-y-3">
+            <div className="mx-auto w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+              {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900">
+                Upload real tour or hotel photos (JPG, PNG, WebP)
+              </p>
+              <p className="text-[11px] text-slate-500">
+                Support for unlimited high-resolution photos.
+              </p>
+            </div>
+            <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold cursor-pointer transition shadow">
+              <span>{uploading ? "Uploading photos..." : "Select Images from Computer"}</span>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                disabled={uploading}
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Photos Preview Thumbnails */}
+          {formData.photos && (
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-700 block">Uploaded Photos Preview:</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                {formData.photos.split(",").map((p) => p.trim()).filter(Boolean).map((photoUrl, idx) => (
+                  <div key={idx} className="relative group rounded-xl overflow-hidden aspect-video bg-slate-100 border border-slate-200">
+                    <img src={photoUrl} alt={`Uploaded ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(photoUrl)}
+                      className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-rose-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition"
+                      title="Remove image"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-              Photo Image URLs (Comma separated)
+              Photo Image URLs (Comma separated or auto-populated from uploads above)
             </label>
             <textarea
               rows={2}
@@ -535,9 +815,6 @@ export default function NewListingPage() {
               onChange={(e) => setFormData({ ...formData, photos: e.target.value })}
               className="w-full px-4 py-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
             />
-            <p className="text-[11px] text-slate-500 mt-1">
-              Pre-filled with authentic high-resolution Pakistani photography. You can replace with your own links.
-            </p>
           </div>
 
           <div>

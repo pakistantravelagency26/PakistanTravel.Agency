@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Terms of Service & Booking Policy | Pakistan Travel Agency",
+  description: "Read the terms of service, payment policies, cancellation guidelines, and traveler guarantees for booking trips with PakistanTravel.Agency.",
+  alternates: {
+    canonical: "/terms",
+    languages: {
+      "en-PK": "/terms",
+      "ur-PK": "/ur/terms",
+    },
+  },
+};
 
 export default function TermsPage() {
   return (
@@ -35,6 +48,28 @@ export default function TermsPage() {
           <p>
             Payments are processed in Pakistani Rupee (PKR) through licensed local rails (JazzCash, EasyPaisa, 1LINK) and international credit/debit card gateways (Stripe). Instant electronic vouchers are issued upon confirmation.
           </p>
+
+          <h2 className="text-base font-bold text-slate-900">5. Mountain Weather, Landslides &amp; Force Majeure</h2>
+          <p>
+            Travel in northern Pakistan involves natural mountain terrain subject to sudden weather disruptions, rockfalls, or road blockages (particularly at Babusar Pass, Kohistan, or Jaglot). In the event of unforeseen road closures, local operators will provide safe alternate routes (such as via Besham/KKH) or reschedule itineraries in consultation with travelers. PakistanTravel.Agency does not charge modification fees for acts of force majeure.
+          </p>
+
+          <h2 className="text-base font-bold text-slate-900">6. High-Altitude Health &amp; Liability</h2>
+          <p>
+            Certain northern expeditions exceed 3,000 meters above sea level (including Deosai National Park, Khunjerab Pass, and Rush Lake). Travelers are responsible for ensuring personal medical fitness and consulting physicians regarding altitude sickness medications. Operators maintain basic first-aid supplies on ground.
+          </p>
+
+          <h2 className="text-base font-bold text-slate-900">7. Corporate Information &amp; Governing Law</h2>
+          <p>
+            These terms are governed by the laws of the Islamic Republic of Pakistan. Any legal proceedings shall be subject to the exclusive jurisdiction of the competent courts of Islamabad.
+          </p>
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2 space-y-1 text-xs">
+            <p><strong>Company:</strong> PakistanTravel.Agency Technologies (Private) Limited {/* TODO: CONFIRM_LEGAL_COMPANY_NAME */}</p>
+            <p><strong>NTN:</strong> 9824102-7 {/* TODO: CONFIRM_NTN */}</p>
+            <p><strong>SECP CUIN:</strong> 0248911-PK {/* TODO: CONFIRM_SECP_CUIN */}</p>
+            <p><strong>Address:</strong> Floor 4, Evacuee Trust Complex, Blue Area, Islamabad, Pakistan {/* TODO: CONFIRM_REGISTERED_OFFICE_ADDRESS */}</p>
+            <p><strong>Legal Inquiries:</strong> pakistantravel.agency26@gmail.com</p>
+          </div>
         </div>
       </div>
     </div>

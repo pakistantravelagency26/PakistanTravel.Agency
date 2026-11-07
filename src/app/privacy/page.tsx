@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy & Data Security | Pakistan Travel Agency",
+  description: "Learn how PakistanTravel.Agency collects, encrypts, and protects your personal information and transaction details when booking tours in Pakistan.",
+  alternates: {
+    canonical: "/privacy",
+    languages: {
+      "en-PK": "/privacy",
+      "ur-PK": "/ur/privacy",
+    },
+  },
+};
 
 export default function PrivacyPage() {
   return (
@@ -25,6 +38,21 @@ export default function PrivacyPage() {
             <li>Verification Details: CNIC or Passport numbers required by Pakistani law for hotel check-ins.</li>
             <li>Booking Preferences: Travel dates, room configurations, and dietary requirements.</li>
           </ul>
+
+          <h2 className="text-base font-bold text-slate-900">Payment Security &amp; No Card Storage</h2>
+          <p>
+            Payment transactions via JazzCash, EasyPaisa, and Credit/Debit Cards (Stripe) are processed directly over PCI-DSS certified encrypted gateways. PakistanTravel.Agency never stores or logs your raw payment credentials or credit card numbers.
+          </p>
+
+          <h2 className="text-base font-bold text-slate-900">Data Protection Officer &amp; Inquiries</h2>
+          <p>
+            You have the right to request access to or deletion of your stored profile and booking history at any time.
+          </p>
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2 space-y-1 text-xs">
+            <p><strong>Data Controller:</strong> PakistanTravel.Agency Technologies (Private) Limited {/* TODO: CONFIRM_LEGAL_CONTROLLER_ENTITY */}</p>
+            <p><strong>Data Protection Officer:</strong> Compliance Dept, Floor 4, Evacuee Trust Complex, Islamabad {/* TODO: APPOINT_OR_UPDATE_DPO_CONTACT */}</p>
+            <p><strong>Email:</strong> privacy@pakistantravel.agency / pakistantravel.agency26@gmail.com</p>
+          </div>
         </div>
       </div>
     </div>

@@ -205,6 +205,10 @@ export async function POST(req: Request) {
             city: newListing.city,
             photos: newListing.photos,
             amenities: newListing.amenities,
+            durationDays: Number(body.durationDays) || (body.type === "HOTEL" ? 1 : 4),
+            durationNights: body.durationNights !== undefined ? Number(body.durationNights) : (body.type === "HOTEL" ? 1 : 3),
+            singleSupplement: Number(body.singleSupplement || 0),
+            depositPercent: Number(body.depositPercent || 25),
             cancellationPolicy: newListing.cancellationPolicy,
             freeCancellationDays: newListing.freeCancellationDays,
             vendorPrice: Number(body.basePrice),
@@ -213,6 +217,42 @@ export async function POST(req: Request) {
             isFeatured: true,
           },
         });
+
+        // Also create departures if provided or default for tour
+        if (body.type === "TOUR") {
+          const departureItems = Array.isArray(body.departures) && body.departures.length > 0
+            ? body.departures
+            : [
+                {
+                  startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                  endDate: new Date(Date.now() + (7 + (Number(body.durationDays) || 5)) * 24 * 60 * 60 * 1000),
+                  seatsTotal: Number(body.inventory || 12),
+                  seatsLeft: Number(body.inventory || 12),
+                  price: Number(body.basePrice),
+                },
+                {
+                  startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                  endDate: new Date(Date.now() + (14 + (Number(body.durationDays) || 5)) * 24 * 60 * 60 * 1000),
+                  seatsTotal: Number(body.inventory || 12),
+                  seatsLeft: Number(body.inventory || 12),
+                  price: Number(body.basePrice),
+                },
+              ];
+
+          for (const dep of departureItems) {
+            await prisma.departure.create({
+              data: {
+                listingId: newListing.id,
+                startDate: new Date(dep.startDate),
+                endDate: new Date(dep.endDate),
+                seatsTotal: Number(dep.seatsTotal || 12),
+                seatsLeft: Number(dep.seatsLeft || dep.seatsTotal || 12),
+                price: dep.price ? Number(dep.price) : Number(body.basePrice),
+                status: "AVAILABLE",
+              },
+            });
+          }
+        }
 
         // Also create unit in Neon DB
         await prisma.listingUnit.create({

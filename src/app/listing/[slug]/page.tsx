@@ -27,30 +27,50 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
 
   if (!listing) {
     return {
-      title: "Experience Not Found | PakistanTravel.Agency",
-      description: "Explore verified tours, mountain stays and travel packages across Pakistan.",
+      title: "Experience Not Found | Pakistan Travel Agency",
+      description: "Explore verified tour packages, mountain stays and travel experiences across northern Pakistan.",
     };
   }
 
   const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
-  const title = `${listing.title} | ${isTour ? "Tour Package" : "Hotel"} in ${listing.city}`;
-  const description = `${listing.description.slice(0, 155)}... Book online with verified operator ${listing.vendor.businessName} starting from PKR ${listing.basePrice.toLocaleString()}. Guaranteed voucher confirmation.`;
+  
+  // Format Title strictly targeting 50-60 characters
+  let title = `${listing.title} | ${isTour ? "Tour" : "Hotel"} in ${listing.city}`;
+  if (title.length > 60) {
+    title = `${listing.title.slice(0, 44)} | ${listing.city} Trip`;
+  } else if (title.length < 50) {
+    title = `${listing.title} | ${isTour ? "Tour Package" : "Hotel"} in ${listing.city}, Pakistan`;
+    if (title.length > 60) {
+      title = `${listing.title} | ${listing.city}, Pakistan`;
+    }
+  }
+  if (title.length > 60) title = title.slice(0, 60);
+
+  // Format Description strictly targeting 140-155 characters (complete sentence, no "...")
+  let description = `Book ${listing.title} in ${listing.city} with verified operator ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with instant confirmation vouchers.`;
+  if (description.length > 155) {
+    description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with guaranteed instant vouchers.`;
+  }
+  if (description.length < 140) {
+    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with guaranteed instant vouchers and 24/7 support.`;
+  }
+  if (description.length > 155) {
+    description = description.slice(0, 154).trim();
+    if (!description.endsWith(".")) description = description.replace(/[,;]$/, "") + ".";
+  }
+
   const canonicalUrl = `${siteUrl}/listing/${listing.slug}`;
   const mainPhoto = listing.photos[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200";
 
   return {
     title,
     description,
-    keywords: [
-      listing.title,
-      `${listing.city} tours`,
-      `${listing.destinationName} travel`,
-      isTour ? "Pakistan guided tour" : "Pakistan hotel booking",
-      listing.vendor.businessName,
-      "PakistanTravel.Agency",
-    ],
     alternates: {
       canonical: canonicalUrl,
+      languages: {
+        "en-PK": canonicalUrl,
+        "ur-PK": `${siteUrl}/ur/listing/${listing.slug}`,
+      },
     },
     openGraph: {
       type: "website",
@@ -64,7 +84,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
           url: mainPhoto,
           width: 1200,
           height: 630,
-          alt: listing.title,
+          alt: `${listing.title} in ${listing.city}`,
         },
       ],
     },
@@ -106,7 +126,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
   const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
 
   // Google Rich Results Structured Data JSON-LD
-  const mainJsonLd = {
+  const mainJsonLd: Record<string, any> = {
     "@context": "https://schema.org",
     "@type": isTour ? "TouristTrip" : "Hotel",
     name: listing.title,
@@ -120,13 +140,18 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
       addressRegion: listing.province,
       addressCountry: "PK",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: listing.avgRating,
-      reviewCount: Math.max(listing.totalReviews, 1),
-      bestRating: "5",
-      worstRating: "1",
-    },
+    // AggregateRating ONLY when a listing has at least 10 real reviews per Requirement 3
+    ...(listing.totalReviews >= 10
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: listing.avgRating,
+            reviewCount: listing.totalReviews,
+            bestRating: "5",
+            worstRating: "1",
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       price: listing.basePrice,
@@ -156,7 +181,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
         "@type": "ListItem",
         position: 2,
         name: listing.destinationName,
-        item: `${siteUrl}/search?destination=${listing.destinationSlug}`,
+        item: `${siteUrl}/destinations/${listing.destinationSlug}`,
       },
       {
         "@type": "ListItem",

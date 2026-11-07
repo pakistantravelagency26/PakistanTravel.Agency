@@ -98,6 +98,14 @@ async function main() {
       image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop&q=80',
       isFeatured: false,
     },
+    {
+      name: 'Kumrat Valley & Dir',
+      slug: 'kumrat',
+      province: 'Khyber Pakhtunkhwa',
+      description: 'Pristine alpine pine forests, roaring riverbanks, Jahaz Banda meadows, and turquoise Katora glacial lake.',
+      image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&auto=format&fit=crop&q=80',
+      isFeatured: true,
+    },
   ];
 
   for (const d of destinations) {
@@ -109,10 +117,10 @@ async function main() {
   }
   console.log('[init-db] Destinations verified.');
 
-  // 4. Vendors: ONLY seed initial vendors if vendor table is completely empty
+  // 4. Vendors: ONLY seed initial vendors if vendor table is completely empty AND explicitly requested
   const vendorCount = await prisma.vendor.count();
-  if (vendorCount > 0) {
-    console.log(`[init-db] Database already has ${vendorCount} vendor(s). Skipping vendor seeding so deletions and edits are preserved.`);
+  if (vendorCount > 0 || process.env.SEED_SAMPLE_DATA !== 'true') {
+    console.log(`[init-db] Skipping vendor auto-seeding. Current vendors: ${vendorCount}. (Set SEED_SAMPLE_DATA=true to seed initial vendors).`);
     return;
   }
 

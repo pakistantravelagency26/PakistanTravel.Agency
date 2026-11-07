@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, ShieldCheck, CreditCard, Mail, Headphones } from "lucide-react";
+import { Compass, ShieldCheck, CreditCard, Mail, Headphones, Phone } from "lucide-react";
 
 export function Footer() {
   const pathname = usePathname();
@@ -29,9 +29,10 @@ export function Footer() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white">Verified Northern Partners</h4>
+              <p className="font-bold text-white text-sm">Vetted Northern Partners</p>
               <p className="text-xs text-slate-400 mt-1">
-                Every hotel in Hunza & Skardu and 4x4 mountain driver is physically vetted and licensed.
+                Operators are verified against DTS licenses and SECP registration records.{" "}
+                <Link href="/how-we-verify-partners" className="text-sky-400 hover:underline">Learn how</Link>
               </p>
             </div>
           </div>
@@ -41,7 +42,7 @@ export function Footer() {
               <CreditCard className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white">JazzCash, EasyPaisa & Cards</h4>
+              <p className="font-bold text-white text-sm">JazzCash, EasyPaisa & Cards</p>
               <p className="text-xs text-slate-400 mt-1">
                 Zero hassle local Pakistani payments with instant PDF check-in voucher issuance.
               </p>
@@ -53,7 +54,7 @@ export function Footer() {
               <Headphones className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-white">24/7 Online Assistance</h4>
+              <p className="font-bold text-white text-sm">24/7 Online Assistance</p>
               <p className="text-xs text-slate-400 mt-1">
                 Dedicated on-ground emergency and route coordinators active during your journeys.
               </p>
@@ -64,45 +65,63 @@ export function Footer() {
         {/* Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 text-sm">
           <div>
-            <h5 className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-sky-400">Popular Destinations</h5>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-sky-400">Popular Destinations</p>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li><Link href="/search?destination=hunza" className="hover:text-white transition">Hunza Valley & Attabad Lake</Link></li>
-              <li><Link href="/search?destination=skardu" className="hover:text-white transition">Skardu & Deosai Plains</Link></li>
-              <li><Link href="/search?destination=swat" className="hover:text-white transition">Swat Valley & Kalam</Link></li>
-              <li><Link href="/search?destination=murree" className="hover:text-white transition">Murree & Bhurban Resorts</Link></li>
-              <li><Link href="/search?destination=kumrat" className="hover:text-white transition">Kumrat Valley & Dir</Link></li>
+              <li><Link href="/destinations/hunza" className="hover:text-white transition">Hunza Valley & Attabad Lake</Link></li>
+              <li><Link href="/destinations/skardu" className="hover:text-white transition">Skardu & Deosai Plains</Link></li>
+              <li><Link href="/destinations/swat" className="hover:text-white transition">Swat Valley & Kalam</Link></li>
+              <li><Link href="/destinations/kumrat" className="hover:text-white transition">Kumrat Valley & Dir</Link></li>
+              <li><Link href="/destinations/murree" className="hover:text-white transition">Murree & Bhurban Resorts</Link></li>
+              <li><Link href="/destinations/neelum" className="hover:text-white transition">Neelum Valley (Azad Kashmir)</Link></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-orange-400">Experience Categories</h5>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-orange-400">Experience Categories</p>
             <ul className="space-y-2 text-xs text-slate-400">
               <li><Link href="/search?type=HOTEL" className="hover:text-white transition">Luxury Hotels & Resorts</Link></li>
               <li><Link href="/search?type=TOUR" className="hover:text-white transition">Guided Northern Tours</Link></li>
-              <li><Link href="/search?destination=hunza" className="hover:text-white transition">Hunza Valley Packages</Link></li>
-              <li><Link href="/search?destination=skardu" className="hover:text-white transition">Skardu Expeditions</Link></li>
+              <li><Link href="/destinations/hunza" className="hover:text-white transition">Hunza Valley Packages</Link></li>
+              <li><Link href="/destinations/skardu" className="hover:text-white transition">Skardu Expeditions</Link></li>
+              <li><Link href="/blog" className="hover:text-white transition">Northern Travel Guides & Tips</Link></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-teal-400">Traveler Guarantees</h5>
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-teal-400">Traveler Guarantees</p>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li><Link href="/faq" className="hover:text-white transition">Best Price Match Policy</Link></li>
+              <li><Link href="/how-we-verify-partners" className="hover:text-white transition">How We Verify Partners</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition">Direct Operator Rates Policy</Link></li>
               <li><Link href="/terms" className="hover:text-white transition">Flexible Cancellation Policy</Link></li>
-              <li><Link href="/about" className="hover:text-white transition">Verified Local Tour Partners</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition">Customer Care 24/7</Link></li>
+              <li><Link href="/about" className="hover:text-white transition">About PakistanTravel.Agency</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition">Customer Care &amp; WhatsApp</Link></li>
+              <li><Link href="/blog" className="hover:text-white transition">Travel Blog &amp; Insights</Link></li>
             </ul>
           </div>
 
           <div>
-            <h5 className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">Direct Support</h5>
-            <div className="space-y-2 text-xs text-slate-400">
+            <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">Direct Support</p>
+            <div className="space-y-2.5 text-xs text-slate-400">
+              <a
+                href="https://wa.me/923222327096?text=Hi%20PakistanTravel.Agency%20Support"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-white transition text-emerald-400 font-bold"
+              >
+                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>+92 322 2327096 (WhatsApp / Call)</span>
+              </a>
               <p className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-emerald-400" />
-                pakistantravel.agency26@gmail.com
+                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>pakistantravel.agency26@gmail.com</span>
               </p>
-              <p className="pt-2 text-[11px] text-slate-500">
-                Blue Area, Islamabad, Pakistan
+              <p className="pt-1 text-[11px] text-slate-500">
+                Floor 4, Evacuee Trust Complex, Blue Area, Islamabad, Pakistan
+              </p>
+              <p className="pt-1">
+                <Link href="/how-we-verify-partners" className="text-sky-400 hover:text-white transition text-xs font-semibold">
+                  How We Verify Partners →
+                </Link>
               </p>
             </div>
           </div>
@@ -113,6 +132,7 @@ export function Footer() {
           <p>© {new Date().getFullYear()} PakistanTravel.Agency. Designed with pride for Pakistan Tourism.</p>
           <div className="flex flex-wrap items-center gap-5 font-medium">
             <Link href="/about" className="hover:text-white transition">About Us</Link>
+            <Link href="/blog" className="hover:text-white transition">Blog</Link>
             <Link href="/contact" className="hover:text-white transition">Contact & Help</Link>
             <Link href="/faq" className="hover:text-white transition">FAQs</Link>
             <Link href="/terms" className="hover:text-white transition">Terms & Policies</Link>

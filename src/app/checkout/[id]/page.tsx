@@ -19,6 +19,7 @@ import {
   Loader2
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
+import { calculateBookingPricing } from "@/lib/bookingPricing";
 
 export const dynamic = "force-dynamic";
 
@@ -91,21 +92,56 @@ function CheckoutContent() {
   }
 
   const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
+  const depId = searchParams.get("depId") || undefined;
+  const isSolo = searchParams.get("isSolo") === "1" || (isTour && qty === 1);
   const unit = (listing.units || []).find((u) => u.id === unitId) || listing.units?.[0] || {
     id: `${listing.id}-default`,
     title: isTour ? "Standard Tour Seat" : "Standard Room",
     basePrice: listing.basePrice,
     maxGuests: 2,
   };
-  const nightsCount = 3;
+  const nightsCount = listing.durationNights || 3;
   const unitPrice = unit ? unit.basePrice : listing.basePrice;
-  const baseRate = isTour ? unitPrice * qty : unitPrice * nightsCount * qty;
-  const tax = Math.round(baseRate * 0.05); // 5% provincial tourism levy
+
+  // Auto-calculated End Date from duration
+  const autoEndDate = isTour
+    ? (function() {
+        if (endParam && endParam !== startParam) return endParam;
+        const d = new Date(startParam);
+        d.setDate(d.getDate() + (listing.durationDays || 4) - 1);
+        return d.toISOString().split("T")[0];
+      })()
+    : endParam;
+
+  // Calculate Pricing breakdown via centralized pricing engine
+  const pricing = calculateBookingPricing({
+    basePrice: unitPrice,
+    quantity: qty,
+    isTour,
+    nightsCount,
+    isSoloTraveler: isSolo,
+    singleSupplementAmount: listing.singleSupplement,
+    depositPercent: listing.depositPercent || 25,
+    discountAmount: discount,
+    taxRate: 0.05,
+  });
+
+  const singleSupplement = pricing.singleSupplement;
+  const baseRate = pricing.baseRate;
+  const subtotal = pricing.subtotal;
+  const tax = pricing.tax;
+  const totalAmount = pricing.totalAmount;
+  const depositPercent = listing.depositPercent || 25;
+  const depositAmount = pricing.depositAmount;
+  const balanceDue = pricing.balanceDue;
+
+  // Payment choice: DEPOSIT (25% online) | FULL (100% online) | ON_ARRIVAL (reservation request)
+  const [paymentChoice, setPaymentChoice] = useState<"DEPOSIT" | "FULL" | "ON_ARRIVAL">("DEPOSIT");
+  const amountToPayNow = paymentChoice === "DEPOSIT" ? depositAmount : paymentChoice === "FULL" ? totalAmount : 0;
+  const balanceOnArrival = totalAmount - amountToPayNow;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const totalAmount = baseRate + tax - discount;
 
   function handleApplyPromo() {
     if (promoCode.toUpperCase() === "HUNZA10" || promoCode.toUpperCase() === "WELCOME") {
@@ -121,10 +157,30 @@ function CheckoutContent() {
   async function handleCompleteBooking(e: React.FormEvent) {
     e.preventDefault();
     if (!listing) return;
-    setLoading(true);
     setError("");
 
+    // Explicit client-side validation messages
+    if (!guestName.trim() || guestName.trim().length < 2) {
+      setError("Please provide your full name as shown on your government CNIC or Passport.");
+      return;
+    }
+    if (!guestEmail.includes("@") || !guestEmail.includes(".")) {
+      setError("Please provide a valid email address to receive your official PDF booking voucher.");
+      return;
+    }
+    if (guestPhone.replace(/\D/g, "").length < 10) {
+      setError("Please provide a valid Pakistani phone or WhatsApp number (e.g. 03001234567).");
+      return;
+    }
+    if (!cnicOrPassport.trim() || cnicOrPassport.trim().length < 5) {
+      setError("Please enter a valid CNIC or Passport number required for northern checkpoint verification.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
+      const effectiveMethod = paymentChoice === "ON_ARRIVAL" ? "CASH_ON_ARRIVAL" : paymentMethod;
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,13 +190,19 @@ function CheckoutContent() {
           listingPhoto: listing.photos[0],
           unitTitle: unit.title,
           destination: `${listing.city}, ${listing.province}`,
+          departureId: depId,
           startDate: startParam,
-          endDate: endParam,
+          endDate: autoEndDate,
           nightsCount,
-          guestsCount: unit.maxGuests * qty,
+          guestsCount: isTour ? qty : (unit.maxGuests * qty),
           unitsCount: qty,
           totalAmount,
-          paymentMethod,
+          depositAmount: amountToPayNow,
+          balanceDue: balanceOnArrival,
+          isSoloTraveler: isSolo,
+          singleSupplement,
+          paymentMethod: effectiveMethod,
+          paymentChoice,
           guestName,
           guestEmail,
           guestPhone,
@@ -201,8 +263,9 @@ function CheckoutContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Full Name</label>
+                  <label htmlFor="checkout-guest-name" className="block text-xs font-semibold text-slate-700 uppercase mb-1">Full Name</label>
                   <input
+                    id="checkout-guest-name"
                     type="text"
                     required
                     value={guestName}
@@ -212,8 +275,9 @@ function CheckoutContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Email Address</label>
+                  <label htmlFor="checkout-guest-email" className="block text-xs font-semibold text-slate-700 uppercase mb-1">Email Address</label>
                   <input
+                    id="checkout-guest-email"
                     type="email"
                     required
                     value={guestEmail}
@@ -223,8 +287,9 @@ function CheckoutContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">WhatsApp / Phone Number</label>
+                  <label htmlFor="checkout-guest-phone" className="block text-xs font-semibold text-slate-700 uppercase mb-1">WhatsApp / Phone Number</label>
                   <input
+                    id="checkout-guest-phone"
                     type="tel"
                     required
                     value={guestPhone}
@@ -234,10 +299,11 @@ function CheckoutContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                  <label htmlFor="checkout-guest-cnic" className="block text-xs font-semibold text-slate-700 uppercase mb-1">
                     CNIC or Passport No. <span className="text-slate-400 font-normal">(Required for check-in)</span>
                   </label>
                   <input
+                    id="checkout-guest-cnic"
                     type="text"
                     required
                     value={cnicOrPassport}
@@ -260,145 +326,194 @@ function CheckoutContent() {
               </div>
             </div>
 
-            {/* Step 2: Payment Method */}
+            {/* Step 2: Payment Plan & Method */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-brand-emerald text-white text-xs flex items-center justify-center font-bold">2</span>
-                Choose Payment Method
+                Payment Options & Deposit
               </h2>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {/* JazzCash */}
+              {/* Payment Option Selector */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("JAZZCASH")}
-                  className={`p-3.5 rounded-xl border-2 text-left transition flex flex-col justify-between ${
-                    paymentMethod === "JAZZCASH"
-                      ? "border-red-600 bg-red-50/30 shadow-sm"
+                  onClick={() => setPaymentChoice("DEPOSIT")}
+                  className={`p-4 rounded-xl border-2 text-left transition flex flex-col justify-between ${
+                    paymentChoice === "DEPOSIT"
+                      ? "border-brand-emerald bg-emerald-50/40 shadow-sm ring-1 ring-brand-emerald"
                       : "border-slate-200 hover:border-slate-300 bg-white"
                   }`}
                 >
-                  <Smartphone className="w-5 h-5 text-red-600 mb-2" />
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">JazzCash</span>
-                    <span className="text-[10px] text-slate-500">Mobile Wallet</span>
+                    <span className="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 mb-2">
+                      Recommended
+                    </span>
+                    <h3 className="font-bold text-xs text-slate-900">Pay {depositPercent}% Deposit Now</h3>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Lock your seat immediately with PKR {depositAmount.toLocaleString()} today.
+                    </p>
                   </div>
+                  <span className="text-xs font-extrabold text-emerald-700 mt-3 block">
+                    PKR {depositAmount.toLocaleString()} Today
+                  </span>
                 </button>
 
-                {/* EasyPaisa */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("EASYPAISA")}
-                  className={`p-3.5 rounded-xl border-2 text-left transition flex flex-col justify-between ${
-                    paymentMethod === "EASYPAISA"
-                      ? "border-emerald-600 bg-emerald-50/30 shadow-sm"
+                  onClick={() => setPaymentChoice("FULL")}
+                  className={`p-4 rounded-xl border-2 text-left transition flex flex-col justify-between ${
+                    paymentChoice === "FULL"
+                      ? "border-sky-600 bg-sky-50/40 shadow-sm ring-1 ring-sky-600"
                       : "border-slate-200 hover:border-slate-300 bg-white"
                   }`}
                 >
-                  <Smartphone className="w-5 h-5 text-emerald-600 mb-2" />
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">EasyPaisa</span>
-                    <span className="text-[10px] text-slate-500">Account / QR</span>
+                    <span className="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-sky-100 text-sky-800 mb-2">
+                      Hassle Free
+                    </span>
+                    <h3 className="font-bold text-xs text-slate-900">Pay 100% In Full</h3>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Pay total amount now. Zero balance remaining at property desk.
+                    </p>
                   </div>
+                  <span className="text-xs font-extrabold text-sky-700 mt-3 block">
+                    PKR {totalAmount.toLocaleString()} Today
+                  </span>
                 </button>
 
-                {/* Stripe / Cards */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("STRIPE")}
-                  className={`p-3.5 rounded-xl border-2 text-left transition flex flex-col justify-between ${
-                    paymentMethod === "STRIPE"
-                      ? "border-brand-navy bg-blue-50/30 shadow-sm"
+                  onClick={() => setPaymentChoice("ON_ARRIVAL")}
+                  className={`p-4 rounded-xl border-2 text-left transition flex flex-col justify-between ${
+                    paymentChoice === "ON_ARRIVAL"
+                      ? "border-amber-500 bg-amber-50/40 shadow-sm ring-1 ring-amber-500"
                       : "border-slate-200 hover:border-slate-300 bg-white"
                   }`}
                 >
-                  <CreditCard className="w-5 h-5 text-brand-navy mb-2" />
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">Credit / Debit</span>
-                    <span className="text-[10px] text-slate-500">Visa / Master</span>
+                    <span className="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800 mb-2">
+                      Reservation Request
+                    </span>
+                    <h3 className="font-bold text-xs text-slate-900">Pay on Arrival</h3>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      No instant charge. Hold request subject to operator seat confirmation.
+                    </p>
                   </div>
-                </button>
-
-                {/* Cash on Arrival */}
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("CASH_ON_ARRIVAL")}
-                  className={`p-3.5 rounded-xl border-2 text-left transition flex flex-col justify-between ${
-                    paymentMethod === "CASH_ON_ARRIVAL"
-                      ? "border-brand-amber bg-amber-50/30 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
-                  }`}
-                >
-                  <Banknote className="w-5 h-5 text-brand-amber mb-2" />
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">Pay at Desk</span>
-                    <span className="text-[10px] text-slate-500">Cash on Arrival</span>
-                  </div>
+                  <span className="text-xs font-extrabold text-amber-700 mt-3 block">
+                    PKR 0 Due Now
+                  </span>
                 </button>
               </div>
 
-              {/* Dynamic Payment Field Inputs */}
-              {(paymentMethod === "JAZZCASH" || paymentMethod === "EASYPAISA") && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 animate-in fade-in">
-                  <p className="text-xs font-semibold text-slate-800">
-                    Enter your {paymentMethod === "JAZZCASH" ? "JazzCash" : "EasyPaisa"} Mobile Account Number:
-                  </p>
-                  <div className="max-w-xs">
-                    <input
-                      type="tel"
-                      value={walletPhone}
-                      onChange={(e) => setWalletPhone(e.target.value)}
-                      placeholder="03001234567"
-                      className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-emerald"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-500">
-                    You will receive an automated USSD prompt or MPIN request on your mobile phone to approve the transaction.
-                  </p>
-                </div>
-              )}
+              {/* Online Gateways for Deposit or Full */}
+              {paymentChoice !== "ON_ARRIVAL" ? (
+                <div className="space-y-4 pt-2 border-t border-slate-100">
+                  <span className="text-xs font-bold text-slate-700 block">
+                    Select Online Gateway for PKR {amountToPayNow.toLocaleString()} Payment:
+                  </span>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("JAZZCASH")}
+                      className={`p-3 rounded-xl border-2 text-left transition ${
+                        paymentMethod === "JAZZCASH"
+                          ? "border-red-600 bg-red-50/30 shadow-sm"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
+                      }`}
+                    >
+                      <Smartphone className="w-5 h-5 text-red-600 mb-1.5" />
+                      <span className="text-xs font-bold text-slate-900 block">JazzCash</span>
+                      <span className="text-[10px] text-slate-500">Mobile Wallet</span>
+                    </button>
 
-              {paymentMethod === "STRIPE" && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 animate-in fade-in">
-                  <p className="text-xs font-semibold text-slate-800">Card Payment Details (Powered by Stripe):</p>
-                  <div className="space-y-3 max-w-md">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">Card Number</label>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("EASYPAISA")}
+                      className={`p-3 rounded-xl border-2 text-left transition ${
+                        paymentMethod === "EASYPAISA"
+                          ? "border-emerald-600 bg-emerald-50/30 shadow-sm"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
+                      }`}
+                    >
+                      <Smartphone className="w-5 h-5 text-emerald-600 mb-1.5" />
+                      <span className="text-xs font-bold text-slate-900 block">EasyPaisa</span>
+                      <span className="text-[10px] text-slate-500">Wallet / QR</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("STRIPE")}
+                      className={`p-3 rounded-xl border-2 text-left transition ${
+                        paymentMethod === "STRIPE"
+                          ? "border-blue-700 bg-blue-50/30 shadow-sm"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
+                      }`}
+                    >
+                      <CreditCard className="w-5 h-5 text-blue-700 mb-1.5" />
+                      <span className="text-xs font-bold text-slate-900 block">Debit / Card</span>
+                      <span className="text-[10px] text-slate-500">Visa / Mastercard</span>
+                    </button>
+                  </div>
+
+                  {(paymentMethod === "JAZZCASH" || paymentMethod === "EASYPAISA") && (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                      <label className="font-semibold text-slate-800 block">
+                        Enter your {paymentMethod === "JAZZCASH" ? "JazzCash" : "EasyPaisa"} Mobile Account Number:
+                      </label>
                       <input
-                        type="text"
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value)}
-                        className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none"
+                        type="tel"
+                        value={walletPhone}
+                        onChange={(e) => setWalletPhone(e.target.value)}
+                        placeholder="03001234567"
+                        className="max-w-xs px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none"
                       />
+                      <p className="text-[11px] text-slate-500">
+                        You will receive an automated prompt or MPIN request on your phone to approve PKR {amountToPayNow.toLocaleString()}.
+                      </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">Expiry</label>
-                        <input
-                          type="text"
-                          value={cardExpiry}
-                          onChange={(e) => setCardExpiry(e.target.value)}
-                          className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">CVC</label>
-                        <input
-                          type="text"
-                          value={cardCvc}
-                          onChange={(e) => setCardCvc(e.target.value)}
-                          className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 bg-white focus:outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {paymentMethod === "CASH_ON_ARRIVAL" && (
-                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 animate-in fade-in">
-                  <span className="font-bold block mb-1">✓ Instant Voucher Reservation</span>
-                  You can pay the full amount in Pakistani Rupee (PKR cash) directly at the property front desk upon check-in.
+                  {paymentMethod === "STRIPE" && (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                      <span className="font-semibold text-slate-800 block">Debit/Credit Card Details:</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
+                        <div className="sm:col-span-2">
+                          <label className="block text-[10px] font-semibold text-slate-600 mb-1">Card Number</label>
+                          <input
+                            type="text"
+                            value={cardNumber}
+                            onChange={(e) => setCardNumber(e.target.value)}
+                            className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-600 mb-1">Expiry</label>
+                          <input
+                            type="text"
+                            value={cardExpiry}
+                            onChange={(e) => setCardExpiry(e.target.value)}
+                            className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-600 mb-1">CVC</label>
+                          <input
+                            type="text"
+                            value={cardCvc}
+                            onChange={(e) => setCardCvc(e.target.value)}
+                            className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+                  <span className="font-bold block">Reservation Hold Request (Status: Pending)</span>
+                  <p>
+                    Your booking request will be placed on hold without any instant deduction. The verified tour operator will confirm seat availability, and you can pay the full amount of PKR {totalAmount.toLocaleString()} directly at check-in.
+                  </p>
                 </div>
               )}
             </div>
@@ -464,8 +579,14 @@ function CheckoutContent() {
                   <span className="text-slate-500 font-medium">
                     {isTour ? "Tour Schedule:" : "Dates:"}
                   </span>
-                  <span className="font-bold text-slate-800">{startParam} to {endParam}</span>
+                  <span className="font-bold text-slate-800">{startParam} to {autoEndDate}</span>
                 </div>
+                {depId && (
+                  <div className="flex justify-between text-[11px] text-emerald-700 font-semibold pt-0.5">
+                    <span>Guaranteed Departure:</span>
+                    <span>Fixed Seat Locked</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-slate-500 font-medium">
                     {isTour ? "Travelers:" : "Duration:"}
@@ -479,15 +600,23 @@ function CheckoutContent() {
               </div>
 
               {/* Price Breakdown */}
-              <div className="space-y-2 text-xs pt-2 border-t border-slate-100">
+              <div className="space-y-1.5 text-xs pt-2 border-t border-slate-100">
                 <div className="flex justify-between text-slate-600">
                   <span>
                     {isTour 
-                      ? `Tour package (${qty} ${qty > 1 ? "travelers" : "traveler"}):`
+                      ? `Base tour package (${qty} ${qty > 1 ? "travelers" : "traveler"}):`
                       : `Room charges (${nightsCount} nights):`}
                   </span>
                   <span>PKR {baseRate.toLocaleString()}</span>
                 </div>
+
+                {singleSupplement > 0 && (
+                  <div className="flex justify-between text-sky-700 font-medium">
+                    <span>Solo Private Room Supplement:</span>
+                    <span>+PKR {singleSupplement.toLocaleString()}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-slate-600">
                   <span>Provincial Tourism Levy (5%):</span>
                   <span>PKR {tax.toLocaleString()}</span>
@@ -495,18 +624,30 @@ function CheckoutContent() {
 
                 {promoApplied && (
                   <div className="flex justify-between text-green-700 font-semibold">
-                    <span>Discount (HUNZA10):</span>
+                    <span>Discount ({promoCode}):</span>
                     <span>- PKR {discount.toLocaleString()}</span>
                   </div>
                 )}
 
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-slate-900">Total Price:</span>
+                  <span className="text-sm font-bold text-slate-900">Total Amount:</span>
                   <div className="text-right">
-                    <span className="text-xl font-extrabold text-brand-emerald">
+                    <span className="text-xl font-extrabold text-slate-900">
                       PKR {totalAmount.toLocaleString()}
                     </span>
-                    <span className="text-[10px] text-slate-400 block">Includes all taxes</span>
+                    <span className="text-[10px] text-slate-400 block">Taxes included</span>
+                  </div>
+                </div>
+
+                {/* Amount Due Today vs Arrival Breakdown */}
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-xs mt-2">
+                  <div className="flex justify-between text-slate-700 font-bold">
+                    <span>Due Today Online:</span>
+                    <span className="text-emerald-700">PKR {amountToPayNow.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-500 text-[11px]">
+                    <span>Balance Due on Arrival:</span>
+                    <span className="font-semibold text-slate-700">PKR {balanceOnArrival.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -518,8 +659,10 @@ function CheckoutContent() {
                 className="w-full py-3.5 bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm rounded-xl transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading 
-                  ? (isTour ? "Processing Tour Booking..." : "Processing Reservation...") 
-                  : (isTour ? "Confirm & Book Tour" : "Confirm & Reserve Room")}
+                  ? "Processing..." 
+                  : paymentChoice === "ON_ARRIVAL" 
+                  ? "Request Reservation (Pay on Arrival)" 
+                  : `Pay PKR ${amountToPayNow.toLocaleString()} & Get Voucher`}
                 <ArrowRight className="w-4 h-4" />
               </button>
 

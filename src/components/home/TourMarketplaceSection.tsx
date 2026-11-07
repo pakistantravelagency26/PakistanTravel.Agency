@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   Compass, 
   Building2, 
@@ -24,15 +25,43 @@ export function TourMarketplaceSection({ initialListings }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const categories = [
-    { id: "ALL", label: "All Experiences", count: initialListings.length },
-    { id: "TOUR", label: "Tour Packages", count: initialListings.filter(l => l.type === "TOUR").length },
-    { id: "HOTEL", label: "Hotels & Stays", count: initialListings.filter(l => l.type === "HOTEL").length },
-    { id: "hunza", label: "Hunza Valley", count: initialListings.filter(l => l.destinationSlug === "hunza").length },
-    { id: "skardu", label: "Skardu & Deosai", count: initialListings.filter(l => l.destinationSlug === "skardu").length },
-    { id: "swat", label: "Swat & Kalam", count: initialListings.filter(l => l.destinationSlug === "swat").length },
-    { id: "neelum", label: "Neelum Valley", count: initialListings.filter(l => l.destinationSlug === "neelum").length },
-  ];
+  const categories = useMemo(() => {
+    const tourCount = initialListings.filter(l => l.type === "TOUR").length;
+    const hotelCount = initialListings.filter(l => l.type === "HOTEL").length;
+
+    const destinationNames: Record<string, string> = {
+      hunza: "Hunza Valley",
+      skardu: "Skardu & Deosai",
+      swat: "Swat & Kalam",
+      kumrat: "Kumrat Valley & Dir",
+      neelum: "Neelum Valley",
+      gwadar: "Gwadar & Makran",
+    };
+
+    const destMap = new Map<string, { label: string; count: number }>();
+    initialListings.forEach((item) => {
+      const slug = item.destinationSlug || "other";
+      const label = destinationNames[slug] || item.destinationName || slug;
+      const cur = destMap.get(slug);
+      if (cur) {
+        cur.count += 1;
+      } else {
+        destMap.set(slug, { label, count: 1 });
+      }
+    });
+
+    const list = [
+      { id: "ALL", label: "All Experiences", count: initialListings.length },
+      ...(tourCount > 0 ? [{ id: "TOUR", label: "Tour Packages", count: tourCount }] : []),
+      ...(hotelCount > 0 ? [{ id: "HOTEL", label: "Hotels & Stays", count: hotelCount }] : []),
+    ];
+
+    destMap.forEach((val, slug) => {
+      list.push({ id: slug, label: val.label, count: val.count });
+    });
+
+    return list.filter((cat) => cat.count > 0);
+  }, [initialListings]);
 
   const filteredListings = useMemo(() => {
     return initialListings.filter((item) => {
@@ -154,11 +183,13 @@ export function TourMarketplaceSection({ initialListings }: Props) {
             >
               {/* Photo & Badges */}
               <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                <img
+                <Image
                   src={item.photos[0]}
-                  alt={item.title}
+                  alt={`${item.title} - ${item.destinationName}, ${item.province}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="object-cover group-hover:scale-105 transition duration-500"
                 />
                 
                 {/* Badge Top Left */}

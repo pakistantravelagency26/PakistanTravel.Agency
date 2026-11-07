@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { 
   Building2, 
   Compass, 
@@ -17,6 +18,26 @@ export const revalidate = 60;
 
 export default async function HomePage() {
   const listings = await getActiveDbListings();
+
+  // Filter dropdown destinations and experience types strictly by real available listings
+  const activeDestinationSlugs = new Set(listings.map((l) => l.destinationSlug));
+  const hasHotels = listings.some((l) => l.type === "HOTEL");
+  const hasTours = listings.some((l) => l.type === "TOUR");
+  const hasRentals = listings.some((l) => l.type === "RENTAL");
+
+  const allDestinations = [
+    { slug: "hunza", label: "Hunza Valley & Attabad" },
+    { slug: "skardu", label: "Skardu & Deosai Plains" },
+    { slug: "kumrat", label: "Kumrat Valley & Dir" },
+    { slug: "swat", label: "Swat & Kalam" },
+    { slug: "neelum", label: "Neelum Valley" },
+    { slug: "murree", label: "Murree & Bhurban" },
+  ];
+
+  const availableDestinations = allDestinations.filter(
+    (d) => activeDestinationSlugs.size === 0 || activeDestinationSlugs.has(d.slug)
+  );
+
   return (
     <div className="space-y-12 pb-20 bg-slate-50/50">
       {/* Light & Modern Hero Banner (Musandam Tours style) */}
@@ -54,12 +75,12 @@ export default async function HomePage() {
                   className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 outline-none cursor-pointer"
                   defaultValue=""
                 >
-                  <option value="">All Destinations (Hunza, Skardu, Swat...)</option>
-                  <option value="hunza">Hunza Valley & Attabad</option>
-                  <option value="skardu">Skardu & Deosai Plains</option>
-                  <option value="swat">Swat & Kalam</option>
-                  <option value="murree">Murree & Bhurban</option>
-                  <option value="kumrat">Kumrat Valley & Dir</option>
+                  <option value="">All Destinations</option>
+                  {availableDestinations.map((d) => (
+                    <option key={d.slug} value={d.slug}>
+                      {d.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -90,9 +111,9 @@ export default async function HomePage() {
                   defaultValue=""
                 >
                   <option value="">All Categories</option>
-                  <option value="HOTEL">Hotels & Resorts</option>
-                  <option value="TOUR">Northern Guided Tours</option>
-                  <option value="RENTAL">4x4 Mountain Jeeps</option>
+                  {(hasTours || (!hasHotels && !hasRentals)) && <option value="TOUR">Northern Guided Tours</option>}
+                  {hasHotels && <option value="HOTEL">Hotels & Resorts</option>}
+                  {hasRentals && <option value="RENTAL">4x4 Mountain Jeeps</option>}
                 </select>
               </div>
             </div>
@@ -110,17 +131,17 @@ export default async function HomePage() {
           </form>
         </div>
 
-        {/* Confidence Badges (Musandam style) */}
+        {/* Confidence Badges */}
         <div className="max-w-4xl mx-auto mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-slate-600">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <Link href="/how-we-verify-partners" className="flex items-center gap-3 hover:opacity-80 transition group">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:scale-105 transition">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">100% Verified Partners</span>
-              <span className="text-[11px] text-slate-400">Licensed Northern Operators</span>
+              <span className="font-bold text-slate-900 block group-hover:text-emerald-700">Licensed Local Operators</span>
+              <span className="text-[11px] text-slate-400">DTS & SECP Vetted · How we verify</span>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
@@ -138,7 +159,7 @@ export default async function HomePage() {
             </div>
             <div>
               <span className="font-bold text-slate-900 block">24/7 Online Support</span>
-              <span className="text-[11px] text-slate-400">Always available for assistance</span>
+              <span className="text-[11px] text-slate-400">WhatsApp & Phone Desk</span>
             </div>
           </div>
         </div>

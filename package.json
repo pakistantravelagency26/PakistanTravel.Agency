@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "test": "node --experimental-strip-types --test tests/booking-flow.test.mjs"
   },
   "dependencies": {
     "@neon/config": "^1.11.3",

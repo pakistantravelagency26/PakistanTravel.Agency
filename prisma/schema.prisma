@@ -173,6 +173,11 @@ model Listing {
   cancellationPolicy  String        @db.Text
   freeCancellationDays Int          @default(1)
 
+  durationDays        Int?          @default(1)
+  durationNights      Int?          @default(0)
+  singleSupplement    Float?        @default(0.0)
+  depositPercent      Float?        @default(25.0)
+
   vendorPrice         Float?
   basePrice           Decimal       @db.Decimal(10, 2)
   commissionRate      Float?        @default(12.0)
@@ -184,6 +189,7 @@ model Listing {
   updatedAt           DateTime      @updatedAt
 
   units               ListingUnit[]
+  departures          Departure[]
   reviews             Review[]
   wishlists           Wishlist[]
   bookings            Booking[]
@@ -269,6 +275,13 @@ model Booking {
 
   status          BookingStatus @default(PENDING_PAYMENT)
   
+  departureId     String?
+  departure       Departure?    @relation(fields: [departureId], references: [id])
+  depositAmount   Decimal?      @default(0.0) @db.Decimal(10, 2)
+  balanceDue      Decimal?      @default(0.0) @db.Decimal(10, 2)
+  isSoloTraveler  Boolean       @default(false)
+  singleSupplement Decimal?     @default(0.0) @db.Decimal(10, 2)
+
   guestName       String
   guestEmail      String
   guestPhone      String
@@ -284,8 +297,27 @@ model Booking {
   @@index([bookingNumber])
   @@index([userId])
   @@index([listingId])
+  @@index([departureId])
   @@index([status])
   @@index([startDate, endDate])
+}
+
+model Departure {
+  id          String      @id @default(uuid())
+  listingId   String
+  listing     Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  startDate   DateTime    @db.Date
+  endDate     DateTime    @db.Date
+  seatsTotal  Int         @default(12)
+  seatsLeft   Int         @default(12)
+  price       Decimal?    @db.Decimal(10, 2)
+  status      String      @default("AVAILABLE")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  bookings    Booking[]
+
+  @@index([listingId, startDate])
 }
 
 model Payment {

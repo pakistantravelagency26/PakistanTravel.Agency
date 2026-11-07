@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   MapPin, 
   Search, 
@@ -291,11 +292,13 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
                 <div>
                   {/* Photo Container */}
                   <div className="relative h-56 w-full overflow-hidden bg-slate-100">
-                    <img
+                    <Image
                       src={item.photos[0]}
-                      alt={item.title}
+                      alt={`${item.title} in ${item.city}, ${item.province}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
 
                     {/* Type Badge */}

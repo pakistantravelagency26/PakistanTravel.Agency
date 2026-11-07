@@ -1,7 +1,24 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Mail, MapPin, ArrowLeft, Headphones, Clock } from "lucide-react";
+import { Mail, MapPin, ArrowLeft, Headphones, Clock, Phone, MessageSquare } from "lucide-react";
+import { ContactForm } from "@/components/contact/ContactForm";
+
+export const metadata: Metadata = {
+  title: "Contact Us | Pakistan Travel Agency Support Desk",
+  description: "Contact PakistanTravel.Agency customer support for tour inquiries, hotel reservations, road condition updates, and custom northern packages.",
+  alternates: {
+    canonical: "/contact",
+    languages: {
+      "en-PK": "/contact",
+      "ur-PK": "/ur/contact",
+    },
+  },
+  openGraph: {
+    title: "Contact Us | Pakistan Travel Agency Support Desk",
+    description: "Contact PakistanTravel.Agency customer support for tour inquiries, hotel reservations, road condition updates, and custom northern packages.",
+    url: "/contact",
+  },
+};
 
 export default function ContactPage() {
   return (
@@ -12,9 +29,9 @@ export default function ContactPage() {
 
       <div className="space-y-8">
         <div>
-          <span className="text-xs font-bold text-sky-600 uppercase tracking-widest">Support & Inquiries</span>
+          <span className="text-xs font-bold text-sky-600 uppercase tracking-widest">Support &amp; Inquiries</span>
           <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Contact Customer Desk</h1>
-          <p className="text-xs text-slate-500 mt-1">Our on-ground coordinators are active 24/7 to assist with your bookings and travel plans.</p>
+          <p className="text-xs text-slate-500 mt-1">Our support desk is active to assist with tour reservations, route conditions, and custom itineraries.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -22,14 +39,30 @@ export default function ContactPage() {
           <div className="space-y-4">
             <h2 className="text-base font-bold text-slate-900">Direct Contact Channels</h2>
 
-            <div className="space-y-4 text-xs text-slate-600">
-              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-sky-50 text-sky-900 border border-sky-100 font-bold">
-                <Headphones className="w-6 h-6 text-sky-600 shrink-0" />
+            <div className="space-y-3 text-xs text-slate-600">
+              <a
+                href="https://wa.me/923222327096?text=Hi%20PakistanTravel.Agency%2C%20I%20have%20an%20inquiry%20regarding%20a%20tour"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 text-emerald-950 border border-emerald-200 font-bold hover:bg-emerald-100 transition"
+              >
+                <MessageSquare className="w-6 h-6 text-emerald-600 shrink-0" />
                 <div>
-                  <span className="block text-sm">24/7 Online Support</span>
-                  <span className="text-[11px] font-normal text-sky-700">Instant assistance for travelers and bookings</span>
+                  <span className="block text-sm">WhatsApp Live Chat</span>
+                  <span className="text-[11px] font-normal text-emerald-800">+92 322 2327096 · Instant Response</span>
                 </div>
-              </div>
+              </a>
+
+              <a
+                href="tel:+923222327096"
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-sky-50 text-sky-950 border border-sky-200 font-bold hover:bg-sky-100 transition"
+              >
+                <Phone className="w-5 h-5 text-sky-600 shrink-0" />
+                <div>
+                  <span className="block text-sm">Call Support</span>
+                  <span className="text-[11px] font-normal text-sky-800">+92 322 2327096 (Mon - Sat, 9am - 8pm PKT)</span>
+                </div>
+              </a>
 
               <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
                 <Mail className="w-5 h-5 text-orange-500 shrink-0" />
@@ -40,18 +73,12 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                <Clock className="w-5 h-5 text-teal-600 shrink-0" />
-                <div>
-                  <span className="font-bold text-slate-900 block text-sm">Operating Hours</span>
-                  <span className="text-slate-500">Monday – Sunday · 24 Hours Active</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
                 <MapPin className="w-5 h-5 text-teal-600 shrink-0" />
                 <div>
-                  <span className="font-bold text-slate-900 block text-sm">Headquarters</span>
-                  <span className="text-slate-500">Floor 4, Evacuee Trust Complex, Blue Area, Islamabad</span>
+                  <span className="font-bold text-slate-900 block text-sm">Headquarters (Pakistan)</span>
+                  {/* TODO: Replace with registered legal office address if different */}
+                  <span className="text-slate-500 block">Floor 4, Evacuee Trust Complex, Aga Khan Rd, F-5/1, Islamabad, ICT 44000</span>
+                  <span className="text-[10px] text-slate-400">NTN / Registration on file with SECP</span>
                 </div>
               </div>
             </div>
@@ -60,49 +87,10 @@ export default function ContactPage() {
           {/* Quick Message Form */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-slate-900">Send an Online Message</h2>
-            <form onSubmit={(e) => { e.preventDefault(); alert("Message sent! Our support team will respond to your email shortly."); }} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Your Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Asad Malik"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Your Email</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="name@example.com"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Message</label>
-                <textarea
-                  rows={4}
-                  required
-                  placeholder="Ask about customized tour packages, road conditions, or private Prado rentals..."
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-md shadow-orange-500/20"
-              >
-                Send Inquiry
-              </button>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-

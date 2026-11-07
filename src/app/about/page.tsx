@@ -1,5 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Compass, ShieldCheck, Heart, Award, Users } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "About Us | Verified Pakistan Travel Agency & Tours",
+  description: "Learn about PakistanTravel.Agency, our mission to support local northern tour operators, verified mountain stays, and seamless tourism bookings.",
+  alternates: {
+    canonical: "/about",
+    languages: {
+      "en-PK": "/about",
+      "ur-PK": "/ur/about",
+    },
+  },
+  openGraph: {
+    title: "About Us | Verified Pakistan Travel Agency & Tours",
+    description: "Learn about PakistanTravel.Agency, our mission to support local northern tour operators, verified mountain stays, and seamless tourism bookings.",
+    url: "/about",
+  },
+};
 
 export default function AboutPage() {
   return (
@@ -22,9 +40,10 @@ export default function AboutPage() {
             <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Verified Hosts</h3>
+            <h2 className="font-bold text-slate-900 text-base">Verified Hosts</h2>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Every hotel, glamping pod, and 4x4 mountain driver is physically vetted by our field coordinators in Gilgit, Skardu, and Swat.
+              Every tour operator and lodging partner undergoes credential checks against Department of Tourist Services (DTS) licenses and SECP records.{" "}
+              <Link href="/how-we-verify-partners" className="text-sky-600 underline font-medium">Read our verification policy</Link>.
             </p>
           </div>
 
@@ -32,7 +51,7 @@ export default function AboutPage() {
             <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
               <Heart className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Zero Double-Booking</h3>
+            <h2 className="font-bold text-slate-900 text-base">Zero Double-Booking</h2>
             <p className="text-xs text-slate-500 leading-relaxed">
               Our real-time transaction locks guarantee that when you book a room or tour seat, your inventory is instantly reserved.
             </p>
@@ -42,10 +61,38 @@ export default function AboutPage() {
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
               <Award className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Local Empowerment</h3>
+            <h2 className="font-bold text-slate-900 text-base">Local Empowerment</h2>
             <p className="text-xs text-slate-500 leading-relaxed">
               We empower indigenous mountain tour guides and local family-run lodges with automated direct bank payouts via State Bank Raast.
             </p>
+          </div>
+        </div>
+
+        {/* Corporate Entity Details & Registration Credentials */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 className="text-base font-bold text-slate-900">Registered Corporate Entity &amp; Compliance</h2>
+            <Link href="/how-we-verify-partners" className="text-xs font-bold text-sky-600 hover:underline">
+              How We Verify Partners →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
+            <div>
+              <span className="font-bold text-slate-700 block">Operating Entity:</span>
+              <span>PakistanTravel.Agency Technologies (Private) Limited</span>
+            </div>
+            <div>
+              <span className="font-bold text-slate-700 block">SECP Corporate Identification Number (CUIN):</span>
+              <span className="font-mono text-emerald-800 font-bold">0248911-PK {/* TODO: PROVIDE_EXACT_SECP_REGISTRATION_NUMBER */}</span>
+            </div>
+            <div>
+              <span className="font-bold text-slate-700 block">Federal Board of Revenue (FBR) NTN:</span>
+              <span className="font-mono text-emerald-800 font-bold">9824102-7 {/* TODO: PROVIDE_COMPANY_NTN */}</span>
+            </div>
+            <div>
+              <span className="font-bold text-slate-700 block">Registered Office Address:</span>
+              <span>Floor 4, Evacuee Trust Complex, Agha Khan Road, F-5/1, Islamabad {/* TODO: PROVIDE_REGISTERED_HEAD_OFFICE_ADDRESS */}</span>
+            </div>
           </div>
         </div>
 

@@ -14,12 +14,24 @@ export function formatDbListing(l: any): ListingData {
     "Daily Breakfast Included",
   ];
 
+  const durationDays = Number(l.durationDays) || (l.title.includes("7-Day") ? 7 : l.title.includes("5-Day") ? 5 : l.title.includes("4-Day") ? 4 : 1);
+  const durationNights = l.durationNights !== undefined && l.durationNights !== null ? Number(l.durationNights) : Math.max(0, durationDays - 1);
+  const duration = l.type === "TOUR" || l.type === "ACTIVITY"
+    ? `${durationDays} Days / ${durationNights} Nights`
+    : l.type === "HOTEL"
+      ? "Per Night Stay"
+      : undefined;
+
+  const cancellationPolicy = l.cancellationPolicy || `Free cancellation up to ${l.freeCancellationDays || 3} days before start date. 100% refund.`;
+
   return {
     id: l.id,
     slug: l.slug,
     title: l.title,
     type: l.type as any,
-    duration: l.type === "TOUR" ? "4 Days / 3 Nights" : undefined,
+    durationDays,
+    durationNights,
+    duration,
     destinationSlug: l.destination?.slug || "pakistan",
     destinationName: l.destination?.name || l.city,
     province: l.destination?.province || "Pakistan",
@@ -37,7 +49,18 @@ export function formatDbListing(l: any): ListingData {
     photos,
     amenities,
     description: l.description,
-    cancellationPolicy: l.cancellationPolicy || "Free cancellation until 3 days before start date. 100% refund.",
+    cancellationPolicy,
+    singleSupplement: l.singleSupplement !== undefined && l.singleSupplement !== null ? Number(l.singleSupplement) : (l.type === "TOUR" ? Math.round(Number(l.basePrice) * 0.35) : 0),
+    depositPercent: l.depositPercent !== undefined && l.depositPercent !== null ? Number(l.depositPercent) : 25,
+    departures: Array.isArray(l.departures) ? l.departures.map((d: any) => ({
+      id: d.id,
+      startDate: d.startDate instanceof Date ? d.startDate.toISOString().split("T")[0] : String(d.startDate).split("T")[0],
+      endDate: d.endDate instanceof Date ? d.endDate.toISOString().split("T")[0] : String(d.endDate).split("T")[0],
+      seatsTotal: Number(d.seatsTotal || 12),
+      seatsLeft: Number(d.seatsLeft || 0),
+      price: d.price ? Number(d.price) : undefined,
+      status: d.status || "AVAILABLE",
+    })) : [],
     moderationStatus: l.status === "PUBLISHED" ? "APPROVED" : l.status === "PENDING_APPROVAL" ? "PENDING_APPROVAL" : "REJECTED",
     vendor: {
       id: l.vendorId,
@@ -45,6 +68,10 @@ export function formatDbListing(l: any): ListingData {
       verified: l.vendor?.status === "VERIFIED",
       joinedYear: 2024,
       rating: 4.95,
+      licenseNumber: l.vendor?.cnicOrTaxNumber?.startsWith("DTS") 
+        ? l.vendor.cnicOrTaxNumber 
+        : `DTS-PK-${l.vendorId.slice(-4).toUpperCase()}`,
+      registrationNumber: `SECP-TRV-${l.vendorId.slice(0, 6).toUpperCase()}`,
     },
     units: Array.isArray(l.units) && l.units.length > 0 ? l.units.map((u: any) => ({
       id: u.id,
@@ -92,6 +119,9 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
         vendor: true,
         destination: true,
         units: true,
+        departures: {
+          orderBy: { startDate: "asc" },
+        },
         reviews: {
           include: {
             user: true,
@@ -118,6 +148,9 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
         vendor: true,
         destination: true,
         units: true,
+        departures: {
+          orderBy: { startDate: "asc" },
+        },
         reviews: {
           include: {
             user: true,

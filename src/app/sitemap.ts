@@ -1,5 +1,7 @@
 import { MetadataRoute } from "next";
 import { getActiveDbListings } from "@/services/serverListing.service";
+import { destinationsData } from "@/data/destinationData";
+import { blogPosts } from "@/data/blogData";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +18,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${baseUrl}/search`,
       lastModified: new Date(),
-      changeFrequency: "hourly",
+      changeFrequency: "daily",
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/destinations`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/about`,
@@ -35,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/faq`,
       lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.6,
+      priority: 0.65,
     },
     {
       url: `${baseUrl}/terms`,
@@ -51,20 +65,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const destinationRoutes: MetadataRoute.Sitemap = [
-    "hunza",
-    "skardu",
-    "swat",
-    "murree",
-    "kumrat",
-    "islamabad",
-  ].map((slug) => ({
-    url: `${baseUrl}/search?destination=${slug}`,
+  // Static landing pages for all 6 destinations
+  const destinationRoutes: MetadataRoute.Sitemap = Object.keys(destinationsData).map((slug) => ({
+    url: `${baseUrl}/destinations/${slug}`,
     lastModified: new Date(),
-    changeFrequency: "daily",
-    priority: 0.85,
+    changeFrequency: "weekly",
+    priority: 0.9,
   }));
 
+  // Blog articles
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  // Dynamic active database listings
   let listingRoutes: MetadataRoute.Sitemap = [];
   try {
     const activeListings = await getActiveDbListings();
@@ -78,5 +95,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Sitemap DB fetch fallback:", err);
   }
 
-  return [...staticRoutes, ...destinationRoutes, ...listingRoutes];
+  return [...staticRoutes, ...destinationRoutes, ...blogRoutes, ...listingRoutes];
 }

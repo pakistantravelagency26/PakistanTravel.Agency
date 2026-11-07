@@ -1,5 +1,15 @@
 import { isVendorEnabled } from "./vendor.service";
 
+export interface DepartureData {
+  id: string;
+  startDate: string;
+  endDate: string;
+  seatsTotal: number;
+  seatsLeft: number;
+  price?: number;
+  status: string;
+}
+
 export interface ListingUnitData {
   id: string;
   title: string;
@@ -34,6 +44,8 @@ export interface ListingData {
   amenities: string[];
   description: string;
   badge?: string;
+  durationDays?: number;
+  durationNights?: number;
   duration?: string;
   cancellationPolicy: string;
   moderationStatus?: "APPROVED" | "PENDING_APPROVAL" | "REJECTED";
@@ -47,8 +59,13 @@ export interface ListingData {
     verified: boolean;
     joinedYear: number;
     rating: number;
+    licenseNumber?: string;
+    registrationNumber?: string;
   };
   units: ListingUnitData[];
+  departures?: DepartureData[];
+  singleSupplement?: number;
+  depositPercent?: number;
   reviews: {
     id: string;
     userName: string;

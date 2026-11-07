@@ -16,7 +16,7 @@ import {
   Compass,
   ArrowRight
 } from "lucide-react";
-import { BookingRecord, getBookingById } from "@/services/booking.service";
+import type { BookingRecord } from "@/services/booking.service";
 
 export default function ConfirmationPage() {
   const params = useParams();
@@ -27,36 +27,45 @@ export default function ConfirmationPage() {
 
   useEffect(() => {
     async function load() {
-      const data = await getBookingById(bookingId);
-      if (data) {
-        setBooking(data);
-      } else {
-        // Fallback demo mock
-        setBooking({
-          id: bookingId,
-          bookingNumber: bookingId.startsWith("PKT") ? bookingId : `PKT-2026-89421`,
-          listingId: "hunza-serena-inn",
-          listingTitle: "Hunza Serena Inn & Heritage Lodge",
-          listingPhoto: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80",
-          unitTitle: "Deluxe Mountain View Room",
-          destination: "Karimabad, Hunza Valley",
-          startDate: "2026-11-10",
-          endDate: "2026-11-13",
-          nightsCount: 3,
-          guestsCount: 2,
-          unitsCount: 1,
-          totalAmount: 102375,
-          paymentMethod: "JAZZCASH",
-          paymentStatus: "PAID",
-          status: "CONFIRMED",
-          guestName: "Usman Tariq",
-          guestEmail: "customer@pakistantravel.agency",
-          guestPhone: "03001234567",
-          cnicOrPassport: "37405-1234567-1",
-          specialRequests: "Upper floor room with direct view of Rakaposhi peak.",
-          createdAt: new Date().toISOString(),
-        });
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}`);
+        const data = await res.json();
+        if (data.success && data.booking) {
+          setBooking(data.booking);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.warn("Could not fetch remote booking, using fallback:", e);
       }
+
+      // Fallback demo mock
+      setBooking({
+        id: bookingId,
+        bookingNumber: bookingId.startsWith("PKT") ? bookingId : `PKT-2026-89421`,
+        listingId: "hunza-serena-inn",
+        listingTitle: "Hunza Serena Inn & Heritage Lodge",
+        listingPhoto: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80",
+        unitTitle: "Deluxe Mountain View Room",
+        destination: "Karimabad, Hunza Valley",
+        startDate: "2026-11-10",
+        endDate: "2026-11-13",
+        nightsCount: 3,
+        guestsCount: 2,
+        unitsCount: 1,
+        totalAmount: 102375,
+        depositAmount: 25593,
+        balanceDue: 76782,
+        paymentMethod: "JAZZCASH",
+        paymentStatus: "PAID",
+        status: "CONFIRMED",
+        guestName: "Usman Tariq",
+        guestEmail: "customer@pakistantravel.agency",
+        guestPhone: "03001234567",
+        cnicOrPassport: "37405-1234567-1",
+        specialRequests: "Upper floor room with direct view of Rakaposhi peak.",
+        createdAt: new Date().toISOString(),
+      });
       setLoading(false);
     }
     load();
@@ -93,16 +102,25 @@ export default function ConfirmationPage() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => window.print()}
+            <a
+              href={`/api/bookings/${booking.bookingNumber}/voucher`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-4 py-2.5 rounded-xl bg-white text-emerald-800 hover:bg-slate-100 font-bold text-xs shadow transition flex items-center gap-1.5"
             >
+              <Download className="w-4 h-4" />
+              <span>Download PDF Voucher</span>
+            </a>
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow transition flex items-center gap-1.5"
+            >
               <Printer className="w-4 h-4" />
-              <span>Print Voucher</span>
+              <span>Print</span>
             </button>
             <Link
               href="/account/bookings"
-              className="px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow transition"
+              className="px-4 py-2.5 rounded-xl bg-emerald-900 hover:bg-black text-white font-bold text-xs shadow transition"
             >
               My Bookings
             </Link>
@@ -195,22 +213,60 @@ export default function ConfirmationPage() {
 
           {/* Financial Summary */}
           <div className="space-y-3 border-t border-slate-100 pt-6">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Receipt</h3>
-            <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
-              <div>
-                <span className="text-xs font-bold text-slate-800 block">
-                  Method: {booking.paymentMethod}
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  Status: {booking.paymentStatus === "PAID" ? "Paid in full (PKR)" : "Pay at front desk on check-in"}
-                </span>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Receipt & Breakdown</h3>
+              <a
+                href={`/api/bookings/${booking.bookingNumber}/voucher`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-bold text-brand-emerald hover:underline flex items-center gap-1"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download PDF Voucher</span>
+              </a>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <div>
+                  <span className="font-bold text-slate-800 block">
+                    Method: {booking.paymentMethod}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Status: {booking.paymentStatus === "PAID" ? "Payment Completed" : "Partial Deposit / Due on Arrival"}
+                  </span>
+                  {booking.isSoloTraveler && (
+                    <span className="inline-block mt-1 text-[10px] font-semibold text-brand-emerald bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Solo Traveler Booking (Twin-share solo supplement included: PKR {Number(booking.singleSupplement || 0).toLocaleString()})
+                    </span>
+                  )}
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 uppercase block font-semibold">Total Price (Inc. Taxes)</span>
+                  <span className="text-xl font-extrabold text-slate-900">
+                    PKR {booking.totalAmount.toLocaleString()}
+                  </span>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 uppercase block font-semibold">Total Amount</span>
-                <span className="text-2xl font-extrabold text-slate-900">
-                  PKR {booking.totalAmount.toLocaleString()}
-                </span>
-              </div>
+
+              {(booking.depositAmount > 0 || booking.balanceDue > 0) && (
+                <div className="border-t border-slate-200 pt-3 grid grid-cols-2 gap-4 text-xs">
+                  <div className="bg-white p-3 rounded-lg border border-slate-200">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Paid Online (Deposit)</span>
+                    <span className="text-sm font-extrabold text-emerald-600 block mt-0.5">
+                      PKR {booking.depositAmount.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-slate-400">Card / JazzCash / EasyPaisa</span>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border border-slate-200">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Balance Due on Arrival</span>
+                    <span className={`text-sm font-extrabold block mt-0.5 ${booking.balanceDue > 0 ? "text-amber-700" : "text-slate-900"}`}>
+                      PKR {booking.balanceDue.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-slate-400">Pay at departure / check-in desk</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

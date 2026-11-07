@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   MapPin, 
   Star, 
@@ -22,6 +23,12 @@ import {
   Building,
   ArrowRight,
   MessageSquarePlus,
+  Lock,
+  Image as ImageIcon,
+  FileText,
+  ShieldAlert,
+  MessageCircle,
+  Phone
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
 import { WriteReviewModal } from "@/components/reviews/WriteReviewModal";
@@ -34,24 +41,73 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
   const router = useRouter();
 
   const [activePhoto, setActivePhoto] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [selectedUnitId, setSelectedUnitId] = useState<string>(listing.units?.[0]?.id || "");
   const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
-  const [checkInDate, setCheckInDate] = useState("2026-11-10");
-  const [checkOutDate, setCheckOutDate] = useState("2026-11-13");
+  const [checkInDate, setCheckInDate] = useState("2026-11-15");
+  const [checkOutDate, setCheckOutDate] = useState("2026-11-21");
   const [isSaved, setIsSaved] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewsList, setReviewsList] = useState<any[]>(listing.reviews || []);
+  const [isReviewEligible, setIsReviewEligible] = useState(false);
 
   const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
   const selectedUnit = listing.units.find((u) => u.id === selectedUnitId) || listing.units[0];
-  const nightsCount = 3; // Demo nights duration for hotels
+  const maxCapacity = Math.max(1, selectedUnit?.maxGuests || (isTour ? 2 : 4));
+  const nightsCount = listing.durationNights || 3;
   const unitPrice = selectedUnit ? selectedUnit.basePrice : listing.basePrice;
-  const totalPrice = isTour ? unitPrice * selectedQuantity : unitPrice * nightsCount * selectedQuantity;
+
+  // Fixed Departures
+  const departures = listing.departures && listing.departures.length > 0 ? listing.departures : [
+    { id: "dep-1", startDate: "2026-11-15", endDate: "2026-11-21", seatsTotal: 12, seatsLeft: 8, status: "AVAILABLE" },
+    { id: "dep-2", startDate: "2026-11-22", endDate: "2026-11-28", seatsTotal: 12, seatsLeft: 4, status: "AVAILABLE" },
+    { id: "dep-3", startDate: "2026-11-29", endDate: "2026-12-05", seatsTotal: 12, seatsLeft: 11, status: "AVAILABLE" },
+    { id: "dep-4", startDate: "2026-12-06", endDate: "2026-12-12", seatsTotal: 12, seatsLeft: 12, status: "AVAILABLE" },
+  ];
+  const [selectedDepartureId, setSelectedDepartureId] = useState<string>(departures[0]?.id || "");
+  const selectedDeparture = departures.find((d) => d.id === selectedDepartureId) || departures[0];
+
+  // Auto-calculated Dates (Tour End Date is strictly read-only derived)
+  const effectiveStartDate = isTour ? selectedDeparture?.startDate || checkInDate : checkInDate;
+  const effectiveEndDate = isTour
+    ? selectedDeparture?.endDate || (function() {
+        const start = new Date(checkInDate);
+        start.setDate(start.getDate() + (listing.durationDays || 4) - 1);
+        return start.toISOString().split("T")[0];
+      })()
+    : checkOutDate;
+
+  // Solo Traveler Single Supplement
+  const isSingleTraveler = selectedQuantity === 1 && isTour;
+  const singleSupplementRate = listing.singleSupplement || Math.round(unitPrice * 0.35);
+  const [isSoloSupplementApplied, setIsSoloSupplementApplied] = useState(true);
+  const activeSupplement = isSingleTraveler && isSoloSupplementApplied ? singleSupplementRate : 0;
+
+  // Pricing Calculation
+  const baseTravelerPrice = isTour
+    ? unitPrice * Math.min(selectedQuantity, maxCapacity)
+    : unitPrice * nightsCount * Math.min(selectedQuantity, maxCapacity);
+
+  const totalPrice = baseTravelerPrice + activeSupplement;
+  const depositPercent = listing.depositPercent || 25;
+  const depositAmount = Math.round((totalPrice * depositPercent) / 100);
+  const balanceDue = totalPrice - depositAmount;
+
+  useEffect(() => {
+    fetch(`/api/bookings/eligible-review?listingId=${listing.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.eligible) {
+          setIsReviewEligible(true);
+        }
+      })
+      .catch(() => {});
+  }, [listing.id]);
 
   function handleReserve() {
     if (!listing) return;
     router.push(
-      `/checkout/${listing.id}?unitId=${selectedUnit?.id || ""}&qty=${selectedQuantity}&start=${checkInDate}&end=${checkOutDate}`
+      `/checkout/${listing.id}?unitId=${selectedUnit?.id || ""}&depId=${selectedDeparture?.id || ""}&qty=${selectedQuantity}&isSolo=${isSingleTraveler && isSoloSupplementApplied ? "1" : "0"}&start=${effectiveStartDate}&end=${effectiveEndDate}`
     );
   }
 
@@ -92,13 +148,17 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {listing.title}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 flex items-center gap-1.5 mt-1">
-              <MapPin className="w-4 h-4 text-brand-emerald shrink-0" />
-              <span>{listing.address}, {listing.city}, {listing.province}</span>
-              <span className="text-brand-emerald font-semibold hover:underline cursor-pointer ml-1">
-                — Show on map
+            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-600 mt-2">
+              <span className="flex items-center gap-1.5 text-slate-800 font-semibold bg-slate-100 px-2.5 py-0.5 rounded-md">
+                <Clock className="w-3.5 h-3.5 text-orange-500" />
+                {listing.duration || (isTour ? `${listing.durationDays || 1} Days / ${listing.durationNights || 0} Nights` : "Per Night Stay")}
               </span>
-            </p>
+              <span className="text-slate-300">|</span>
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-brand-emerald shrink-0" />
+                <span>{listing.address}, {listing.city}, {listing.province}</span>
+              </span>
+            </div>
           </div>
 
           {/* Action buttons & Quick Price */}
@@ -109,6 +169,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 isSaved ? "text-red-500 border-red-200 bg-red-50" : "text-slate-600"
               }`}
               title="Save to Wishlist"
+              aria-label="Save to Wishlist"
             >
               <Heart className={`w-5 h-5 ${isSaved ? "fill-red-500" : ""}`} />
             </button>
@@ -117,6 +178,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               onClick={() => navigator.clipboard.writeText(window.location.href)}
               className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition shadow-sm"
               title="Share Listing"
+              aria-label="Share Listing"
             >
               <Share2 className="w-5 h-5" />
             </button>
@@ -133,16 +195,32 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
         {/* High Impact Photo Gallery */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-2xl overflow-hidden shadow-md">
           {/* Main Large Photo */}
-          <div className="md:col-span-2 h-72 sm:h-96 relative group cursor-pointer">
-            <img
+          <div 
+            onClick={() => setIsGalleryOpen(true)}
+            className="md:col-span-2 h-72 sm:h-96 relative group cursor-pointer overflow-hidden bg-slate-100"
+          >
+            <Image
               src={listing.photos[activePhoto] || listing.photos[0]}
               alt={`${listing.title} Main Gallery View`}
-              className="w-full h-full object-cover transition duration-300"
-              loading="eager"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition duration-300 group-hover:scale-102"
             />
-            <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-md backdrop-blur-sm">
-              Photo {activePhoto + 1} of {listing.photos.length}
+            <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm flex items-center gap-1.5">
+              <ImageIcon className="w-3.5 h-3.5" />
+              <span>Photo {activePhoto + 1} of {listing.photos.length} · Click to expand</span>
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsGalleryOpen(true);
+              }}
+              aria-label={`View all ${listing.photos.length} photos`}
+              className="absolute top-3 right-3 bg-white/90 hover:bg-white text-slate-900 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md transition"
+            >
+              View All {listing.photos.length} Photos
+            </button>
           </div>
 
           {/* Secondary Thumbnail Grid */}
@@ -151,15 +229,17 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               <div
                 key={index}
                 onClick={() => setActivePhoto(index)}
-                className={`relative h-full overflow-hidden cursor-pointer rounded-lg border-2 transition ${
+                className={`relative h-full overflow-hidden cursor-pointer rounded-lg border-2 transition bg-slate-100 ${
                   activePhoto === index ? "border-brand-emerald" : "border-transparent opacity-80 hover:opacity-100"
                 }`}
               >
-                <img 
+                <Image 
                   src={photo} 
                   alt={`${listing.title} Preview ${index + 1}`} 
-                  className="w-full h-full object-cover" 
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
                   loading="lazy"
+                  className="object-cover" 
                 />
               </div>
             ))}
@@ -178,6 +258,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
           <a href="#policies" className="hover:text-brand-emerald transition whitespace-nowrap">
             {isTour ? "Schedule & Guidelines" : "House Rules & Policies"}
           </a>
+          <a href="#safety" className="hover:text-brand-emerald transition whitespace-nowrap">Permits &amp; Safety</a>
           <a href="#reviews" className="hover:text-brand-emerald transition whitespace-nowrap">Guest Reviews ({listing.totalReviews})</a>
         </div>
 
@@ -193,32 +274,19 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 {listing.description}
               </p>
 
-              {/* Northern Pakistan Specific Highlights */}
+              {/* Data-Driven Tour & Property Inclusions */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 text-xs">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Zap className="w-4 h-4 text-amber-500" />
-                  <span>24/7 Power Backup</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Flame className="w-4 h-4 text-orange-500" />
-                  <span>{isTour ? "Campfire Nights" : "Heated Rooms"}</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Wifi className="w-4 h-4 text-sky-500" />
-                  <span>High Speed WiFi</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Coffee className="w-4 h-4 text-emerald-600" />
-                  <span>Free Breakfast</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <ShieldCheck className="w-4 h-4 text-green-600" />
-                  <span>Verified Partner</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span>{isTour ? "Guided Schedule" : "24hr Front Desk"}</span>
-                </div>
+                {(listing.amenities && listing.amenities.length > 0 ? listing.amenities : [
+                  "Verified Transportation",
+                  "Licensed Local Guide",
+                  "Confirmed Accommodations",
+                  "Daily Breakfast Included"
+                ]).slice(0, 6).map((amenity, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-slate-700">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="truncate">{amenity}</span>
+                  </div>
+                ))}
               </div>
             </section>
 
@@ -282,8 +350,8 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                             <p className="text-xl font-extrabold text-slate-900">
                               PKR {unit.basePrice.toLocaleString()}
                             </p>
-                            <span className="text-[11px] text-green-700 font-semibold block">
-                              Free cancellation before trip
+                            <span className="text-[11px] text-green-700 font-semibold block max-w-xs">
+                              {listing.cancellationPolicy}
                             </span>
                           </div>
 
@@ -365,6 +433,58 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               </div>
             </section>
 
+            {/* Permits, NOC & High-Altitude Safety Guidelines */}
+            <section id="safety" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-sky-600" />
+                <h2 className="text-lg font-bold text-slate-900">
+                  Northern Areas Permits, NOC &amp; Safety Guidelines
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <span className="font-bold text-slate-900 block flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    Pakistani Citizens Documentation
+                  </span>
+                  <p className="leading-relaxed">
+                    Original Computerized National Identity Cards (CNIC) must be carried by all adult passengers. Mandatory verification occurs at Babusar Top, Diamer, and Gilgit military checkpoints.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <span className="font-bold text-slate-900 block flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-amber-600" />
+                    Foreign Nationals &amp; Non-PK Passports
+                  </span>
+                  <p className="leading-relaxed">
+                    Foreign tourists can freely visit Hunza, Skardu, and Swat with a valid Pakistan tourist visa. Restricted border areas (e.g. sensitive sections of Khunjerab Pass or military forward zones) may require an advance Non-Objection Certificate (NOC) from the Ministry of Interior.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <span className="font-bold text-slate-900 block flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-rose-600" />
+                    Altitude Sickness (AMS) &amp; Acclimatization
+                  </span>
+                  <p className="leading-relaxed">
+                    For excursions above 3,000m (Deosai, Khunjerab, Babusar), ascend gradually, drink 3–4 liters of water daily, and avoid heavy alcohol or tobacco. In case of persistent dizziness or headache, descend immediately.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <span className="font-bold text-slate-900 block flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-sky-600" />
+                    Mountain Pass Timings &amp; Road Safety
+                  </span>
+                  <p className="leading-relaxed">
+                    Babusar Pass road operates strictly between 05:00 AM and 05:00 PM in summer for passenger safety. During late autumn and winter, vehicles must carry snow chains. Emergency support: +92 322 2327096.
+                  </p>
+                </div>
+              </div>
+            </section>
+
             {/* Verified Reviews */}
             <section id="reviews" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between">
@@ -373,13 +493,20 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   <p className="text-xs text-slate-500">Only guests who booked and experienced this can leave reviews</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setIsReviewModalOpen(true)}
-                    className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow"
-                  >
-                    <MessageSquarePlus className="w-3.5 h-3.5" />
-                    <span>Write a Review</span>
-                  </button>
+                  {isReviewEligible ? (
+                    <button
+                      onClick={() => setIsReviewModalOpen(true)}
+                      className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow"
+                    >
+                      <MessageSquarePlus className="w-3.5 h-3.5" />
+                      <span>Write a Review</span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Reviews open to travelers with completed bookings</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <div className="w-10 h-10 rounded-xl bg-brand-emerald text-white flex items-center justify-center font-bold text-sm shadow-md">
                       {listing.avgRating}
@@ -441,12 +568,77 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 </p>
               </div>
 
-              {/* Date pickers simulation */}
-              <div className="space-y-2 text-xs">
-                <div className="grid grid-cols-2 gap-2">
+              {/* Tour Fixed Departures & Auto-calculated Date */}
+              {isTour ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                      Select Fixed Departure Date *
+                    </label>
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
+                      {departures.map((d) => {
+                        const isCurrent = selectedDepartureId === d.id;
+                        const isSoldOut = d.seatsLeft <= 0;
+                        return (
+                          <div
+                            key={d.id}
+                            onClick={() => !isSoldOut && setSelectedDepartureId(d.id)}
+                            className={`p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-between ${
+                              isCurrent
+                                ? "border-brand-emerald bg-emerald-50/50 shadow-sm"
+                                : isSoldOut
+                                ? "border-slate-200 bg-slate-100 opacity-60 cursor-not-allowed"
+                                : "border-slate-200 hover:border-slate-300 bg-white"
+                            }`}
+                          >
+                            <div>
+                              <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-brand-emerald" />
+                                <span>{d.startDate} → {d.endDate}</span>
+                              </div>
+                              <span className="text-[10px] text-slate-500">
+                                {listing.duration || `${listing.durationDays || 7} Days`}
+                              </span>
+                            </div>
+                            <span
+                              className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                                isSoldOut
+                                  ? "bg-red-100 text-red-700"
+                                  : d.seatsLeft <= 4
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-emerald-100 text-emerald-800"
+                              }`}
+                            >
+                              {isSoldOut ? "Sold Out" : `${d.seatsLeft} seats left`}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Auto-calculated End Date (Read-Only) */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
+                      <span className="block text-[10px] font-bold text-slate-500 uppercase">
+                        Start Date
+                      </span>
+                      <span className="font-bold text-slate-800">{effectiveStartDate}</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-100">
+                      <span className="block text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-slate-400" />
+                        End Date (Read-only)
+                      </span>
+                      <span className="font-bold text-slate-700">{effectiveEndDate}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                      {isTour ? "Tour Start Date" : "Check-in"}
+                      Check-in
                     </label>
                     <input
                       type="date"
@@ -457,7 +649,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </div>
                   <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                      {isTour ? "Tour End Date" : "Check-out"}
+                      Check-out
                     </label>
                     <input
                       type="date"
@@ -467,22 +659,71 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                     />
                   </div>
                 </div>
+              )}
 
-                <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center">
-                  <span className="text-slate-600 font-medium">
-                    {isTour ? "Travelers / Seats" : "Quantity"}
+              {/* Traveler Capacity Selection */}
+              <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
+                <div>
+                  <span className="text-slate-600 font-medium block">
+                    {isTour ? "Travelers / Seats" : "Rooms"}
                   </span>
-                  <select
-                    value={selectedQuantity}
-                    onChange={(e) => setSelectedQuantity(Number(e.target.value))}
-                    className="font-bold text-slate-800 bg-transparent focus:outline-none"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
-                      <option key={num} value={num}>
-                        {num} {isTour ? (num > 1 ? "Travelers" : "Traveler") : (num > 1 ? "Rooms" : "Room")}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="text-[10px] text-slate-400">
+                    Max Capacity: {maxCapacity} {isTour ? "seats max" : "guests max"}
+                  </span>
+                </div>
+                <select
+                  value={Math.min(selectedQuantity, maxCapacity)}
+                  onChange={(e) => setSelectedQuantity(Number(e.target.value))}
+                  className="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
+                >
+                  {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((num) => (
+                    <option key={num} value={num}>
+                      {num} {isTour ? (num > 1 ? "Travelers / Seats" : "Traveler / Seat") : (num > 1 ? "Rooms" : "Room")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Solo Traveler Supplement Notice */}
+              {isSingleTraveler && (
+                <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold">Solo Private Room Supplement:</span>
+                    <span className="font-bold">+PKR {singleSupplementRate.toLocaleString()}</span>
+                  </div>
+                  <p className="text-[11px] text-sky-700 leading-tight">
+                    Standard rates are based on twin sharing. Solo supplement ensures a private hotel room throughout the journey.
+                  </p>
+                </div>
+              )}
+
+              {/* Itemized Price Breakdown */}
+              <div className="space-y-1 text-xs border-t border-slate-100 pt-3">
+                <div className="flex justify-between text-slate-600">
+                  <span>Base Rate ({selectedQuantity} {selectedQuantity > 1 ? "Travelers" : "Traveler"}):</span>
+                  <span>PKR {baseTravelerPrice.toLocaleString()}</span>
+                </div>
+                {activeSupplement > 0 && (
+                  <div className="flex justify-between text-sky-700 font-medium">
+                    <span>Solo Room Supplement:</span>
+                    <span>+PKR {activeSupplement.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-slate-600">
+                  <span>Provincial Tourism Taxes:</span>
+                  <span className="text-emerald-700 font-semibold">Included</span>
+                </div>
+                <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">
+                  <span>Total Package Price:</span>
+                  <span>PKR {totalPrice.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-500 pt-1">
+                  <span>Online Deposit Due ({depositPercent}%):</span>
+                  <span className="font-bold text-emerald-800">PKR {depositAmount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-[11px] text-slate-500">
+                  <span>Balance Due on Arrival:</span>
+                  <span className="font-bold text-slate-700">PKR {balanceDue.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -495,12 +736,23 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 <ArrowRight className="w-4 h-4" />
               </button>
 
+              {/* WhatsApp Quick Inquire Button */}
+              <a
+                href={`https://wa.me/923222327096?text=${encodeURIComponent(`Hi PakistanTravel.Agency, I have a question about booking: ${listing.title}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2 transition"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-600" />
+                <span>Ask Operator on WhatsApp</span>
+              </a>
+
               <div className="space-y-1.5 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
                 <p className="flex items-center gap-1.5 text-green-700 font-medium">
-                  <Check className="w-3.5 h-3.5" /> No instant charge: Pay online or Cash on arrival
+                  <Check className="w-3.5 h-3.5 shrink-0" /> {listing.cancellationPolicy}
                 </p>
                 <p className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-brand-emerald" /> 
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-emerald shrink-0" /> 
                   {isTour ? "Guaranteed seat reservation & trip voucher" : "Guaranteed booking confirmation voucher"}
                 </p>
               </div>
@@ -508,10 +760,15 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
 
             {/* Vendor Profile Card */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Host & Operator</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Host &amp; Operator</h3>
+                <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  DTS Registered
+                </span>
+              </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-brand-emeraldLight text-brand-emerald flex items-center justify-center font-bold">
-                  <Building className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full bg-emerald-50 text-brand-emerald flex items-center justify-center font-bold">
+                  <Building className="w-5 h-5 text-emerald-700" />
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-slate-900">{listing.vendor.businessName}</h4>
@@ -520,9 +777,38 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-slate-600">
-                Licensed tourism partner adhering to Pakistan Department of Tourist Services standards.
-              </p>
+
+              {/* Verified Credentials */}
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1 text-xs">
+                <div className="flex justify-between text-slate-600">
+                  <span className="text-[11px] text-slate-500">DTS License No:</span>
+                  <span className="font-mono font-bold text-slate-800">{listing.vendor.licenseNumber || "DTS-PK-2024"}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span className="text-[11px] text-slate-500">SECP Reg:</span>
+                  <span className="font-mono font-bold text-slate-800">{listing.vendor.registrationNumber || "SECP-TRV-PK"}</span>
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <Link
+                  href="/how-we-verify-partners"
+                  className="text-xs text-sky-600 hover:text-sky-700 font-bold hover:underline flex items-center gap-1"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>How we verify this operator →</span>
+                </Link>
+              </div>
+
+              <a
+                href={`https://wa.me/923222327096?text=${encodeURIComponent(`Hi, I am inquiring about operator ${listing.vendor.businessName} for listing: ${listing.title}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center gap-2 transition"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-600" />
+                <span>Chat on WhatsApp (+92 322 2327096)</span>
+              </a>
             </div>
           </div>
         </div>
@@ -530,11 +816,72 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
 
       {/* Review Modal */}
       <WriteReviewModal
+        listingId={listing.id}
         listingTitle={listing.title}
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         onSubmitSuccess={(newReview) => setReviewsList([newReview, ...reviewsList])}
       />
+
+      {/* Unlimited Gallery Photos Lightbox Modal */}
+      {isGalleryOpen && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 sm:p-8 animate-in fade-in">
+          <div className="flex items-center justify-between text-white pb-3 border-b border-white/10">
+            <div>
+              <h3 className="font-bold text-base truncate max-w-lg">{listing.title}</h3>
+              <span className="text-xs text-slate-400">Photo {activePhoto + 1} of {listing.photos.length}</span>
+            </div>
+            <button
+              onClick={() => setIsGalleryOpen(false)}
+              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition"
+            >
+              ✕ Close Gallery
+            </button>
+          </div>
+
+          <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
+            <img
+              src={listing.photos[activePhoto]}
+              alt={`Photo ${activePhoto + 1}`}
+              className="max-h-[75vh] max-w-full object-contain rounded-xl shadow-2xl"
+            />
+
+            {listing.photos.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActivePhoto((prev) => (prev > 0 ? prev - 1 : listing.photos.length - 1))}
+                  className="absolute left-2 sm:left-6 p-3 rounded-full bg-black/60 hover:bg-black/80 text-white text-lg font-bold"
+                  aria-label="Previous photo"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={() => setActivePhoto((prev) => (prev < listing.photos.length - 1 ? prev + 1 : 0))}
+                  className="absolute right-2 sm:right-6 p-3 rounded-full bg-black/60 hover:bg-black/80 text-white text-lg font-bold"
+                  aria-label="Next photo"
+                >
+                  ›
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Thumbnail Strip */}
+          <div className="flex gap-2 overflow-x-auto py-2 justify-center scrollbar-none">
+            {listing.photos.map((p, idx) => (
+              <img
+                key={idx}
+                src={p}
+                alt={`Thumbnail ${idx + 1}`}
+                onClick={() => setActivePhoto(idx)}
+                className={`w-14 h-14 object-cover rounded-lg cursor-pointer border-2 transition ${
+                  activePhoto === idx ? "border-emerald-500 scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

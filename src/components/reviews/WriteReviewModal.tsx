@@ -4,51 +4,95 @@ import { useState } from "react";
 import { Star, X, CheckCircle2, ShieldCheck } from "lucide-react";
 
 interface Props {
+  listingId?: string;
   listingTitle: string;
   isOpen: boolean;
   onClose: () => void;
   onSubmitSuccess: (review: any) => void;
 }
 
-export function WriteReviewModal({ listingTitle, isOpen, onClose, onSubmitSuccess }: Props) {
+export function WriteReviewModal({ listingId, listingTitle, isOpen, onClose, onSubmitSuccess }: Props) {
   const [overallRating, setOverallRating] = useState(5);
   const [cleanliness, setCleanliness] = useState(5);
   const [staff, setStaff] = useState(5);
   const [location, setLocation] = useState(5);
   const [comment, setComment] = useState("");
-  const [bookingRef, setBookingRef] = useState("PKT-2026-89421");
+  const [bookingRef, setBookingRef] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      onSubmitSuccess({
-        id: `rev-${Date.now()}`,
-        userName: "Usman Tariq",
-        userCity: "Islamabad, Pakistan",
-        rating: overallRating,
-        date: "Just now",
-        comment,
-      });
-      onClose();
-    }, 1500);
+    setError("");
+    setSubmitting(true);
+
+    try {
+      if (listingId) {
+        const res = await fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            listingId,
+            rating: overallRating,
+            comment,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to submit review");
+        }
+
+        setSubmitted(true);
+        setTimeout(() => {
+          onSubmitSuccess(data.review);
+          onClose();
+        }, 1200);
+        return;
+      }
+
+      setSubmitted(true);
+      setTimeout(() => {
+        onSubmitSuccess({
+          id: `rev-${Date.now()}`,
+          userName: "Verified Traveler",
+          userCity: "Pakistan",
+          rating: overallRating,
+          date: "Just now",
+          comment,
+        });
+        onClose();
+      }, 1200);
+    } catch (err: any) {
+      setError(err.message || "Failed to submit review");
+      setSubmitting(false);
+    }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+    <div 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="review-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
+    >
       <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100">
         <div className="flex justify-between items-start">
           <div>
             <span className="text-[10px] font-bold text-brand-emerald uppercase tracking-wider flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" /> Verified Guest Review
             </span>
-            <h2 className="text-xl font-bold text-slate-900 mt-0.5">Rate your experience</h2>
+            <h2 id="review-modal-title" className="text-xl font-bold text-slate-900 mt-0.5">Rate your experience</h2>
             <p className="text-xs text-slate-500">{listingTitle}</p>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+          <button 
+            onClick={onClose} 
+            aria-label="Close review dialog" 
+            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -72,6 +116,7 @@ export function WriteReviewModal({ listingTitle, isOpen, onClose, onSubmitSucces
                     type="button"
                     key={star}
                     onClick={() => setOverallRating(star)}
+                    aria-label={`Rate ${star} out of 5 stars`}
                     className="p-1 text-amber-400 hover:scale-110 transition"
                   >
                     <Star
@@ -144,11 +189,18 @@ export function WriteReviewModal({ listingTitle, isOpen, onClose, onSubmitSucces
               />
             </div>
 
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full py-3 bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-xs rounded-xl transition shadow"
+              disabled={submitting}
+              className="w-full py-3 bg-brand-emerald hover:bg-brand-emeraldDark disabled:opacity-50 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-1.5"
             >
-              Post Verified Review
+              <span>{submitting ? "Verifying & Posting..." : "Post Verified Review"}</span>
             </button>
           </form>
         )}
