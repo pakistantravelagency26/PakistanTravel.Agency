@@ -43,12 +43,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         session?.user?.role !== "ADMIN"
       ) {
         window.location.href = `/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`;
-      } else if (
-        status === "authenticated" &&
-        session?.user?.role === "ADMIN" &&
-        !(session.user as any).twoFactorEnabled
-      ) {
-        window.location.href = "/secure-admin/setup-2fa";
       }
     }
   }, [status, session, pathname, timedOut]);

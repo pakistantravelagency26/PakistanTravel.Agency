@@ -58,9 +58,6 @@ export async function middleware(req: NextRequest) {
   }
 
   const hasQueryParams = req.nextUrl.search.length > 0;
-  const snooze2fa =
-    req.cookies.get("snooze_2fa")?.value === "1" ||
-    req.nextUrl.searchParams.get("snooze_2fa") === "1";
 
   // 2. Super Admin Portal protection (/secure-admin)
   if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
@@ -71,11 +68,6 @@ export async function middleware(req: NextRequest) {
     }
     if (token.role !== "ADMIN") {
       return new NextResponse("Forbidden: Access restricted to platform administrators.", { status: 403 });
-    }
-    // Mandatory 2FA Enforcement for Admin (supports 24h snooze reminder)
-    if (!token.twoFactorEnabled && path !== "/secure-admin/setup-2fa" && !snooze2fa) {
-      const setup2faUrl = new URL("/secure-admin/setup-2fa", req.url);
-      return NextResponse.redirect(setup2faUrl);
     }
   }
 
@@ -96,15 +88,6 @@ export async function middleware(req: NextRequest) {
       loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
-    // Mandatory 2FA Enforcement for Vendor / Partner (supports 24h snooze reminder)
-    if (token.role === "VENDOR" && !token.twoFactorEnabled && path !== "/partner-hub/setup-2fa" && !snooze2fa) {
-      const setup2faUrl = new URL("/partner-hub/setup-2fa", req.url);
-      return NextResponse.redirect(setup2faUrl);
-    }
-    if (token.role === "ADMIN" && !token.twoFactorEnabled && path !== "/secure-admin/setup-2fa" && !snooze2fa) {
-      const setup2faUrl = new URL("/secure-admin/setup-2fa", req.url);
-      return NextResponse.redirect(setup2faUrl);
-    }
   }
 
   // 4. Customer Account protection (/account)
@@ -117,10 +100,6 @@ export async function middleware(req: NextRequest) {
   }
 
   const res = NextResponse.next();
-
-  if (req.nextUrl.searchParams.get("snooze_2fa") === "1") {
-    res.cookies.set("snooze_2fa", "1", { path: "/", maxAge: 86400, sameSite: "lax" });
-  }
 
   // 5. SEO Protection for Non-Canonical Hosts (e.g. Vercel Preview Deployments)
   // Keep previews accessible for testing, but prevent duplicate indexing in search engines

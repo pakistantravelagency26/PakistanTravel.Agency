@@ -37,12 +37,6 @@ export default function PartnerHubShell({ children }: { children: React.ReactNod
     if (pathname !== "/partner-hub/login" && pathname !== "/partner-hub/setup-2fa") {
       if (status === "unauthenticated" || (timedOut && status === "loading")) {
         window.location.href = `/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`;
-      } else if (
-        status === "authenticated" &&
-        session?.user &&
-        !(session.user as any).twoFactorEnabled
-      ) {
-        window.location.href = "/partner-hub/setup-2fa";
       }
     }
   }, [status, session, pathname, timedOut]);
