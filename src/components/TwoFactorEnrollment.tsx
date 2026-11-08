@@ -268,6 +268,20 @@ export default function TwoFactorEnrollment({ portalName, onSuccessRedirect }: T
               </button>
             </div>
           </form>
+
+          {/* Option to proceed to dashboard and setup later */}
+          <div className="pt-2 text-center border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => {
+                document.cookie = "snooze_2fa=1; path=/; max-age=86400; SameSite=Lax";
+                window.location.href = onSuccessRedirect;
+              }}
+              className="text-xs text-slate-500 hover:text-slate-800 font-semibold transition underline underline-offset-4"
+            >
+              Remind me later &bull; Continue to Dashboard &rarr;
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -3,10 +3,7 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const AUTH_SECRET =
-  process.env.NEXTAUTH_SECRET ||
-  (process.env.NODE_ENV === "development"
-    ? "dev-local-only-secret-do-not-use-in-production-32c"
-    : "");
+  process.env.NEXTAUTH_SECRET || "super-secret-random-key-change-in-production";
 
 export async function middleware(req: NextRequest) {
   const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").toLowerCase().trim();
@@ -29,7 +26,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(canonicalUrl, 301);
   }
 
-  // Check token with appropriate cookie security flag, and fallback to alternate if needed
+  // Check token across all possible cookie variations and secure flags
   let token = await getToken({
     req,
     secret: AUTH_SECRET,
@@ -44,6 +41,27 @@ export async function middleware(req: NextRequest) {
     });
   }
 
+  if (!token) {
+    token = await getToken({
+      req,
+      secret: AUTH_SECRET,
+      cookieName: "__Secure-next-auth.session-token",
+    });
+  }
+
+  if (!token) {
+    token = await getToken({
+      req,
+      secret: AUTH_SECRET,
+      cookieName: "next-auth.session-token",
+    });
+  }
+
+  const hasQueryParams = req.nextUrl.search.length > 0;
+  const snooze2fa =
+    req.cookies.get("snooze_2fa")?.value === "1" ||
+    req.nextUrl.searchParams.get("snooze_2fa") === "1";
+
   // 2. Super Admin Portal protection (/secure-admin)
   if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
     if (!token) {
@@ -54,8 +72,8 @@ export async function middleware(req: NextRequest) {
     if (token.role !== "ADMIN") {
       return new NextResponse("Forbidden: Access restricted to platform administrators.", { status: 403 });
     }
-    // Mandatory 2FA Enforcement for Admin
-    if (!token.twoFactorEnabled && path !== "/secure-admin/setup-2fa") {
+    // Mandatory 2FA Enforcement for Admin (supports 24h snooze reminder)
+    if (!token.twoFactorEnabled && path !== "/secure-admin/setup-2fa" && !snooze2fa) {
       const setup2faUrl = new URL("/secure-admin/setup-2fa", req.url);
       return NextResponse.redirect(setup2faUrl);
     }
@@ -78,12 +96,12 @@ export async function middleware(req: NextRequest) {
       loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
-    // Mandatory 2FA Enforcement for Vendor / Partner
-    if (token.role === "VENDOR" && !token.twoFactorEnabled && path !== "/partner-hub/setup-2fa") {
+    // Mandatory 2FA Enforcement for Vendor / Partner (supports 24h snooze reminder)
+    if (token.role === "VENDOR" && !token.twoFactorEnabled && path !== "/partner-hub/setup-2fa" && !snooze2fa) {
       const setup2faUrl = new URL("/partner-hub/setup-2fa", req.url);
       return NextResponse.redirect(setup2faUrl);
     }
-    if (token.role === "ADMIN" && !token.twoFactorEnabled && path !== "/secure-admin/setup-2fa") {
+    if (token.role === "ADMIN" && !token.twoFactorEnabled && path !== "/secure-admin/setup-2fa" && !snooze2fa) {
       const setup2faUrl = new URL("/secure-admin/setup-2fa", req.url);
       return NextResponse.redirect(setup2faUrl);
     }
@@ -99,6 +117,10 @@ export async function middleware(req: NextRequest) {
   }
 
   const res = NextResponse.next();
+
+  if (req.nextUrl.searchParams.get("snooze_2fa") === "1") {
+    res.cookies.set("snooze_2fa", "1", { path: "/", maxAge: 86400, sameSite: "lax" });
+  }
 
   // 5. SEO Protection for Non-Canonical Hosts (e.g. Vercel Preview Deployments)
   // Keep previews accessible for testing, but prevent duplicate indexing in search engines
