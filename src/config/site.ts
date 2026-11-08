@@ -13,6 +13,28 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pakista
 export const COMMISSION_PERCENT = Number(process.env.NEXT_PUBLIC_COMMISSION_PERCENT || 10);
 export const PAYOUT_TIMING = "within 48 hours of trip departure or guest check-in";
 
+export const ADMIN_NOTIFICATION_EMAILS: string[] = [
+  process.env.ADMIN_ALERT_EMAIL || "ops@pakistantravel.agency",
+];
+
+export interface LoginSecurityConfig {
+  maxFailedAttemptsPerPair: number;
+  pairLockoutDurationMinutes: number;
+  globalIpMaxFailuresPerHour: number;
+  globalIpLockoutDurationMinutes: number;
+  progressiveDelayStepMs: number;
+  maxProgressiveDelayMs: number;
+}
+
+export const LOGIN_SECURITY_CONFIG: LoginSecurityConfig = {
+  maxFailedAttemptsPerPair: 3, // 3 wrong passwords for (IP + email) -> 30-minute block
+  pairLockoutDurationMinutes: 30, // 30 minutes
+  globalIpMaxFailuresPerHour: 30, // 30 failures/hr across all emails -> IP block
+  globalIpLockoutDurationMinutes: 30, // 30 minutes
+  progressiveDelayStepMs: 1000, // 1s per previous recent failure
+  maxProgressiveDelayMs: 60000, // max 60s
+};
+
 export interface SiteConfig {
   name: string;
   legalBrand: string;

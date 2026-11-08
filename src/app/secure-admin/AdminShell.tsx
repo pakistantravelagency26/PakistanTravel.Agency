@@ -16,6 +16,7 @@ import {
   Tag, 
   Globe,
   Headphones,
+  ShieldAlert,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -84,6 +85,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: "/secure-admin/destinations", label: "Destinations & Valleys", icon: MapPin, perm: "DESTINATIONS" },
     { href: "/secure-admin/coupons", label: "Coupons & Promos", icon: Tag, perm: "COUPONS" },
     { href: "/secure-admin/website", label: "Website CMS & Content", icon: Globe, perm: "WEBSITE" },
+    { href: "/secure-admin/security", label: "Login Security & Lockouts", icon: ShieldAlert, perm: "TEAM" },
     { href: "/secure-admin/team", label: "Team & Staff Access", icon: ShieldCheck, perm: "TEAM" },
   ];
 

@@ -486,4 +486,54 @@ model ChatMessage {
   @@index([createdAt])
 }
 
+// --------------------------------------------------------
+// SECURITY & AUDIT LOGS (PHASE 3)
+// --------------------------------------------------------
+
+model LoginAttempt {
+  id         String   @id @default(uuid())
+  identifier String
+  ip         String
+  pairKey    String
+  success    Boolean
+  attemptAt  DateTime @default(now())
+
+  @@index([pairKey, attemptAt])
+  @@index([ip, attemptAt])
+  @@index([attemptAt])
+}
+
+model BlockedLogin {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  type        String    // "PAIR" | "GLOBAL_IP"
+  target      String    // email/phone or IP address
+  ip          String
+  reason      String
+  blockedAt   DateTime  @default(now())
+  expiresAt   DateTime
+  unblockedAt DateTime?
+  unblockedBy String?
+
+  @@index([expiresAt])
+  @@index([type])
+  @@index([ip])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorId      String?
+  actorEmail   String?
+  action       String   // e.g., "LOGIN_FAILED", "LOGIN_BLOCKED", "LOGIN_UNBLOCKED", "ACCOUNT_LOCKED"
+  resourceType String?  // e.g., "USER", "LOGIN_BLOCK", "IP"
+  resourceId   String?
+  details      String?  @db.Text
+  ip           String?
+  createdAt    DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+  @@index([actorEmail])
+}
+
 

@@ -6,6 +6,11 @@ import { prisma } from "@/lib/prisma";
 import { findUserByIdentifier } from "@/services/user.service";
 import { verifyPassword } from "@/lib/password";
 import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
+import { getTrustedClientIp } from "@/lib/clientIp";
+import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "@/lib/loginThrottle";
+
+// Pre-computed valid bcrypt salt/hash for constant-time evaluation to eliminate timing attacks
+const DUMMY_BCRYPT_HASH = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
 
 const authSecret = process.env.NEXTAUTH_SECRET;
 if (process.env.NODE_ENV === "production") {
@@ -42,42 +47,62 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Login ID / Email / Phone", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter both Login ID and password");
         }
 
         const identifier = credentials.email.trim();
+        const clientIp = getTrustedClientIp(req?.headers);
 
-        // 1. Rate limiting & Brute force protection per identifier (5 attempts per 5 minutes)
-        const rateCheck = checkRateLimit(`login-auth:${identifier.toLowerCase()}`, 5, 5 * 60 * 1000);
-        if (!rateCheck.success) {
-          throw new Error(`Too many login attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.`);
+        // 1. Check persistent lockout status (30-min block after 3 wrong passwords or global IP block)
+        const status = await checkLoginStatus(identifier, clientIp);
+        if (!status.allowed) {
+          throw new Error(status.message || "Account temporarily locked. Please try again later.");
         }
 
+        // 2. Progressive backoff delay (1s, 2s, 3s... up to 60s)
+        if (status.delayMs && status.delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, status.delayMs));
+        }
+
+        // 3. User lookup
         const user = await findUserByIdentifier(identifier);
 
-        if (!user || !user.passwordHash) {
-          // Constant error message to prevent user enumeration
-          throw new Error("Invalid Login ID or password");
-        }
-
-        // 2. Cryptographic password verification (bcrypt)
+        // 4. Cryptographic password verification (bcrypt) with constant-time protection
         let isValid = false;
-        try {
-          isValid = await verifyPassword(credentials.password, user.passwordHash);
-        } catch {
+        if (user && user.passwordHash) {
+          try {
+            isValid = await verifyPassword(credentials.password, user.passwordHash);
+          } catch {
+            isValid = false;
+          }
+        } else {
+          // Constant-time dummy verify to eliminate timing-based user enumeration attacks
+          try {
+            await verifyPassword(credentials.password, DUMMY_BCRYPT_HASH);
+          } catch {
+            // ignore
+          }
           isValid = false;
         }
 
-        if (!isValid) {
+        if (!isValid || !user) {
+          const lockResult = await recordFailedLogin(identifier, clientIp, user?.role);
+          if (lockResult.locked) {
+            throw new Error(
+              lockResult.reason ||
+                "Account temporarily locked due to 3 consecutive failed login attempts. Please try again in 30 minutes."
+            );
+          }
           throw new Error("Invalid Login ID or password");
         }
 
-        // Clear rate limiter on successful password verification
+        // 5. Successful login: record success and clear lockouts
+        await recordSuccessfulLogin(identifier, clientIp);
         resetRateLimit(`login-auth:${identifier.toLowerCase()}`);
 
-        // 3. Verify that vendor account is not disabled by Super Admin
+        // 6. Verify that vendor account is not disabled by Super Admin
         if (user.role === "VENDOR" && user.vendorId) {
           const { isVendorEnabled } = await import("@/services/vendor.service");
           if (!isVendorEnabled(user.vendorId)) {
