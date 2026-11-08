@@ -571,4 +571,31 @@ model TwoFactorChallenge {
   @@index([userId])
 }
 
+// --------------------------------------------------------
+// TRANSACTIONAL EMAIL OUTBOX
+// --------------------------------------------------------
+
+model EmailOutbox {
+  id            String    @id @default(uuid())
+  to            String
+  recipientRole String    // "CUSTOMER" | "VENDOR" | "ADMIN"
+  subject       String
+  htmlBody      String    @db.Text
+  textBody      String    @db.Text
+  status        String    @default("PENDING") // PENDING | SENT | FAILED
+  attempts      Int       @default(0)
+  lastError     String?   @db.Text
+  bookingId     String?
+  eventType     String    // "BOOKING_CONFIRMED" | "BOOKING_CANCELLED" | "PAYMENT_RECEIVED"
+  sentAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status, attempts])
+  @@index([bookingId])
+  @@index([to])
+  @@index([createdAt])
+}
+
+
 

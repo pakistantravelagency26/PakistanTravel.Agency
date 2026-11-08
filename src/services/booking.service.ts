@@ -3,6 +3,7 @@ import { generateBookingConfirmationHtml } from "@/lib/notifications";
 import { calculateBookingPricing } from "@/lib/bookingPricing";
 import { resolveBookingVendorContact } from "@/lib/antiLeakage";
 import { COMMISSION_PERCENT } from "@/config/site";
+import { sendBookingConfirmationEmails, sendBookingCancellationEmails } from "./email.service";
 import crypto from "crypto";
 
 export interface BookingRecord {
@@ -234,12 +235,10 @@ export async function createBooking(data: {
     createdAt: result.createdAt.toISOString(),
   };
 
-  // Asynchronously trigger confirmation email / notification
-  try {
-    generateBookingConfirmationHtml(record);
-  } catch (err) {
-    console.error("Error generating confirmation notification:", err);
-  }
+  // Asynchronously dispatch transactional outbox emails to Customer, Vendor, and Admin
+  sendBookingConfirmationEmails(result.id).catch((err) => {
+    console.error("[EMAIL OUTBOX] Error dispatching booking confirmation emails:", err);
+  });
 
   return record;
 }
@@ -472,6 +471,10 @@ export async function cancelBooking(id: string): Promise<boolean> {
       });
     });
 
+    sendBookingCancellationEmails(id).catch((err) => {
+      console.error("[EMAIL OUTBOX] Error dispatching cancellation emails:", err);
+    });
+
     return true;
   } catch (error) {
     console.error("Error cancelling booking:", error);
@@ -488,7 +491,7 @@ export async function handlePaymentWebhookIdempotent(payload: {
   paymentMethod: "STRIPE" | "JAZZCASH" | "EASYPAISA";
   rawResponse?: any;
 }): Promise<{ success: boolean; message: string; bookingId?: string }> {
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // 1. Find existing payment by transactionRef
     const existingPayment = await tx.payment.findUnique({
       where: { transactionRef: payload.transactionRef },
@@ -502,6 +505,7 @@ export async function handlePaymentWebhookIdempotent(payload: {
           success: true,
           message: "Payment already processed previously (Idempotent replay).",
           bookingId: existingPayment.bookingId,
+          newlyPaid: false,
         };
       }
 
@@ -511,6 +515,7 @@ export async function handlePaymentWebhookIdempotent(payload: {
         return {
           success: false,
           message: `Underpayment: expected ${expectedAmount} PKR but received ${payload.amount} PKR.`,
+          newlyPaid: false,
         };
       }
 
@@ -533,9 +538,18 @@ export async function handlePaymentWebhookIdempotent(payload: {
         success: true,
         message: "Payment marked PAID successfully.",
         bookingId: existingPayment.bookingId,
+        newlyPaid: true,
       };
     }
 
-    return { success: false, message: "Transaction reference not found." };
+    return { success: false, message: "Transaction reference not found.", newlyPaid: false };
   });
+
+  if (result.success && result.newlyPaid && result.bookingId) {
+    sendBookingConfirmationEmails(result.bookingId).catch((err) => {
+      console.error("[EMAIL OUTBOX] Error dispatching payment confirmation emails:", err);
+    });
+  }
+
+  return result;
 }
