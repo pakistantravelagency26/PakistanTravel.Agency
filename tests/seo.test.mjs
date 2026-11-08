@@ -29,13 +29,13 @@ describe("Phase 7: SEO & Canonical Routing Test Suite", () => {
   });
 
   describe("Sitemap URLs & Indexable Routes", () => {
-    it("generates sitemap with /tours, /hotels, /rentals and no admin routes", async () => {
+    it("generates sitemap with /tours, destinations, and static pages but NO /hotels or /rentals", async () => {
       const entries = await sitemapGenerator();
       const urls = entries.map((e) => e.url);
 
       assert.ok(urls.includes("https://www.pakistantravel.agency/tours"), "Includes /tours");
-      assert.ok(urls.includes("https://www.pakistantravel.agency/hotels"), "Includes /hotels");
-      assert.ok(urls.includes("https://www.pakistantravel.agency/rentals"), "Includes /rentals");
+      assert.ok(!urls.includes("https://www.pakistantravel.agency/hotels"), "Must NOT include /hotels in sitemap");
+      assert.ok(!urls.includes("https://www.pakistantravel.agency/rentals"), "Must NOT include /rentals in sitemap");
       assert.ok(urls.includes("https://www.pakistantravel.agency/destinations"), "Includes /destinations");
 
       // Verify every single URL starts with the canonical SITE_URL
@@ -68,22 +68,11 @@ describe("Phase 7: SEO & Canonical Routing Test Suite", () => {
       assert.ok(file.includes('"PKR"'), "Tours schema must use PKR currency");
     });
 
-    it("verifies /hotels has ItemList (Hotel), BreadcrumbList, and canonical URL", () => {
-      const file = fs.readFileSync(path.resolve(process.cwd(), "src/app/hotels/page.tsx"), "utf-8");
-      assert.ok(file.includes('canonical: `${SITE_URL}/hotels`'), "Hotels page must define canonical /hotels");
-      assert.ok(file.includes('"@type": "ItemList"'), "Hotels page must inject ItemList JSON-LD");
-      assert.ok(file.includes('"@type": "Hotel"'), "Hotels items must be schema type Hotel");
-      assert.ok(file.includes('"@type": "BreadcrumbList"'), "Hotels page must inject BreadcrumbList JSON-LD");
-      assert.ok(file.includes("export const revalidate = 60"), "Hotels page must use 60s ISR revalidation");
-    });
-
-    it("verifies /rentals has ItemList (Product), BreadcrumbList, and canonical URL", () => {
-      const file = fs.readFileSync(path.resolve(process.cwd(), "src/app/rentals/page.tsx"), "utf-8");
-      assert.ok(file.includes('canonical: `${SITE_URL}/rentals`'), "Rentals page must define canonical /rentals");
-      assert.ok(file.includes('"@type": "ItemList"'), "Rentals page must inject ItemList JSON-LD");
-      assert.ok(file.includes('"@type": "Product"'), "Rentals items must be schema type Product");
-      assert.ok(file.includes('"@type": "BreadcrumbList"'), "Rentals page must inject BreadcrumbList JSON-LD");
-      assert.ok(file.includes("export const revalidate = 60"), "Rentals page must use 60s ISR revalidation");
+    it("verifies 301 redirects exist for legacy /hotels and /rentals routes in middleware", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/middleware.ts"), "utf-8");
+      assert.ok(file.includes('/hotels'), "Middleware must handle legacy /hotels");
+      assert.ok(file.includes('/rentals'), "Middleware must handle legacy /rentals");
+      assert.ok(file.includes('301'), "Middleware must perform permanent 301 redirects to /tours");
     });
 
     it("verifies /listing/[slug] protects against fake aggregate ratings (<10 reviews)", () => {

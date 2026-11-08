@@ -28,7 +28,7 @@ export const blogPosts: BlogPost[] = [
     slug: "skardu-trip-cost-2026",
     title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown",
     seoTitle: "Skardu Trip Cost 2026: Budget & Luxury Guide",
-    metaDescription: "Plan your Skardu trip in 2026 with an exact cost breakdown for flights, 4x4 rentals, Deosai safaris, luxury hotels, and local dining.",
+    metaDescription: "Plan your Skardu trip in 2026 with an itemized cost breakdown for flights, guided 4x4 packages, Deosai safaris, tour inclusions, and local dining.",
     date: "10 May 2026",
     isoDate: "2026-05-10",
     author: {
@@ -39,13 +39,13 @@ export const blogPosts: BlogPost[] = [
     category: "Cost & Budget Guides",
     coverImage: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&auto=format&fit=crop&q=80",
     coverAlt: "Scenic view of Skardu valley and snowy Karakoram mountain peaks in Baltistan",
-    excerpt: "Planning a dream journey to Skardu and Deosai Plains in 2026? Here is an itemized breakdown of flights, 4x4 mountain rentals, luxury resorts, meals, and park permits.",
+    excerpt: "Planning a dream journey to Skardu and Deosai Plains in 2026? Here is an itemized breakdown of flights, 4x4 mountain transport, tour packages, meals, and park permits.",
     content: [
       {
         heading: "Introduction: Why Skardu Budgeting Matters in 2026",
         paragraphs: [
           "Skardu has evolved from a rugged mountaineering outpost into Pakistan's top luxury mountain destination. With direct commercial flights from Islamabad operating year-round (weather permitting) and seasonal connections from Lahore and Karachi during peak summer, access to Baltistan is more accessible than ever. However, remote mountain logistics make accurate budgeting essential for a seamless vacation.",
-          "Whether you are planning a solo backpacking photography tour, a family vacation to Shangrila, or a luxury glamping retreat in the Sarfaranga Cold Desert, this guide breaks down realistic 2026 expenses across transport, lodging, guided excursions, and permits.",
+          "Whether you are planning a solo photography tour, a family vacation to Shangrila, or a luxury glamping retreat in the Sarfaranga Cold Desert, this guide breaks down realistic 2026 expenses across transport, tour package inclusions, guided excursions, and permits.",
           "Pricing Disclaimer: Estimated costs in this guide are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. Confirm current rates with local operators before booking."
         ]
       },
@@ -63,15 +63,14 @@ export const blogPosts: BlogPost[] = [
         ]
       },
       {
-        heading: "2. Hotel & Accommodation Rates Across Baltistan",
+        heading: "2. Tour Package Inclusions & Valley Accommodation Standards",
         paragraphs: [
-          "Accommodation options in Skardu cater to every travel style, from cozy local homestays in Shigar to five-star heritage palaces and lakefront luxury chalets."
+          "Where accommodation is part of a tour package, comfortable valley hotels or luxury heritage resorts are arranged by the operator as detailed in the package inclusions."
         ],
         list: [
-          "Budget Guesthouses & Motels: PKR 4,000 – 7,500 per night (clean room, hot water, basic generator backup).",
-          "Mid-Range 3-Star Hotels (Skardu Town & Kachura): PKR 12,000 – 22,000 per night with buffet breakfast and mountain view balconies.",
-          "Luxury Heritage Resorts (Serena Shigar Fort, Khaplu Palace, Shangrila Resort): PKR 35,000 – 75,000 per night.",
-          "Cold Desert Glamping Domes: PKR 18,000 – 30,000 per night under starry Karakoram skies."
+          "Standard Tour Package Lodges (Skardu Town & Kachura): Comfortable ensuite rooms with breakfast included in mid-range packages.",
+          "Heritage Resort Inclusions (Serena Shigar Fort, Khaplu Palace, Shangrila Resort): Premium boutique rooms included across luxury tour itineraries.",
+          "Cold Desert Glamping Domes: Unique star-gazing pod inclusions featured in select adventure itineraries."
         ]
       },
       {
@@ -90,7 +89,7 @@ export const blogPosts: BlogPost[] = [
         heading: "4. Summary Budget Expectations for a 7-Day Skardu Trip",
         paragraphs: [
           "Budget Traveler: PKR 55,000 – 75,000 per person (shared road transport, guesthouse accommodation, local dining).",
-          "Comfort / Family Traveler: PKR 110,000 – 175,000 per person (return flights, dedicated private Prado, 3-star mountain view hotels).",
+          "Comfort / Family Traveler: PKR 110,000 – 175,000 per person (return flights, dedicated private Prado, tour package inclusions).",
           "Luxury Traveler: PKR 260,000 – 420,000+ per couple (flights, Serena heritage suites, private guided 4x4, curated cultural dining)."
         ]
       }
@@ -171,7 +170,7 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "Introduction: Exploring the Hidden Forest of Upper Dir",
         paragraphs: [
-          "Kumrat Valley in Upper Dir is renowned as one of Pakistan's last pristine pine wildernesses. While Hunza and Swat offer paved highways and commercial hotels, Kumrat remains an authentic adventure destination where cedar forest canopies, crystal rivers, and rugged trails take center stage.",
+          "Kumrat Valley in Upper Dir is renowned as one of Pakistan's last pristine pine wildernesses. While Hunza and Swat offer paved highways and established tourism infrastructure, Kumrat remains an authentic adventure destination where cedar forest canopies, crystal rivers, and rugged trails take center stage.",
           "Navigating Kumrat successfully requires understanding road transitions from asphalt to boulder tracks, choosing the right vehicle, and packing for sudden alpine weather changes."
         ]
       },
@@ -203,7 +202,7 @@ export const blogPosts: BlogPost[] = [
     slug: "skardu-vs-hunza",
     title: "Skardu vs Hunza: Which Northern Destination Should You Visit First?",
     seoTitle: "Skardu vs Hunza: Which Northern Trip Is Best?",
-    metaDescription: "Comparing Skardu vs Hunza for your northern Pakistan journey: mountain scenery, travel time, hotel quality, flight reliability, and expenses.",
+    metaDescription: "Comparing Skardu vs Hunza for your northern Pakistan journey: mountain scenery, travel time, tour itineraries, flight reliability, and expenses.",
     date: "18 May 2026",
     isoDate: "2026-05-18",
     author: {
@@ -297,7 +296,7 @@ export const blogPosts: BlogPost[] = [
         heading: "3. Power, Electronics & Photography",
         list: [
           "High-Capacity Power Bank: 20,000mAh or higher to keep smartphones, cameras, and drones charged during long road journeys.",
-          "Universal Travel Adapter: Type C and D round-pin adapters are standard across Pakistani mountain hotels.",
+          "Universal Travel Adapter: Type C and D round-pin adapters are standard across valley hotel rooms included in tour packages.",
           "Extra Camera Batteries & Memory Cards: Cold mountain temperatures drain lithium-ion batteries twice as fast."
         ]
       },

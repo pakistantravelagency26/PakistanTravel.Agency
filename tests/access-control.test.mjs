@@ -204,8 +204,8 @@ describe("Phase 2: RBAC & IDOR Access Control Test Suite", () => {
       assert.equal(shouldRenderChatbot("/"), true);
     });
 
-    it("renders chatbot on public listing page (/listing/skardu-luxury-resort)", () => {
-      assert.equal(shouldRenderChatbot("/listing/skardu-luxury-resort"), true);
+    it("renders chatbot on public listing page (/listing/skardu-autumn-valley-tour)", () => {
+      assert.equal(shouldRenderChatbot("/listing/skardu-autumn-valley-tour"), true);
     });
 
     it("renders chatbot on public destination page (/destinations/hunza)", () => {

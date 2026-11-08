@@ -147,5 +147,13 @@ test.describe("AI Chatbot QA & Safety Test Suite", () => {
       const ticketNum = generateTicketNumber();
       assert.match(ticketNum, /^PTA-TKT-[A-Z0-9]+-[A-Z0-9]+$/);
     });
+
+    test("chatbot grounding service enforces tours-only marketplace policies", async () => {
+      const { getGroundedContext } = await import("../src/services/chatGrounding.service.ts");
+      const context = await getGroundedContext("Can I book a hotel room in Hunza?");
+      assert.ok(context.systemPrompt.includes("exclusively for northern Pakistan guided tour packages"), "Must state marketplace is exclusively for guided tour packages");
+      assert.ok(context.systemPrompt.includes("Tours-Only Marketplace Policy"), "Must include Tours-Only policy rule");
+      assert.ok(context.systemPrompt.includes("We do NOT sell standalone hotel rooms, resorts, or standalone vehicle rentals"), "Must state no standalone hotel rooms or rentals");
+    });
   });
 });

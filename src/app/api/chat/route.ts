@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         start(controller) {
           const encoder = new TextEncoder();
           const message =
-            "I cannot fulfill instructions to override my guidelines, reveal system configurations, or act outside my role as the PakistanTravel.Agency assistant. How may I help you with northern Pakistan tours, hotels, or travel questions?";
+            "I cannot fulfill instructions to override my guidelines, reveal system configurations, or act outside my role as the PakistanTravel.Agency assistant. How may I help you with northern Pakistan tour packages or travel questions?";
           controller.enqueue(encoder.encode(message));
           controller.close();
         },

@@ -6,8 +6,8 @@
  * without requiring code commits or rebuilds.
  */
 
-import { prisma } from "@/lib/prisma";
-import { COMMISSION_PERCENT, PAYOUT_TIMING } from "@/config/site";
+import { prisma } from "../lib/prisma.ts";
+import { COMMISSION_PERCENT, PAYOUT_TIMING } from "../config/site.ts";
 
 export interface GeneralSettings {
   siteName: string;

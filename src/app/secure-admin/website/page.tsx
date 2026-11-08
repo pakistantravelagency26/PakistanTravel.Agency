@@ -491,7 +491,7 @@ export default function AdminWebsiteManagerPage() {
                 <div>
                   <h2 className="text-base font-extrabold text-slate-900">Header Navbar Menu Links</h2>
                   <p className="text-xs text-slate-500">
-                    Customize the top navigation menu displayed on every page (Hunza, Skardu, Swat, Kumrat, Tours, Hotels, Blog, etc.)
+                    Customize the top navigation menu displayed on every page (Hunza, Skardu, Swat, Kumrat, Tours, Destinations, Blog, etc.)
                   </p>
                 </div>
                 <button
@@ -934,7 +934,7 @@ export default function AdminWebsiteManagerPage() {
             >
               <div>
                 <h2 className="text-base font-extrabold text-slate-900">Homepage Marketplace Catalog Section</h2>
-                <p className="text-xs text-slate-500">Edit the title, subtitle, and zero-listing empty state for the tours and hotels feed</p>
+                <p className="text-xs text-slate-500">Edit the title, subtitle, and zero-listing empty state for the tour packages catalog feed</p>
               </div>
 
               <div className="space-y-4">
@@ -1486,7 +1486,7 @@ export default function AdminWebsiteManagerPage() {
                       rows={3}
                       value={newFaqA}
                       onChange={(e) => setNewFaqA(e.target.value)}
-                      placeholder="e.g. Yes, cash on arrival is supported for select hotel bookings with advance verification."
+                      placeholder="e.g. Yes, cash on arrival is supported for select tour package bookings with advance verification."
                       className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       required
                     />

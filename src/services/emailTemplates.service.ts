@@ -89,7 +89,7 @@ export function buildCustomerBookingConfirmationEmail(data: BookingEmailData) {
               </div>
               ${data.unitTitle ? `
               <div class="row">
-                <span class="label">Package / Room:</span>
+                <span class="label">Tour Package:</span>
                 <span class="val">${escapeHtml(data.unitTitle)}</span>
               </div>` : ""}
               <div class="row">
@@ -102,7 +102,7 @@ export function buildCustomerBookingConfirmationEmail(data: BookingEmailData) {
               </div>
               <div class="row">
                 <span class="label">Payment Status:</span>
-                <span class="val">${data.paymentStatus === "PAID" ? "Paid in full (PKR)" : "Pending / Pay at Check-in"}</span>
+                <span class="val">${data.paymentStatus === "PAID" ? "Paid in full (PKR)" : "Pending / Pay on Departure"}</span>
               </div>
               ${data.depositAmount > 0 ? `
               <div class="row">
@@ -111,7 +111,7 @@ export function buildCustomerBookingConfirmationEmail(data: BookingEmailData) {
               </div>` : ""}
               ${data.balanceDue > 0 ? `
               <div class="row">
-                <span class="label">Balance Due at Check-in:</span>
+                <span class="label">Balance Due on Departure:</span>
                 <span class="val" style="color: #d97706;">PKR ${data.balanceDue.toLocaleString()}</span>
               </div>` : ""}
               <div class="row total-row">
@@ -121,10 +121,10 @@ export function buildCustomerBookingConfirmationEmail(data: BookingEmailData) {
             </div>
 
             <div style="background: #f1f5f9; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
-              <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Your Host / Tour Operator:</span>
+              <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Your Tour Operator:</span>
               <strong style="color: #0f172a; font-size: 14px;">${escapeHtml(data.vendorBusinessName || "Local Verified Partner")}</strong>
-              ${data.vendorPhone ? `<div style="font-size: 13px; color: #475569; margin-top: 4px;">Host Contact: <strong>${escapeHtml(data.vendorPhone)}</strong></div>` : ""}
-              ${data.vendorWhatsapp ? `<div style="font-size: 13px; color: #0A5C36; margin-top: 2px;">Host WhatsApp: <strong>${escapeHtml(data.vendorWhatsapp)}</strong></div>` : ""}
+              ${data.vendorPhone ? `<div style="font-size: 13px; color: #475569; margin-top: 4px;">Operator Contact: <strong>${escapeHtml(data.vendorPhone)}</strong></div>` : ""}
+              ${data.vendorWhatsapp ? `<div style="font-size: 13px; color: #0A5C36; margin-top: 2px;">Operator WhatsApp: <strong>${escapeHtml(data.vendorWhatsapp)}</strong></div>` : ""}
             </div>
 
             <div style="text-align: center; margin: 24px 0;">
@@ -154,8 +154,8 @@ Your reservation has been confirmed:
 - Dates: ${data.startDate} to ${data.endDate} (${data.nightsCount} Nights)
 - Guests: ${data.guestsCount} Person(s)
 - Total Amount: PKR ${data.totalAmount.toLocaleString()} (${data.paymentStatus})
-${data.balanceDue > 0 ? `- Balance Due at Check-in: PKR ${data.balanceDue.toLocaleString()}\n` : ""}- Host / Operator: ${data.vendorBusinessName || "Local Verified Partner"}
-${data.vendorPhone ? `- Host Contact: ${data.vendorPhone}\n` : ""}
+${data.balanceDue > 0 ? `- Balance Due on Departure: PKR ${data.balanceDue.toLocaleString()}\n` : ""}- Tour Operator: ${data.vendorBusinessName || "Local Verified Partner"}
+${data.vendorPhone ? `- Operator Contact: ${data.vendorPhone}\n` : ""}
 Download your Official Travel Voucher:
 ${voucherUrl}
 
@@ -166,7 +166,7 @@ Support: ${siteConfig.contact.supportEmail}`;
 }
 
 /**
- * 2. Vendor / Host Booking Alert Email
+ * 2. Vendor / Tour Operator Booking Alert Email
  */
 export function buildVendorBookingAlertEmail(data: BookingEmailData) {
   const subject = `New Booking Received! Ref: ${data.bookingNumber} (${data.listingTitle})`;

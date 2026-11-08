@@ -57,8 +57,8 @@ export async function GET(
       ? `Official Travel Voucher - ${booking.bookingNumber}`
       : `Booking Request Received - ${booking.bookingNumber}`;
     const voucherHeaderSubtitle = isConfirmed
-      ? "Official Traveler Check-in Voucher"
-      : "Booking Request Awaiting Payment / Confirmation";
+      ? "Official Tour Package Booking Voucher & Traveler Confirmation"
+      : "Tour Booking Request Awaiting Payment / Confirmation";
     const statusBadgeBg = isConfirmed ? "#22c55e" : "#f59e0b";
     const statusLabel = isConfirmed ? "CONFIRMED" : "PENDING CONFIRMATION";
 
@@ -137,27 +137,27 @@ export async function GET(
           <div class="field-val">${booking.guestsCount} Traveler(s) · ${booking.isSoloTraveler ? "Solo Room Supplement Included" : "Twin Sharing Package"}</div>
         </div>
         <div>
-          <div class="field-label">Accommodation Package</div>
+          <div class="field-label">Accommodation Included</div>
           <div class="field-val">${booking.unitTitle}</div>
         </div>
       </div>
 
-      <div class="section-title">Your Host for This Trip</div>
+      <div class="section-title">Your Tour Operator for This Trip</div>
       <div class="grid">
         <div>
-          <div class="field-label">Host Company</div>
+          <div class="field-label">Operator Company</div>
           <div class="field-val">${booking.vendor?.businessName || "Local Partner Operator"}</div>
         </div>
         <div>
-          <div class="field-label">Host Location / Base</div>
+          <div class="field-label">Operator Hub / City</div>
           <div class="field-val">${booking.vendor?.city || booking.destination}</div>
         </div>
         <div>
-          <div class="field-label">Host WhatsApp</div>
+          <div class="field-label">Operator WhatsApp</div>
           <div class="field-val">${isConfirmed && (booking.vendor?.whatsapp || booking.vendor?.phone) ? `<a href="https://wa.me/${(booking.vendor.whatsapp || booking.vendor.phone || '').replace(/\\D/g, '')}" style="color: #0A5C36; font-weight: 700;">${booking.vendor.whatsapp || booking.vendor.phone}</a>` : '<span style="color: #64748b; font-style: italic;">Released upon payment confirmation</span>'}</div>
         </div>
         <div>
-          <div class="field-label">Host Direct Phone</div>
+          <div class="field-label">Operator Direct Phone</div>
           <div class="field-val">${isConfirmed && booking.vendor?.phone ? booking.vendor.phone : '<span style="color: #64748b; font-style: italic;">Released upon payment confirmation</span>'}</div>
         </div>
       </div>
@@ -204,12 +204,12 @@ export async function GET(
 
       <div style="font-size: 11px; color: #64748b; line-height: 1.6; margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
         <strong>Standard Cancellation Policy:</strong> ${siteConfig.cancellationPolicy.summary}<br/>
-        <strong style="margin-top: 4px; display: inline-block;">Check-in Notice:</strong> Present this voucher and original CNIC/Passport at departure check-in. Warm alpine clothing required for high-altitude passes.
+        <strong style="margin-top: 4px; display: inline-block;">Departure Notice:</strong> Present this voucher and original CNIC/Passport at tour departure meeting point. Warm alpine clothing required for high-altitude passes.
       </div>
     </div>
 
     <div class="footer">
-      <p style="margin: 0;">PakistanTravel.Agency · Multi-Vendor Tourism Marketplace</p>
+      <p style="margin: 0;">PakistanTravel.Agency · Verified Tour Operator Marketplace</p>
       <p style="margin: 4px 0 0;">Customer Support: ${siteConfig.contact.supportEmail} · AI Assistant 24/7</p>
     </div>
   </div>
