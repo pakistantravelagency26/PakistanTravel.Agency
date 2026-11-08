@@ -18,13 +18,22 @@ export async function GET(
 
     const session = await getServerSession(authOptions);
     const url = new URL(req.url);
-    const guestEmailParam = url.searchParams.get("email")?.toLowerCase().trim();
+    const guestToken = url.searchParams.get("token")?.trim();
+    
+    // Cryptographic HMAC token for secure guest voucher access without user login
+    const crypto = await import("crypto");
+    const expectedToken = crypto
+      .createHmac("sha256", process.env.NEXTAUTH_SECRET || "voucher-token-fallback")
+      .update(`${booking.id}:${booking.guestEmail.toLowerCase().trim()}`)
+      .digest("hex");
+
+    const isTokenValid = Boolean(guestToken && guestToken === expectedToken);
 
     const isAdmin = session?.user?.role === "ADMIN";
     const isOwner =
-      (session?.user?.email &&
+      Boolean(session?.user?.email &&
         booking.guestEmail.toLowerCase() === session.user.email.toLowerCase()) ||
-      (guestEmailParam && booking.guestEmail.toLowerCase() === guestEmailParam);
+      isTokenValid;
 
     let isVendorOwner = false;
     if (session?.user?.role === "VENDOR" && session.user.vendorId) {

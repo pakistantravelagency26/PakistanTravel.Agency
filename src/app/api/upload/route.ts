@@ -73,9 +73,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Cannot upload more than 10 files at once." }, { status: 400 });
     }
 
+    const isPrivate = formData.get("isPrivate") === "true";
+    if (isPrivate && session.user.role !== "VENDOR" && session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden: Only operators and admins can upload verification documents." }, { status: 403 });
+    }
+
     const uploadedUrls: string[] = [];
 
-    // Check if Cloudinary is configured
+    // Check if Cloudinary is configured (for public listing images only)
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
@@ -109,8 +114,15 @@ export async function POST(req: Request) {
         );
       }
 
+      // If document is private (CNIC, NTN, license), store in private non-public storage
+      if (isPrivate) {
+        const privateRef = await saveSecurePrivateFile(buffer, ext);
+        uploadedUrls.push(privateRef);
+        continue;
+      }
+
       if (cloudName && apiKey && apiSecret) {
-        // Cloudinary upload
+        // Cloudinary upload for public listing media
         const base64Data = buffer.toString("base64");
         const dataUri = `data:${file.type};base64,${base64Data}`;
 
@@ -161,4 +173,15 @@ async function saveSecureLocalFile(buffer: Buffer, ext: string): Promise<string>
 
   await writeFile(filePath, buffer);
   return `/uploads/${fileName}`;
+}
+
+async function saveSecurePrivateFile(buffer: Buffer, ext: string): Promise<string> {
+  const privateDir = path.join(process.cwd(), "storage", "private-documents");
+  await mkdir(privateDir, { recursive: true });
+
+  const fileName = `${crypto.randomUUID()}${ext}`;
+  const filePath = path.join(privateDir, fileName);
+
+  await writeFile(filePath, buffer);
+  return `private://${fileName}`;
 }

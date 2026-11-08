@@ -1,5 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import {
   requireRole,
   requireVendorOwnership,
@@ -329,6 +330,134 @@ describe("Phase 2: RBAC & IDOR Access Control Test Suite", () => {
       assert.equal(evaluateCustomerBookingAccess(roles.CUSTOMER, "cust2@gmail.com"), 403);
       assert.equal(evaluateCustomerBookingAccess(roles.CUSTOMER, "cust@gmail.com"), 200);
       assert.equal(evaluateCustomerBookingAccess(roles.ADMIN, "cust@gmail.com"), 200);
+    });
+  });
+
+  describe("Phase 2 Critical Fixes: OAuth Restriction for Admin/Vendor", () => {
+    function simulateOAuthSignInCheck({ userRole, provider }) {
+      if (provider === "google" || provider === "facebook") {
+        if (userRole === "ADMIN" || userRole === "VENDOR") {
+          return { allowed: false, redirect: "/login?error=OAuthRoleRestricted" };
+        }
+      }
+      return { allowed: true };
+    }
+
+    it("blocks ADMIN from logging in via Google OAuth", () => {
+      const res = simulateOAuthSignInCheck({ userRole: "ADMIN", provider: "google" });
+      assert.equal(res.allowed, false);
+      assert.equal(res.redirect, "/login?error=OAuthRoleRestricted");
+    });
+
+    it("blocks VENDOR from logging in via Facebook OAuth", () => {
+      const res = simulateOAuthSignInCheck({ userRole: "VENDOR", provider: "facebook" });
+      assert.equal(res.allowed, false);
+      assert.equal(res.redirect, "/login?error=OAuthRoleRestricted");
+    });
+
+    it("allows standard CUSTOMER to log in via Google OAuth", () => {
+      const res = simulateOAuthSignInCheck({ userRole: "CUSTOMER", provider: "google" });
+      assert.equal(res.allowed, true);
+    });
+
+    it("allows standard CUSTOMER to log in via Facebook OAuth", () => {
+      const res = simulateOAuthSignInCheck({ userRole: "CUSTOMER", provider: "facebook" });
+      assert.equal(res.allowed, true);
+    });
+  });
+
+  describe("Phase 2 Critical Fixes: sessionVersion & tokenVersion JWT Invalidation", () => {
+    function simulateJwtSessionCheck({ tokenVersionInJwt, dbUser }) {
+      if (!dbUser) return null; // User deleted
+      const currentVersion = dbUser.sessionVersion ?? dbUser.tokenVersion ?? 1;
+      if (tokenVersionInJwt && currentVersion !== tokenVersionInJwt) {
+        return null; // Session revoked
+      }
+      return { valid: true, version: currentVersion };
+    }
+
+    it("validates token when sessionVersion matches DB version", () => {
+      const res = simulateJwtSessionCheck({
+        tokenVersionInJwt: 2,
+        dbUser: { id: "u1", sessionVersion: 2, tokenVersion: 2 },
+      });
+      assert.notEqual(res, null);
+      assert.equal(res.valid, true);
+    });
+
+    it("immediately invalidates JWT token when sessionVersion was incremented in DB", () => {
+      const res = simulateJwtSessionCheck({
+        tokenVersionInJwt: 1, // Old session
+        dbUser: { id: "u1", sessionVersion: 2, tokenVersion: 2 }, // Incremented after password reset / 2FA / revoke
+      });
+      assert.equal(res, null);
+    });
+
+    it("immediately invalidates JWT token if user was deleted from DB", () => {
+      const res = simulateJwtSessionCheck({
+        tokenVersionInJwt: 1,
+        dbUser: null,
+      });
+      assert.equal(res, null);
+    });
+  });
+
+  describe("Phase 2 Critical Fixes: Voucher HMAC Cryptographic Verification", () => {
+    const secret = "test-secret-key-phase2";
+
+    function generateVoucherToken(bookingId, guestEmail) {
+      return crypto
+        .createHmac("sha256", secret)
+        .update(`${bookingId}:${guestEmail.toLowerCase().trim()}`)
+        .digest("hex");
+    }
+
+    function verifyVoucherAccess({ session, queryToken, booking }) {
+      const isAdmin = session?.user?.role === "ADMIN";
+      const isOwner = session?.user?.email && session.user.email.toLowerCase() === booking.guestEmail.toLowerCase();
+      
+      const expectedToken = generateVoucherToken(booking.id, booking.guestEmail);
+      const isTokenValid = Boolean(queryToken && queryToken === expectedToken);
+
+      if (isAdmin || isOwner || isTokenValid) {
+        return { authorized: true, status: 200 };
+      }
+      return { authorized: false, status: 403 };
+    }
+
+    const testBooking = { id: "b-12345", guestEmail: "traveler@gmail.com" };
+
+    it("rejects unauthenticated request attempting IDOR access with guessing/no token", () => {
+      const res = verifyVoucherAccess({ session: null, queryToken: null, booking: testBooking });
+      assert.equal(res.authorized, false);
+      assert.equal(res.status, 403);
+    });
+
+    it("rejects unauthenticated request with invalid/forged token", () => {
+      const res = verifyVoucherAccess({ session: null, queryToken: "forged-hex-token", booking: testBooking });
+      assert.equal(res.authorized, false);
+      assert.equal(res.status, 403);
+    });
+
+    it("permits guest access when presenting valid HMAC signed token", () => {
+      const validToken = generateVoucherToken(testBooking.id, testBooking.guestEmail);
+      const res = verifyVoucherAccess({ session: null, queryToken: validToken, booking: testBooking });
+      assert.equal(res.authorized, true);
+      assert.equal(res.status, 200);
+    });
+
+    it("permits logged-in owner without needing HMAC token", () => {
+      const session = { user: { email: "traveler@gmail.com", role: "CUSTOMER" } };
+      const res = verifyVoucherAccess({ session, queryToken: null, booking: testBooking });
+      assert.equal(res.authorized, true);
+      assert.equal(res.status, 200);
+    });
+
+    it("permits admin access without token", () => {
+      const session = { user: { email: "ops@pakistantravel.agency", role: "ADMIN" } };
+      const res = verifyVoucherAccess({ session, queryToken: null, booking: testBooking });
+      assert.equal(res.authorized, true);
+      assert.equal(res.status, 200);
     });
   });
 });

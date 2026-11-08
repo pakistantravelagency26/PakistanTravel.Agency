@@ -2,12 +2,12 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
-import { prisma } from "@/lib/prisma";
-import { findUserByIdentifier } from "@/services/user.service";
-import { verifyPassword } from "@/lib/password";
-import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
-import { getTrustedClientIp } from "@/lib/clientIp";
-import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "@/lib/loginThrottle";
+import { prisma } from "./prisma.ts";
+import { findUserByIdentifier } from "../services/user.service.ts";
+import { verifyPassword } from "./password.ts";
+import { checkRateLimit, resetRateLimit } from "./rate-limit.ts";
+import { getTrustedClientIp } from "./clientIp.ts";
+import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "./loginThrottle.ts";
 
 // Pre-computed valid bcrypt salt/hash for constant-time evaluation to eliminate timing attacks
 const DUMMY_BCRYPT_HASH = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
@@ -183,20 +183,29 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
         try {
-          // Check if user already exists in Neon database
+          const email = user.email.toLowerCase().trim();
           let dbUser = await prisma.user.findUnique({
-            where: { email: user.email.toLowerCase().trim() },
+            where: { email },
           });
+
+          // SECURITY: Block OAuth login for ADMIN and VENDOR roles.
+          // They must use email + password + 2FA TOTP only.
+          if (dbUser && (dbUser.role === "ADMIN" || dbUser.role === "VENDOR")) {
+            console.warn(`[SECURITY AUTH] Blocked OAuth login attempt for ${dbUser.role} account: ${email}`);
+            return "/login?error=OAuthRoleRestricted";
+          }
 
           if (!dbUser) {
             // Auto-create customer account in Neon DB
             dbUser = await prisma.user.create({
               data: {
-                email: user.email.toLowerCase().trim(),
-                name: user.name || user.email.split("@")[0],
+                email,
+                name: user.name || email.split("@")[0],
                 role: "CUSTOMER",
                 passwordHash: null,
                 phone: null,
+                tokenVersion: 1,
+                sessionVersion: 1,
               },
             });
           }
@@ -207,10 +216,11 @@ export const authOptions: NextAuthOptions = {
           (user as any).permissions = (dbUser as any).permissions || "NONE";
           (user as any).vendorId = (dbUser as any).vendorId || null;
           (user as any).phone = dbUser.phone || null;
+          (user as any).tokenVersion = dbUser.sessionVersion ?? dbUser.tokenVersion ?? 1;
           return true;
         } catch (err) {
           console.error("OAuth signIn error:", err);
-          return true;
+          return false;
         }
       }
       return true;
@@ -223,21 +233,40 @@ export const authOptions: NextAuthOptions = {
         token.permissions = user.permissions;
         token.vendorId = user.vendorId;
         token.phone = user.phone;
-        token.tokenVersion = (user as any).tokenVersion || 1;
+        token.tokenVersion = (user as any).tokenVersion || (user as any).sessionVersion || 1;
         token.twoFactorEnabled = Boolean((user as any).twoFactorEnabled);
       }
 
-      // Auto-load vendorId from Neon DB if not present in existing session token
-      if (token.id && !token.vendorId && (token.role === "VENDOR" || token.role === "ADMIN")) {
+      // Active Database Session / Token Version Verification on Every Request
+      if (token.id) {
         try {
-          const dbVendor = await prisma.vendor.findFirst({
-            where: { userId: token.id as string },
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: {
+              id: true,
+              tokenVersion: true,
+              sessionVersion: true,
+              role: true,
+              staffRole: true,
+              permissions: true,
+              vendorProfile: { select: { id: true } },
+            },
           });
-          if (dbVendor) {
-            token.vendorId = dbVendor.id;
+
+          // Session Revocation: If user was deleted or tokenVersion/sessionVersion was incremented
+          const currentVersion = dbUser?.sessionVersion ?? dbUser?.tokenVersion;
+          if (!dbUser || (token.tokenVersion && currentVersion !== token.tokenVersion)) {
+            return null as any; // Invalidates the JWT token immediately
+          }
+
+          token.role = dbUser.role;
+          token.staffRole = dbUser.staffRole;
+          token.permissions = dbUser.permissions;
+          if (dbUser.vendorProfile) {
+            token.vendorId = dbUser.vendorProfile.id;
           }
         } catch {
-          // ignore DB error
+          // If DB is temporarily offline, retain existing claims
         }
       }
 
@@ -252,15 +281,17 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as "CUSTOMER" | "VENDOR" | "ADMIN";
-        session.user.staffRole = (token.staffRole as string) || (token.role === "ADMIN" ? "SUPER_ADMIN" : "CUSTOMER");
-        session.user.permissions = (token.permissions as string) || (token.role === "ADMIN" ? "ALL" : "NONE");
-        session.user.vendorId = token.vendorId as string | null;
-        session.user.phone = token.phone as string | null;
-        (session.user as any).twoFactorEnabled = Boolean(token.twoFactorEnabled);
+      if (!token || !token.id || !session.user) {
+        return null as any;
       }
+      session.user.id = token.id as string;
+      session.user.role = token.role as "CUSTOMER" | "VENDOR" | "ADMIN";
+      session.user.staffRole = (token.staffRole as string) || (token.role === "ADMIN" ? "SUPER_ADMIN" : "CUSTOMER");
+      session.user.permissions = (token.permissions as string) || (token.role === "ADMIN" ? "ALL" : "NONE");
+      session.user.vendorId = token.vendorId as string | null;
+      session.user.phone = token.phone as string | null;
+      (session.user as any).tokenVersion = token.tokenVersion as number;
+      (session.user as any).twoFactorEnabled = Boolean(token.twoFactorEnabled);
       return session;
     },
   },

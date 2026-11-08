@@ -18,17 +18,26 @@ export async function GET(
 
     const session = await getServerSession(authOptions);
     const url = new URL(req.url);
-    const guestEmailParam = url.searchParams.get("email")?.toLowerCase().trim();
+    const guestToken = url.searchParams.get("token")?.trim();
+
+    // Cryptographic HMAC token for guest verification
+    const crypto = await import("crypto");
+    const expectedToken = crypto
+      .createHmac("sha256", process.env.NEXTAUTH_SECRET || "voucher-token-fallback")
+      .update(`${booking.id}:${booking.guestEmail.toLowerCase().trim()}`)
+      .digest("hex");
+
+    const isTokenValid = Boolean(guestToken && guestToken === expectedToken);
 
     // IDOR Protection:
     // 1. Admin has access
     const isAdmin = session?.user?.role === "ADMIN";
 
-    // 2. Booking owner (by authenticated email or valid guest confirmation email param)
+    // 2. Booking owner (by authenticated email or valid guest signature token)
     const isOwner =
-      (session?.user?.email &&
+      Boolean(session?.user?.email &&
         booking.guestEmail.toLowerCase() === session.user.email.toLowerCase()) ||
-      (guestEmailParam && booking.guestEmail.toLowerCase() === guestEmailParam);
+      isTokenValid;
 
     // 3. Vendor who owns this listing
     let isVendorOwner = false;

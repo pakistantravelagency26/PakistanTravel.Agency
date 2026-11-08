@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import { hashPassword, verifyPassword } from "@/lib/password";
-import { siteConfig } from "@/config/site";
+import { prisma } from "../lib/prisma.ts";
+import { hashPassword, verifyPassword } from "../lib/password.ts";
+import { siteConfig } from "../config/site.ts";
 
 export interface LocalUser {
   id: string;
