@@ -54,6 +54,11 @@ export async function middleware(req: NextRequest) {
     if (token.role !== "ADMIN") {
       return new NextResponse("Forbidden: Access restricted to platform administrators.", { status: 403 });
     }
+    // Mandatory 2FA Enforcement for Admin
+    if (!token.twoFactorEnabled && path !== "/secure-admin/setup-2fa") {
+      const setup2faUrl = new URL("/secure-admin/setup-2fa", req.url);
+      return NextResponse.redirect(setup2faUrl);
+    }
   }
 
   // 2b. Admin API protection (/api/admin)
@@ -72,6 +77,15 @@ export async function middleware(req: NextRequest) {
       const loginUrl = new URL("/partner-hub/login", req.url);
       loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
+    }
+    // Mandatory 2FA Enforcement for Vendor / Partner
+    if (token.role === "VENDOR" && !token.twoFactorEnabled && path !== "/partner-hub/setup-2fa") {
+      const setup2faUrl = new URL("/partner-hub/setup-2fa", req.url);
+      return NextResponse.redirect(setup2faUrl);
+    }
+    if (token.role === "ADMIN" && !token.twoFactorEnabled && path !== "/secure-admin/setup-2fa") {
+      const setup2faUrl = new URL("/secure-admin/setup-2fa", req.url);
+      return NextResponse.redirect(setup2faUrl);
     }
   }
 

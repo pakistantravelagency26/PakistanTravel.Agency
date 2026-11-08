@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  const auth = requireRole(session, ["ADMIN"]);
-  if (!auth.authorized) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized: Active session required." }, { status: 401 });
+  }
+
+  // Enforce SUPER_ADMIN authority only
+  const isSuperAdmin =
+    session.user.role === "ADMIN" &&
+    ((session.user as any).staffRole === "SUPER_ADMIN" || (session.user as any).permissions === "ALL");
+
+  if (!isSuperAdmin) {
+    return NextResponse.json(
+      { error: "Forbidden: Only Super Administrators can reset 2FA configuration." },
+      { status: 403 }
+    );
   }
 
   try {
@@ -19,6 +30,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid userId" }, { status: 400 });
     }
 
+    // Prohibit resetting own 2FA
+    if (session.user.id === userId) {
+      return NextResponse.json(
+        { error: "Forbidden: Administrators cannot reset their own 2FA credentials. Another Super Admin must perform this action." },
+        { status: 400 }
+      );
+    }
+
+    // Require identity verification reason
+    if (!reason || typeof reason !== "string" || reason.trim().length < 5) {
+      return NextResponse.json(
+        { error: "A documented identity verification reason (minimum 5 characters) is required for audit compliance." },
+        { status: 400 }
+      );
+    }
+
     const targetUser = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -27,9 +54,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Target user not found" }, { status: 404 });
     }
 
-    const adminEmail = session?.user?.email || "admin@pakistantravel.agency";
+    const adminEmail = session.user.email || "admin@pakistantravel.agency";
 
-    // Reset 2FA fields and invalidate active sessions for security
+    // Atomically reset 2FA fields and invalidate active sessions via tokenVersion & sessionVersion
     await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
@@ -40,15 +67,17 @@ export async function POST(req: NextRequest) {
           twoFactorRecoveryCodes: null,
           twoFactorEnrolledAt: null,
           tokenVersion: { increment: 1 },
+          sessionVersion: { increment: 1 },
         },
       }),
       prisma.auditLog.create({
         data: {
           action: "ADMIN_RESET_2FA",
+          actorId: session.user.id,
           actorEmail: adminEmail,
           resourceType: "USER",
           resourceId: userId,
-          details: `Admin ${adminEmail} reset 2FA for ${targetUser.email}. Reason: ${reason || "Account recovery requested"}. User must re-enroll.`,
+          details: `Super Admin ${adminEmail} reset 2FA for ${targetUser.email}. Identity verification reason: ${reason.trim()}. Active sessions revoked; user forced to re-enroll on next login.`,
         },
       }),
     ]);

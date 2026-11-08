@@ -243,6 +243,7 @@ export const authOptions: NextAuthOptions = {
               role: true,
               staffRole: true,
               permissions: true,
+              twoFactorEnabled: true,
               vendorProfile: { select: { id: true } },
             },
           });
@@ -256,6 +257,7 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role;
           token.staffRole = dbUser.staffRole;
           token.permissions = dbUser.permissions;
+          token.twoFactorEnabled = Boolean(dbUser.twoFactorEnabled);
           if (dbUser.vendorProfile) {
             token.vendorId = dbUser.vendorProfile.id;
           }

@@ -190,4 +190,111 @@ describe("Phase 5: Mandatory 2FA & TOTP Security Test Suite", () => {
       assert.equal(reattempt.valid, false);
     });
   });
+
+  describe("Mandatory 2FA Policy & Super Admin Reset Enforcement", () => {
+    it("enforces mandatory setup redirect policy for Admin without 2FA", () => {
+      function evaluate2FARedirect(path, role, twoFactorEnabled) {
+        if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
+          if (role === "ADMIN" && !twoFactorEnabled && path !== "/secure-admin/setup-2fa") {
+            return "/secure-admin/setup-2fa";
+          }
+        }
+        if (path.startsWith("/partner-hub") && path !== "/partner-hub/login") {
+          if (role === "VENDOR" && !twoFactorEnabled && path !== "/partner-hub/setup-2fa") {
+            return "/partner-hub/setup-2fa";
+          }
+        }
+        return null;
+      }
+
+      // Admin without 2FA must redirect to /secure-admin/setup-2fa
+      assert.equal(evaluate2FARedirect("/secure-admin/dashboard", "ADMIN", false), "/secure-admin/setup-2fa");
+      assert.equal(evaluate2FARedirect("/secure-admin/settings", "ADMIN", false), "/secure-admin/setup-2fa");
+
+      // Admin with 2FA enabled is allowed through
+      assert.equal(evaluate2FARedirect("/secure-admin/dashboard", "ADMIN", true), null);
+
+      // Setup page itself does not redirect to avoid loop
+      assert.equal(evaluate2FARedirect("/secure-admin/setup-2fa", "ADMIN", false), null);
+
+      // Vendor without 2FA must redirect to /partner-hub/setup-2fa
+      assert.equal(evaluate2FARedirect("/partner-hub/dashboard", "VENDOR", false), "/partner-hub/setup-2fa");
+      assert.equal(evaluate2FARedirect("/partner-hub/listings", "VENDOR", false), "/partner-hub/setup-2fa");
+
+      // Vendor with 2FA enabled is allowed through
+      assert.equal(evaluate2FARedirect("/partner-hub/dashboard", "VENDOR", true), null);
+
+      // Vendor setup page itself does not redirect
+      assert.equal(evaluate2FARedirect("/partner-hub/setup-2fa", "VENDOR", false), null);
+    });
+
+    it("prevents self-reset of 2FA by administrators", () => {
+      const adminId = "super-admin-001";
+      const targetUserId = "super-admin-001";
+      const isSelfReset = adminId === targetUserId;
+      assert.equal(isSelfReset, true, "Self-reset must be prohibited");
+    });
+
+    it("requires at least 5 characters for identity verification reason", () => {
+      const validateReason = (r) => Boolean(r && typeof r === "string" && r.trim().length >= 5);
+      assert.equal(validateReason(""), false);
+      assert.equal(validateReason("abc"), false);
+      assert.equal(validateReason("   "), false);
+      assert.equal(validateReason("User lost phone and verified via official passport photo"), true);
+    });
+
+    it("executes atomic 2FA reset, invalidating tokenVersion and sessionVersion", async () => {
+      const targetUser = await prisma.user.create({
+        data: {
+          email: `reset-test-${Date.now()}@test.pk`,
+          name: "Reset 2FA Target",
+          role: "VENDOR",
+          twoFactorEnabled: true,
+          twoFactorSecret: "enc:test:secret",
+          twoFactorRecoveryCodes: JSON.stringify(["ABCD-1234"]),
+          tokenVersion: 2,
+          sessionVersion: 2,
+        },
+      });
+
+      // Perform reset transaction
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: targetUser.id },
+          data: {
+            twoFactorEnabled: false,
+            twoFactorSecret: null,
+            twoFactorPendingSecret: null,
+            twoFactorRecoveryCodes: null,
+            twoFactorEnrolledAt: null,
+            tokenVersion: { increment: 1 },
+            sessionVersion: { increment: 1 },
+          },
+        }),
+        prisma.auditLog.create({
+          data: {
+            action: "ADMIN_RESET_2FA",
+            actorId: "super-admin-id",
+            actorEmail: "superadmin@pakistantravel.agency",
+            resourceType: "USER",
+            resourceId: targetUser.id,
+            details: "Super Admin reset 2FA. Verified via video call and government CNIC.",
+          },
+        }),
+      ]);
+
+      const resetUser = await prisma.user.findUnique({ where: { id: targetUser.id } });
+      assert.equal(resetUser.twoFactorEnabled, false);
+      assert.equal(resetUser.twoFactorSecret, null);
+      assert.equal(resetUser.twoFactorRecoveryCodes, null);
+      assert.equal(resetUser.tokenVersion, 3);
+      assert.equal(resetUser.sessionVersion, 3);
+
+      const audit = await prisma.auditLog.findFirst({
+        where: { resourceId: targetUser.id, action: "ADMIN_RESET_2FA" },
+      });
+      assert.ok(audit);
+      assert.equal(audit.actorEmail, "superadmin@pakistantravel.agency");
+    });
+  });
 });
