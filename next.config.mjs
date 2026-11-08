@@ -106,6 +106,24 @@ const nextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        source: "/:prefix(partner-hub|secure-admin|account|dashboard|api)/:path*",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive",
+          },
+        ],
+      },
+      {
+        source: "/:page(login|register|forgot-password|search)",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive",
+          },
+        ],
+      },
     ];
   },
 };

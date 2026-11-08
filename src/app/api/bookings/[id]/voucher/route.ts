@@ -38,10 +38,7 @@ export async function GET(
       }
     }
 
-    const isRecentlyCreated =
-      Date.now() - new Date(booking.createdAt).getTime() < 15 * 60 * 1000;
-
-    if (!isAdmin && !isOwner && !isVendorOwner && !isRecentlyCreated) {
+    if (!isAdmin && !isOwner && !isVendorOwner) {
       return new NextResponse("Forbidden: Access to voucher denied", { status: 403 });
     }
 

@@ -42,17 +42,23 @@ export async function middleware(req: NextRequest) {
 
   // 2. Super Admin Portal protection (/secure-admin)
   if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
-    if (!token || token.role !== "ADMIN") {
+    if (!token) {
       const loginUrl = new URL("/secure-admin/login", req.url);
       loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
+    }
+    if (token.role !== "ADMIN") {
+      return new NextResponse("Forbidden: Access restricted to platform administrators.", { status: 403 });
     }
   }
 
   // 2b. Admin API protection (/api/admin)
   if (path.startsWith("/api/admin")) {
-    if (!token || token.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    if (!token) {
+      return NextResponse.json({ success: false, error: "Unauthorized access: Session required." }, { status: 401 });
+    }
+    if (token.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Forbidden: Admin role required." }, { status: 403 });
     }
   }
 
@@ -82,12 +88,20 @@ export async function middleware(req: NextRequest) {
     res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }
 
-  // 6. Private Portal Indexing Prevention
+  // 6. Private Portal & Query Parameter Indexing Prevention (SEO Protection)
+  const hasQueryParams = req.nextUrl.search.length > 0;
   if (
     path.startsWith("/secure-admin") ||
     path.startsWith("/partner-hub") ||
     path.startsWith("/account") ||
-    path.startsWith("/api/")
+    path.startsWith("/dashboard") ||
+    path === "/login" ||
+    path === "/register" ||
+    path.startsWith("/forgot-password") ||
+    path === "/search" ||
+    path.startsWith("/search/") ||
+    path.startsWith("/api/") ||
+    hasQueryParams
   ) {
     res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }

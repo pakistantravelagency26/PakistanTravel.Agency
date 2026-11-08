@@ -22,13 +22,24 @@ export async function GET(req: Request) {
     let vendorId = searchParams.get("vendorId");
     const singleId = searchParams.get("id") || searchParams.get("slug");
 
-    // Automatically scope partner listings to current vendor if not specified
+    // IDOR Defense: Scope partner listings strictly to current vendor
     const session = await getServerSession(authOptions);
-    if (includeAll && !vendorId && session?.user && session.user.role === "VENDOR") {
-      vendorId = session.user.vendorId || null;
-      if (!vendorId && session.user.id) {
+    if (session?.user && session.user.role === "VENDOR") {
+      let currentVendorId = session.user.vendorId || null;
+      if (!currentVendorId && session.user.id) {
         const dbV = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
-        if (dbV) vendorId = dbV.id;
+        if (dbV) currentVendorId = dbV.id;
+      }
+
+      // If vendor queries all listings or specifies vendorId, enforce ownership
+      if (includeAll || vendorId) {
+        if (vendorId && vendorId !== currentVendorId) {
+          return NextResponse.json(
+            { success: false, error: "Forbidden: You cannot access another vendor's private listings." },
+            { status: 403 }
+          );
+        }
+        vendorId = currentVendorId;
       }
     }
 
@@ -434,7 +445,13 @@ export async function PUT(req: Request) {
         const v = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
         currentVendorId = v?.id || null;
       }
-      if (existing && existing.vendorId !== currentVendorId) {
+      if (!existing) {
+        return NextResponse.json(
+          { success: false, error: "Listing not found" },
+          { status: 404 }
+        );
+      }
+      if (existing.vendorId !== currentVendorId) {
         return NextResponse.json(
           { success: false, error: "Forbidden: You cannot modify another vendor's listing." },
           { status: 403 }
@@ -506,7 +523,13 @@ export async function DELETE(req: Request) {
         const v = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
         currentVendorId = v?.id || null;
       }
-      if (existing && existing.vendorId !== currentVendorId) {
+      if (!existing) {
+        return NextResponse.json(
+          { success: false, error: "Listing not found" },
+          { status: 404 }
+        );
+      }
+      if (existing.vendorId !== currentVendorId) {
         return NextResponse.json(
           { success: false, error: "Forbidden: You cannot delete another vendor's listing." },
           { status: 403 }

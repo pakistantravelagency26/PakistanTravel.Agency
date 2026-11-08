@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   MessageSquare,
   X,
@@ -57,6 +58,19 @@ function isUrduText(text: string): boolean {
 }
 
 export default function SupportChatWidget() {
+  const pathname = usePathname();
+
+  // The AI Chatbot widget must NOT render on portal, admin, dashboard, or auth pages (public pages only)
+  const isExcluded =
+    !pathname ||
+    pathname.startsWith("/partner-hub") ||
+    pathname.startsWith("/secure-admin") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/account") ||
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/forgot-password");
+
   const [isOpen, setIsOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -280,6 +294,10 @@ export default function SupportChatWidget() {
     { label: "Payment Methods", query: "What payment methods do you accept for booking?" },
     { label: "List My Tour / Hotel", query: "How can a local operator or hotel owner list on the platform?" },
   ];
+
+  if (isExcluded) {
+    return null;
+  }
 
   return (
     <>

@@ -42,11 +42,7 @@ export async function GET(
       }
     }
 
-    // 4. Temporary grace period for fresh checkout flow: if booking was created less than 15 minutes ago
-    const isRecentlyCreated =
-      Date.now() - new Date(booking.createdAt).getTime() < 15 * 60 * 1000;
-
-    if (!isAdmin && !isOwner && !isVendorOwner && !isRecentlyCreated) {
+    if (!isAdmin && !isOwner && !isVendorOwner) {
       return NextResponse.json(
         { success: false, error: "Forbidden: You do not have permission to view this booking." },
         { status: 403 }
