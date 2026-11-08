@@ -14,8 +14,8 @@
 
 import crypto from "crypto";
 import { prisma } from "../lib/prisma.ts";
-import { hashPassword } from "../lib/password.ts";
-import { validatePasswordStrength } from "../lib/passwordPolicy.ts";
+import { hashPassword, verifyPassword } from "../lib/password.ts";
+import { validatePasswordStrength, checkHaveIBeenPwned } from "../lib/passwordPolicy.ts";
 
 export function hashCode(code: string): string {
   return crypto.createHash("sha256").update(code.trim()).digest("hex");
@@ -274,10 +274,36 @@ export async function completePasswordReset(
     };
   }
 
-  // 4. Hash new password
+  // 4. Verify new password is NOT identical to previous password
+  if (user.passwordHash) {
+    try {
+      const isSamePassword = await verifyPassword(newPassword, user.passwordHash);
+      if (isSamePassword) {
+        return {
+          success: false,
+          error: "Your new password cannot be the same as your previous password. Please choose a different password.",
+          message: "Password reuse prohibited.",
+        };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // 5. Check against breached passwords using HIBP k-anonymity
+  const hibpResult = await checkHaveIBeenPwned(newPassword);
+  if (hibpResult.breached) {
+    return {
+      success: false,
+      error: "This password has appeared in a known public data breach. For your account security, please choose a different password.",
+      message: "Breached password rejected.",
+    };
+  }
+
+  // 6. Hash new password
   const newHash = await hashPassword(newPassword);
 
-  // 5. Invalidate token and update user password + increment tokenVersion
+  // 7. Invalidate token and update user password + increment tokenVersion and sessionVersion
   await prisma.$transaction([
     prisma.passwordResetToken.update({
       where: { id: verification.tokenId },
@@ -291,6 +317,7 @@ export async function completePasswordReset(
       data: {
         passwordHash: newHash,
         tokenVersion: { increment: 1 }, // Invalidates all existing JWT sessions
+        sessionVersion: { increment: 1 }, // Active session revocation
         updatedAt: new Date(),
       },
     }),
@@ -301,10 +328,27 @@ export async function completePasswordReset(
         ip: cleanIp,
         resourceType: "USER",
         resourceId: user.id,
-        details: "Password reset successfully completed. All existing sessions invalidated.",
+        details: "Password reset successfully completed. Both tokenVersion and sessionVersion incremented.",
       },
     }),
   ]);
+
+  // 8. Queue security confirmation email
+  try {
+    await prisma.emailOutbox.create({
+      data: {
+        to: normEmail,
+        recipientRole: user.role === "ADMIN" ? "ADMIN" : user.role === "VENDOR" ? "VENDOR" : "CUSTOMER",
+        subject: "[Security Notice] Your PakistanTravel.Agency account password was changed",
+        textBody: `Hello ${user.name},\n\nYour account password for PakistanTravel.Agency was recently reset from IP address ${cleanIp}.\n\nAll existing active sessions and remembered devices have been automatically signed out for security.\n\nIf you did NOT request or authorize this change, please contact PakistanTravel.Agency administration immediately at support@pakistantravel.agency.`,
+        htmlBody: `<div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px;"><h3 style="color:#0f172a;margin-top:0;">Password Reset Successfully</h3><p style="color:#334155;font-size:14px;">Hello <strong>${user.name}</strong>,</p><p style="color:#334155;font-size:14px;">Your PakistanTravel.Agency account password was reset from IP address <code>${cleanIp}</code>.</p><p style="color:#334155;font-size:14px;">All existing active sessions have been signed out automatically for security.</p><div style="margin:20px 0;padding:12px;background:#f8fafc;border-left:4px solid #0284c7;font-size:13px;color:#475569;">If you made this change, you can safely disregard this email. If you did not make this change, please contact us immediately at <a href="mailto:support@pakistantravel.agency">support@pakistantravel.agency</a>.</div></div>`,
+        eventType: "SECURITY_NOTICE",
+        status: "PENDING",
+      },
+    });
+  } catch {
+    // Non-fatal email queueing
+  }
 
   return {
     success: true,

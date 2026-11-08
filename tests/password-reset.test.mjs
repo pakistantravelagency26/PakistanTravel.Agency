@@ -19,10 +19,10 @@ describe("Phase 4: Secure Password Reset Test Suite", () => {
       assert.equal(res.errors.length, 0);
     });
 
-    it("rejects passwords shorter than 8 characters", () => {
-      const res = validatePasswordStrength("Short1!");
+    it("rejects passwords shorter than 12 characters", () => {
+      const res = validatePasswordStrength("Short1!Pass");
       assert.equal(res.valid, false);
-      assert.ok(res.errors.some((e) => e.includes("at least 8 characters")));
+      assert.ok(res.errors.some((e) => e.includes("at least 12 characters")));
     });
 
     it("rejects passwords without uppercase letters", () => {
@@ -149,7 +149,17 @@ describe("Phase 4: Secure Password Reset Test Suite", () => {
       assert.equal(token.attemptsLeft, 0);
     });
 
-    it("completes password reset with new valid code and invalidates sessions", async () => {
+    it("rejects password reset if new password is equal to the previous password", async () => {
+      const freshReq = await requestPasswordReset(testEmail, testIp);
+      const validCode = freshReq.debugCode;
+
+      // Try resetting to the existing password
+      const sameRes = await completePasswordReset(testEmail, validCode, "OldPassword#2025!", testIp);
+      assert.equal(sameRes.success, false);
+      assert.match(sameRes.error, /cannot be the same as your previous/i);
+    });
+
+    it("completes password reset with new valid code, increments sessionVersion, and queues security email", async () => {
       // Request fresh code
       const freshReq = await requestPasswordReset(testEmail, testIp);
       const validCode = freshReq.debugCode;
@@ -159,13 +169,24 @@ describe("Phase 4: Secure Password Reset Test Suite", () => {
       assert.equal(resetRes.success, true);
       assert.ok(resetRes.message.includes("successfully reset"));
 
-      // Verify user's passwordHash was updated in database
+      // Verify user's passwordHash was updated in database and sessionVersion incremented
       const updatedUser = await prisma.user.findUnique({
         where: { id: testUserId },
       });
       assert.equal(updatedUser.tokenVersion, 2, "tokenVersion must increment to invalidate prior sessions");
+      assert.equal(updatedUser.sessionVersion, 2, "sessionVersion must increment for active JWT revocation");
       const passwordMatches = await verifyPassword(newPassword, updatedUser.passwordHash);
       assert.equal(passwordMatches, true);
+
+      // Verify security confirmation email was queued
+      const securityEmail = await prisma.emailOutbox.findFirst({
+        where: {
+          to: testEmail,
+          eventType: "SECURITY_NOTICE",
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      assert.ok(securityEmail, "Security notice email must be queued to user upon password reset");
 
       // Verify code was marked used and invalidated
       const consumedToken = await prisma.passwordResetToken.findFirst({

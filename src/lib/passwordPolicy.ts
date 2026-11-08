@@ -30,6 +30,8 @@ const COMMON_PASSWORDS = new Set([
   "islamabad123",
 ]);
 
+import crypto from "crypto";
+
 export interface PasswordValidationResult {
   valid: boolean;
   errors: string[];
@@ -38,8 +40,8 @@ export interface PasswordValidationResult {
 export function validatePasswordStrength(password: string): PasswordValidationResult {
   const errors: string[] = [];
 
-  if (!password || password.length < 8) {
-    errors.push("Password must be at least 8 characters long.");
+  if (!password || password.length < 12) {
+    errors.push("Password must be at least 12 characters long.");
   }
 
   if (password && password.length > 128) {
@@ -71,4 +73,48 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     valid: errors.length === 0,
     errors,
   };
+}
+
+/**
+ * Checks if a password has appeared in known public data breaches using
+ * HaveIBeenPwned (HIBP) k-anonymity model.
+ * 
+ * Only the first 5 characters of the SHA-1 hash are sent to the HIBP API.
+ * The full password or full hash is NEVER transmitted across the network.
+ */
+export async function checkHaveIBeenPwned(password: string): Promise<{ breached: boolean; count?: number }> {
+  try {
+    const sha1Hash = crypto.createHash("sha1").update(password).digest("hex").toUpperCase();
+    const prefix = sha1Hash.slice(0, 5);
+    const suffix = sha1Hash.slice(5);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1500);
+
+    const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+      headers: { "Add-Padding": "true" },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return { breached: false };
+    }
+
+    const text = await response.text();
+    const lines = text.split("\r\n");
+
+    for (const line of lines) {
+      const [hashSuffix, countStr] = line.split(":");
+      if (hashSuffix && hashSuffix.trim() === suffix) {
+        const count = parseInt(countStr || "1", 10);
+        return { breached: true, count };
+      }
+    }
+
+    return { breached: false };
+  } catch {
+    // If HIBP API is unreachable or times out, fail open safely
+    return { breached: false };
+  }
 }
