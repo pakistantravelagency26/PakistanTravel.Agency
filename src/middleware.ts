@@ -57,8 +57,6 @@ export async function middleware(req: NextRequest) {
     });
   }
 
-  const hasQueryParams = req.nextUrl.search.length > 0;
-
   // 2. Super Admin Portal protection (/secure-admin)
   if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
     if (!token) {
