@@ -21,11 +21,7 @@ export function formatDbListing(l: any): ListingData {
 
   const durationDays = Number(l.durationDays) || (l.title.includes("7-Day") ? 7 : l.title.includes("5-Day") ? 5 : l.title.includes("4-Day") ? 4 : 1);
   const durationNights = l.durationNights !== undefined && l.durationNights !== null ? Number(l.durationNights) : Math.max(0, durationDays - 1);
-  const duration = l.type === "TOUR" || l.type === "ACTIVITY"
-    ? `${durationDays} Days / ${durationNights} Nights`
-    : l.type === "HOTEL"
-      ? "Per Night Stay"
-      : undefined;
+  const duration = `${durationDays} Days / ${durationNights} Nights`;
 
   const cancellationPolicy = l.cancellationPolicy || siteConfig.cancellationPolicy.summary;
 
@@ -33,7 +29,7 @@ export function formatDbListing(l: any): ListingData {
     id: l.id,
     slug: l.slug,
     title: l.title,
-    type: l.type as any,
+    type: "TOUR" as any,
     durationDays,
     durationNights,
     duration,
@@ -50,12 +46,12 @@ export function formatDbListing(l: any): ListingData {
     isFeatured: l.isFeatured,
     freeCancellation: true,
     freeCancellationDays: l.freeCancellationDays || siteConfig.cancellationPolicy.fullRefundDays,
-    badge: l.type === "TOUR" ? "Guided Tour" : "Mountain Stay",
+    badge: "Guided Tour Package",
     photos,
     amenities,
     description: l.description,
     cancellationPolicy,
-    singleSupplement: l.singleSupplement !== undefined && l.singleSupplement !== null ? Number(l.singleSupplement) : (l.type === "TOUR" ? Math.round(Number(l.basePrice) * 0.35) : 0),
+    singleSupplement: l.singleSupplement !== undefined && l.singleSupplement !== null ? Number(l.singleSupplement) : Math.round(Number(l.basePrice) * 0.35),
     depositPercent: l.depositPercent !== undefined && l.depositPercent !== null ? Number(l.depositPercent) : 25,
     departures: Array.isArray(l.departures) ? l.departures.map((d: any) => ({
       id: d.id,
@@ -81,18 +77,18 @@ export function formatDbListing(l: any): ListingData {
       basePrice: Number(u.basePrice),
       photos: u.photos || [],
       amenities: u.amenities || [],
-      bedType: u.bedType || "Standard",
+      bedType: u.bedType || "Standard Tour Seat",
     })) : [
       {
         id: `${l.id}-unit-standard`,
-        title: l.type === "TOUR" ? "Standard Tour Seat" : "Deluxe Room",
-        description: "Full package inclusion with guided mountain transport and stay",
+        title: "Standard Tour Seat Package",
+        description: "Full tour package inclusion with guided mountain transport and standard hotel night stays",
         maxGuests: 2,
         totalQuantity: 10,
         basePrice: Number(l.basePrice),
         photos: photos.slice(0, 2),
         amenities: amenities.slice(0, 3),
-        bedType: "Queen Bed / Seat",
+        bedType: "Tour Seat / Per Person",
       }
     ],
     reviews: Array.isArray(l.reviews) ? l.reviews.map((r: any) => ({
@@ -112,6 +108,7 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
     const dbListings = await prisma.listing.findMany({
       where: {
         status: "PUBLISHED",
+        type: "TOUR",
         vendor: { status: "VERIFIED" },
       },
       include: {
@@ -158,7 +155,7 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
       },
     });
 
-    if (!dbListing) return null;
+    if (!dbListing || dbListing.type !== "TOUR") return null;
 
     return formatDbListing(dbListing);
   } catch (error) {

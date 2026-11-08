@@ -44,8 +44,10 @@ export async function GET(req: Request) {
       }
     }
 
-    // Direct single-query relational scan (fast latency)
-    const whereCondition: any = {};
+    // Direct single-query relational scan (fast latency) - strictly tours only
+    const whereCondition: any = {
+      type: "TOUR",
+    };
 
     if (!includeAll) {
       whereCondition.status = "PUBLISHED";
@@ -112,6 +114,13 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+
+    if (body.type && body.type !== "TOUR") {
+      return NextResponse.json(
+        { success: false, error: "PakistanTravel.Agency is a tours-only marketplace. Standalone hotel and rental listings are not supported." },
+        { status: 400 }
+      );
+    }
 
     if (!body.title || !body.basePrice) {
       return NextResponse.json(
@@ -204,7 +213,7 @@ export async function POST(req: Request) {
       moderationStatus: "PENDING_APPROVAL",
       isEdited: false,
       submittedAt: new Date().toISOString(),
-      type: body.type || "TOUR",
+      type: "TOUR",
       duration: body.duration || "5 Days / 4 Nights",
       destinationSlug: body.destinationSlug || body.destination || "hunza",
       destinationName: body.destinationName || body.city || "Hunza Valley",
@@ -219,7 +228,7 @@ export async function POST(req: Request) {
       isFeatured: body.isFeatured ?? true,
       freeCancellation: true,
       freeCancellationDays: Number(body.freeCancellationDays || 3),
-      badge: body.type === "TOUR" ? "Guided Tour" : "Mountain Stay",
+      badge: "Guided Tour Package",
       photos: photosList,
       amenities: Array.isArray(body.amenities) && body.amenities.length > 0 
         ? body.amenities 
@@ -227,7 +236,7 @@ export async function POST(req: Request) {
             "Dedicated 4x4 Mountain Transport",
             "Certified Alpine Guide",
             "Daily Breakfast & Dinner Included",
-            "Hotel / Resort Accommodations",
+            "Standard Hotel Accommodations Included",
             "First Aid & Emergency Support",
           ],
       description: body.description || `${body.title} - Curated by ${vendorBusiness}. Experience scenic valleys and authentic hospitality.`,
@@ -242,14 +251,14 @@ export async function POST(req: Request) {
       units: [
         {
           id: `${uniqueSlug}-unit-1`,
-          title: body.unitTitle || (body.type === "HOTEL" ? "Deluxe Mountain View Room" : "Standard Tour Seat Package"),
-          description: body.type === "HOTEL" ? "Spacious room with scenic mountain views and ensuite bathroom" : "Full package inclusion with guided mountain transport and stay",
+          title: body.unitTitle || "Standard Tour Seat Package",
+          description: "Full tour package inclusion with guided mountain transport, activities, and standard hotel night stays",
           maxGuests: Number(body.maxGuests || 2),
           totalQuantity: Number(body.inventory || 10),
           basePrice: Number(body.basePrice),
           photos: photosList.slice(0, 2),
           amenities: Array.isArray(body.amenities) ? body.amenities.slice(0, 4) : [],
-          bedType: body.type === "HOTEL" ? "Queen Bed / Room" : "Tour Seat / Per Person",
+          bedType: "Tour Seat / Per Person",
         },
       ],
       reviews: [],
@@ -282,7 +291,7 @@ export async function POST(req: Request) {
     }
 
     let cat = await prisma.category.findFirst({
-      where: { type: body.type || "TOUR" },
+      where: { type: "TOUR" },
     });
 
     if (!cat) {
@@ -292,10 +301,10 @@ export async function POST(req: Request) {
     if (!cat) {
       cat = await prisma.category.create({
         data: {
-          name: body.type === "HOTEL" ? "Hotels & Resorts" : "Tour Packages",
-          slug: body.type === "HOTEL" ? "hotels" : "tours",
-          type: body.type || "TOUR",
-          icon: body.type === "HOTEL" ? "Building2" : "Compass",
+          name: "Tour Packages",
+          slug: "tours",
+          type: "TOUR",
+          icon: "Compass",
         },
       });
     }
@@ -328,8 +337,8 @@ export async function POST(req: Request) {
           city: newListing.city,
           photos: newListing.photos,
           amenities: newListing.amenities,
-          durationDays: Number(body.durationDays) || (body.type === "HOTEL" ? 1 : 4),
-          durationNights: body.durationNights !== undefined ? Number(body.durationNights) : (body.type === "HOTEL" ? 1 : 3),
+          durationDays: Number(body.durationDays) || 5,
+          durationNights: body.durationNights !== undefined ? Number(body.durationNights) : 4,
           singleSupplement: Number(body.singleSupplement || 0),
           depositPercent: Number(body.depositPercent || 25),
           cancellationPolicy: newListing.cancellationPolicy,
@@ -341,9 +350,8 @@ export async function POST(req: Request) {
         },
       });
 
-      // Also create departures if provided or default for tour
-      if (body.type === "TOUR") {
-        const departureItems = Array.isArray(body.departures) && body.departures.length > 0
+      // Also create departures for tour package
+      const departureItems = Array.isArray(body.departures) && body.departures.length > 0
           ? body.departures
           : [
               {
@@ -380,15 +388,14 @@ export async function POST(req: Request) {
             },
           });
         }
-      }
 
       // Also create unit in Neon DB
       await prisma.listingUnit.create({
         data: {
           id: `${newListing.id}-unit-1`,
           listingId: newListing.id,
-          title: body.unitTitle || (body.type === "HOTEL" ? "Deluxe Mountain View Room" : "Standard Tour Seat Package"),
-          description: body.type === "HOTEL" ? "Spacious room with scenic mountain views and ensuite bathroom" : "Full package inclusion with guided mountain transport and stay",
+          title: body.unitTitle || "Standard Tour Seat Package",
+          description: "Full tour package inclusion with guided mountain transport, activities, and standard hotel night stays",
           maxGuests: Number(body.maxGuests || 2),
           totalQuantity: Number(body.inventory || 10),
           basePrice: Number(body.basePrice),
@@ -433,6 +440,13 @@ export async function PUT(req: Request) {
     const body = await req.json();
     if (!body.id) {
       return NextResponse.json({ success: false, error: "Listing ID is required" }, { status: 400 });
+    }
+
+    if (body.type && body.type !== "TOUR") {
+      return NextResponse.json(
+        { success: false, error: "PakistanTravel.Agency is a tours-only marketplace. Standalone hotel and rental listings are not supported." },
+        { status: 400 }
+      );
     }
 
     // IDOR Check: If vendor, verify that they own the listing

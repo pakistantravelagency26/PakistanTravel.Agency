@@ -70,7 +70,7 @@ export function Navbar() {
               href="/list-your-tour"
               className="text-slate-700 hover:text-sky-600 font-semibold hidden md:inline-flex items-center gap-1 text-[11px]"
             >
-              List your tour / hotel
+              List your tour
             </Link>
             <span className="text-slate-300 hidden md:inline">|</span>
             <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
@@ -209,7 +209,7 @@ export function Navbar() {
               className="block py-2.5 px-3 rounded-xl bg-slate-50 text-slate-800 font-bold hover:text-sky-600 flex items-center justify-between"
               onClick={() => setIsMenuOpen(false)}
             >
-              <span>Search Tours & Hotels Catalog</span>
+              <span>Search Tour Packages</span>
               <Compass className="w-4 h-4 text-orange-500" />
             </Link>
 
@@ -218,8 +218,8 @@ export function Navbar() {
               className="block py-2.5 px-3 rounded-xl bg-sky-50 text-sky-900 font-bold hover:bg-sky-100 flex items-center justify-between"
               onClick={() => setIsMenuOpen(false)}
             >
-              <span>List Your Tour or Hotel</span>
-              <Building2 className="w-4 h-4 text-sky-600" />
+              <span>List Your Tour Package</span>
+              <Compass className="w-4 h-4 text-sky-600" />
             </Link>
 
             <div className="pt-2 pb-1 border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider px-3">

@@ -1,5 +1,13 @@
+/**
+ * Dynamic Site Settings Service (Database-Backed with Fallback)
+ *
+ * Allows Super Admin to modify titles, texts, contact info,
+ * hero banners, and feature cards across the entire website live
+ * without requiring code commits or rebuilds.
+ */
+
 import { prisma } from "@/lib/prisma";
-import { siteConfig, COMMISSION_PERCENT, PAYOUT_TIMING } from "@/config/site";
+import { COMMISSION_PERCENT, PAYOUT_TIMING } from "@/config/site";
 
 export interface GeneralSettings {
   siteName: string;
@@ -11,9 +19,9 @@ export interface GeneralSettings {
   address: string;
   dtsLicense: string;
   workingHours: string;
-  facebookUrl: string;
-  instagramUrl: string;
-  youtubeUrl: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
 }
 
 export interface HeroSettings {
@@ -35,6 +43,12 @@ export interface HeroSettings {
   badge3Sub: string;
 }
 
+export interface NavLinkItem {
+  id: string;
+  label: string;
+  url: string;
+}
+
 export interface AnnouncementSettings {
   isEnabled: boolean;
   text: string;
@@ -48,12 +62,6 @@ export interface MarketplaceSectionSettings {
   subtitle: string;
   emptyStateTitle: string;
   emptyStateDesc: string;
-}
-
-export interface NavLinkItem {
-  id: string;
-  label: string;
-  url: string;
 }
 
 export interface FooterLinkItem {
@@ -140,7 +148,7 @@ export interface PageBlogSettings {
 export const DEFAULT_SITE_SETTINGS = {
   GENERAL: {
     siteName: "PakistanTravel.Agency",
-    tagline: "Northern Pakistan Tours, Hotels & Mountain Expeditions",
+    tagline: "Northern Pakistan Tour Packages & Guided Expeditions",
     phonePrimary: "",
     phoneHelpline: "",
     whatsappNumber: "",
@@ -154,9 +162,9 @@ export const DEFAULT_SITE_SETTINGS = {
   } as GeneralSettings,
 
   HERO: {
-    badgeText: "Northern Pakistan Multi-Vendor Travel Marketplace",
+    badgeText: "Northern Pakistan Tour Operator Marketplace",
     title: "Discover Pakistan's Majestic Mountains & Valleys",
-    subtitle: "Compare and book tour packages and mountain stays directly from independent local operators across northern Pakistan.",
+    subtitle: "Compare and book guided tour packages directly from independent local tour operators across northern Pakistan.",
     bgImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&auto=format&fit=crop&q=75",
     stat1Value: "Local",
     stat1Label: "Independent Operators",
@@ -164,7 +172,7 @@ export const DEFAULT_SITE_SETTINGS = {
     stat2Label: "Transparent Rates",
     stat3Value: "24/7",
     stat3Label: "AI Travel Assistant",
-    badge1Title: "Independent Local Operators",
+    badge1Title: "Independent Local Tour Operators",
     badge1Sub: "Regional Partner Network · Partner Information",
     badge2Title: "Local & Card Payments",
     badge2Sub: "JazzCash, EasyPaisa, Bank Transfer & Cards",
@@ -177,35 +185,34 @@ export const DEFAULT_SITE_SETTINGS = {
     { id: "nav-2", label: "Skardu", url: "/destinations/skardu" },
     { id: "nav-3", label: "Swat", url: "/destinations/swat" },
     { id: "nav-4", label: "Kumrat", url: "/destinations/kumrat" },
-    { id: "nav-5", label: "Tours", url: "/search?type=TOUR" },
-    { id: "nav-6", label: "Hotels", url: "/search?type=HOTEL" },
-    { id: "nav-7", label: "Blog", url: "/blog" },
+    { id: "nav-5", label: "Tours", url: "/tours" },
+    { id: "nav-6", label: "Blog", url: "/blog" },
   ] as NavLinkItem[],
 
   ANNOUNCEMENT: {
     isEnabled: true,
     text: "Autumn & Early Winter 2026 Season Booking Open across Skardu, Hunza & Swat!",
     linkText: "Explore Tours",
-    linkUrl: "/search",
+    linkUrl: "/tours",
   } as AnnouncementSettings,
 
   MARKETPLACE_SECTION: {
-    badgeText: "Multi-Vendor Tourism Marketplace",
-    title: "Explore Northern Tours & Luxury Stays",
-    subtitle: "Compare tour packages and mountain resorts from independent local operators across Pakistan",
-    emptyStateTitle: "Marketplace Ready for Listings",
-    emptyStateDesc: "No active tours or hotel stays currently published. New partner listings will appear here upon approval.",
+    badgeText: "Verified Tour Operator Marketplace",
+    title: "Explore Northern Tour Packages",
+    subtitle: "Compare guided tour packages from independent local tour operators across Pakistan",
+    emptyStateTitle: "Marketplace Ready for Tours",
+    emptyStateDesc: "No active tour packages currently published. New partner listings will appear here upon approval.",
   } as MarketplaceSectionSettings,
 
   FOOTER: {
-    aboutText: "PakistanTravel.Agency is an online multi-vendor tourism marketplace connecting travelers with independent local tour operators and family-run hotels across northern Pakistan.",
+    aboutText: "PakistanTravel.Agency is an online multi-vendor tourism marketplace connecting travelers with independent local tour operators across northern Pakistan.",
     copyrightNotice: "© 2026 PakistanTravel.Agency. All rights reserved.",
     emergencyPhone: "",
     headOfficeText: "",
-    card1Title: "Independent Local Partners",
-    card1Desc: "Local operators and hotels publish and manage their own listings and itineraries.",
+    card1Title: "Independent Local Tour Operators",
+    card1Desc: "Local tour operators publish and manage their own listings, itineraries, and fixed departures.",
     card2Title: "JazzCash, EasyPaisa & Cards",
-    card2Desc: "Simple local Pakistani payments with confirmed check-in voucher issuance upon verification.",
+    card2Desc: "Simple local Pakistani payments with confirmed tour booking voucher issuance upon verification.",
     card3Title: "Customer Support Desk",
     card3Desc: "AI assistant available 24/7; email support during business working hours.",
     col1Title: "Popular Destinations",
@@ -214,21 +221,19 @@ export const DEFAULT_SITE_SETTINGS = {
       { id: "c1-2", label: "Skardu & Deosai Plains", url: "/destinations/skardu" },
       { id: "c1-3", label: "Swat Valley & Kalam", url: "/destinations/swat" },
       { id: "c1-4", label: "Kumrat Valley & Dir", url: "/destinations/kumrat" },
-      { id: "c1-5", label: "Murree & Bhurban Resorts", url: "/destinations/murree" },
+      { id: "c1-5", label: "Murree & Galyat Tours", url: "/destinations/murree" },
       { id: "c1-6", label: "Neelum Valley (Azad Kashmir)", url: "/destinations/neelum" },
     ],
-    col2Title: "Experience Categories",
+    col2Title: "Tour Packages",
     col2Links: [
-      { id: "c2-1", label: "Luxury Hotels & Resorts", url: "/search?type=HOTEL" },
-      { id: "c2-2", label: "Guided Northern Tours", url: "/search?type=TOUR" },
-      { id: "c2-3", label: "4x4 Mountain Jeeps & Rentals", url: "/search?type=RENTAL" },
-      { id: "c2-4", label: "All Regional Destinations", url: "/destinations" },
-      { id: "c2-5", label: "Northern Travel Guides & Tips", url: "/blog" },
+      { id: "c2-1", label: "Guided Northern Tours", url: "/tours" },
+      { id: "c2-2", label: "All Regional Destinations", url: "/destinations" },
+      { id: "c2-3", label: "Northern Travel Guides & Tips", url: "/blog" },
     ],
     col3Title: "Platform Information",
     col3Links: [
       { id: "c3-1", label: "Partner Information", url: "/partner-info" },
-      { id: "c3-2", label: "List Your Tour / Hotel", url: "/list-your-tour" },
+      { id: "c3-2", label: "List Your Tour Package", url: "/list-your-tour" },
       { id: "c3-3", label: "Direct Operator Rates", url: "/faq#operator-rates" },
       { id: "c3-4", label: "Cancellation Policy", url: "/terms" },
       { id: "c3-5", label: "About PakistanTravel.Agency", url: "/about" },
@@ -247,12 +252,12 @@ export const DEFAULT_SITE_SETTINGS = {
     {
       id: "faq-2",
       q: "How does payment work on PakistanTravel.Agency?",
-      a: "We support JazzCash, EasyPaisa, Direct Bank Transfer (IBAN), and Pakistani Debit/Credit cards. Travelers pay direct operator rates with zero booking fees. Operator disbursements are processed to verified Pakistani commercial bank accounts within 48 hours of departure or check-in.",
+      a: "We support JazzCash, EasyPaisa, Direct Bank Transfer (IBAN), and Pakistani Debit/Credit cards. Travelers pay direct operator rates with zero booking fees. Operator disbursements are processed to verified Pakistani commercial bank accounts within 48 hours of departure.",
     },
     {
       id: "faq-direct-rates",
       q: "What is the Direct Operator Rates Policy?",
-      a: `All tours and hotel rooms listed on PakistanTravel.Agency are priced directly by the local operators and hotel owners themselves. We do not inflate or mark up operator prices for travelers. Travelers pay direct local rates with zero booking fees. A flat ${COMMISSION_PERCENT}% platform commission is deducted from the operator's payout on completed bookings.`,
+      a: `All tour packages listed on PakistanTravel.Agency are priced directly by local tour operators. We do not inflate or mark up operator prices for travelers. Travelers pay direct local rates with zero booking fees. A flat ${COMMISSION_PERCENT}% platform commission is deducted from the operator's payout on completed bookings.`,
     },
     {
       id: "faq-operator-payout",
@@ -267,28 +272,28 @@ export const DEFAULT_SITE_SETTINGS = {
     {
       id: "faq-vouchers",
       q: "When is my confirmed booking voucher issued?",
-      a: "When you submit a reservation request, your booking is recorded in 'Booking Request Received' status. Your official confirmed voucher—complete with the host's direct contact and trip coordination details—is issued immediately once your payment deposit or transfer is confirmed.",
+      a: "When you submit a reservation request, your booking is recorded in 'Booking Request Received' status. Your official confirmed voucher—complete with the tour operator's direct contact and trip coordination details—is issued immediately once your payment deposit or transfer is confirmed.",
     },
     {
       id: "faq-amenities",
-      q: "Do all accommodations have 24/7 power backup and heating?",
-      a: "Amenities vary significantly by property, valley, and seasonal altitude. Many northern hotels operate generators during local load shedding hours and offer room heating either included or for an optional seasonal surcharge. Please review the specific amenities listed on each hotel page prior to reserving.",
+      q: "What hotel and accommodation standards are included in tour packages?",
+      a: "Where hotel accommodation is part of a tour package, comfortable standard or deluxe valley hotel/resort rooms (twin-sharing or private single with supplement) are arranged by the tour operator as specified in the package inclusions. Review each itinerary's specific accommodation inclusions prior to booking.",
     },
     {
       id: "faq-guides",
       q: "Who operates the tours and are guides licensed?",
-      a: "PakistanTravel.Agency is an online technology intermediary. All expeditions, transport, and stays are fulfilled directly by independent local tour operators and family-run hotels. Operators submit their business details and, where applicable, their Department of Tourist Services (DTS) or provincial registrations, which are displayed on their profile as self-reported information.",
+      a: "PakistanTravel.Agency is an online technology intermediary. All expeditions, transport, and guided itineraries are fulfilled directly by independent local tour operators and experienced guides. Operators submit their business details and, where applicable, their Department of Tourist Services (DTS) or provincial registrations, which are displayed on their profile as self-reported information.",
     },
   ] as FaqItem[],
 
   PAGE_VERIFICATION: {
     heading: "Partner Information & Standards",
-    subheading: "How independent tour operators and hotels publish listings and manage bookings on PakistanTravel.Agency.",
+    subheading: "How independent tour operators publish tour packages and manage bookings on PakistanTravel.Agency.",
     steps: [
       {
         step: "01",
         title: "Operator Profile Submission",
-        desc: "Independent tour operators and hotel owners register with their business details, local contact person, and operational cities.",
+        desc: "Independent tour operators register with their business details, local contact person, and operational hubs.",
       },
       {
         step: "02",
@@ -298,7 +303,7 @@ export const DEFAULT_SITE_SETTINGS = {
       {
         step: "03",
         title: "Listing Management & Pricing",
-        desc: "Operators configure their own itineraries, seasonal dates, pricing, and hotel room tiers directly through the partner extranet.",
+        desc: "Tour operators configure their own itineraries, fixed departure dates, seat counts, and pricing directly through the partner portal.",
       },
       {
         step: "04",
@@ -309,11 +314,11 @@ export const DEFAULT_SITE_SETTINGS = {
   } as PageVerificationSettings,
 
   PAGE_ABOUT: {
-    heading: "Connecting Travelers with Northern Pakistan Tourism",
-    subheading: "An online marketplace bringing together independent local tour operators, family-run hotels, and travelers seeking authentic northern adventures.",
-    mission: "Our mission is to provide local mountain tour guides and family-run hotels across Gilgit-Baltistan and Khyber Pakhtunkhwa with modern digital booking tools while offering travelers transparent pricing.",
-    vision: "To be a reliable, easy-to-use travel marketplace connecting travelers with independent regional operators.",
-    story: "PakistanTravel.Agency was created to make northern Pakistan travel planning straightforward. By connecting travelers directly with local service providers on a unified digital platform, we make exploring Pakistan's majestic mountains more accessible.",
+    heading: "Connecting Travelers with Northern Pakistan Guided Tours",
+    subheading: "An online marketplace bringing together independent local tour operators and travelers seeking authentic northern adventures.",
+    mission: "Our mission is to provide local mountain tour operators and certified guides across Gilgit-Baltistan and Khyber Pakhtunkhwa with modern digital booking tools while offering travelers transparent pricing.",
+    vision: "To be a reliable, easy-to-use travel marketplace connecting travelers with independent regional tour operators.",
+    story: "PakistanTravel.Agency was created to make northern Pakistan tour booking straightforward. By connecting travelers directly with local tour operators on a unified digital platform, we make exploring Pakistan's majestic mountains more accessible.",
     corporateName: "",
     secpCuin: "",
     fbrNtn: "",
@@ -321,14 +326,14 @@ export const DEFAULT_SITE_SETTINGS = {
   } as PageAboutSettings,
 
   PAGE_TERMS: {
-    bookingPolicy: "PakistanTravel.Agency is an online booking intermediary. Listings are published and fulfilled by independent local operators. Advance deposit or payment confirmation is required to lock dates and generate your confirmed check-in voucher.",
+    bookingPolicy: "PakistanTravel.Agency is an online booking intermediary. Guided tour listings are published and fulfilled by independent local tour operators. Advance deposit or payment confirmation is required to lock departure seats and generate your confirmed tour voucher.",
     cancellationPolicy: "100% refund for cancellations made 7 or more days before departure. 50% refund for cancellations made between 3 and 6 days before departure. Non-refundable within 72 hours of departure due to pre-committed mountain transport and accommodation logistics.",
     safetyGuidelines: "All travelers must carry valid original CNIC or Passport. Mountain travel is subject to weather conditions and local authority road clearances.",
-    liabilityNotice: "PakistanTravel.Agency acts solely as an intermediary marketplace. Independent operators are responsible for service delivery, local permits, vehicle safety, and listing accuracy.",
+    liabilityNotice: "PakistanTravel.Agency acts solely as an intermediary marketplace. Independent tour operators are responsible for service delivery, local permits, vehicle safety, and itinerary execution.",
   } as PageTermsSettings,
 
   PAGE_PRIVACY: {
-    privacyStatement: "We take your privacy seriously. Your personal contact details and CNIC/Passport information are shared strictly with the executing tour operator for hotel check-ins and security clearances.",
+    privacyStatement: "We take your privacy seriously. Your personal contact details and CNIC/Passport information are shared strictly with the executing tour operator for hotel accommodation check-in arrangements and security clearances.",
     paymentSecurity: "Payments made via JazzCash, EasyPaisa, or bank gateways are processed securely. We never store payment PINs or CVVs.",
     contactProtection: "We do not sell or rent traveler phone numbers or email addresses to third-party marketing companies.",
   } as PagePrivacySettings,
@@ -336,7 +341,7 @@ export const DEFAULT_SITE_SETTINGS = {
   PAGE_DESTINATIONS: {
     badgeText: "Discover Northern Pakistan",
     heading: "Top Travel Destinations in Pakistan",
-    subheading: "Explore comprehensive destination guides, seasonal advice, approximate costs, and tours offered by local mountain operators.",
+    subheading: "Explore comprehensive destination guides, seasonal advice, approximate costs, and guided tours offered by local mountain operators.",
   } as PageDestinationsSettings,
 
   PAGE_BLOG: {
@@ -363,36 +368,32 @@ export async function getSiteSettings(key?: SiteSettingsKey): Promise<any> {
       return DEFAULT_SITE_SETTINGS[key];
     }
 
-    // Load all settings
-    const records = await prisma.siteSetting.findMany();
+    const allRecords = await prisma.siteSetting.findMany();
     const result: Record<string, any> = { ...DEFAULT_SITE_SETTINGS };
 
-    records.forEach((r) => {
+    for (const r of allRecords) {
       if (r.key in DEFAULT_SITE_SETTINGS) {
         const defaultVal = DEFAULT_SITE_SETTINGS[r.key as SiteSettingsKey];
         if (Array.isArray(defaultVal)) {
           result[r.key] = Array.isArray(r.value) ? r.value : defaultVal;
         } else {
-          result[r.key] = {
-            ...defaultVal,
-            ...(r.value as object),
-          };
+          result[r.key] = { ...defaultVal, ...(r.value as object) };
         }
       }
-    });
+    }
 
     return result;
-  } catch (error) {
-    console.error("Failed to load site settings from DB, using defaults:", error);
+  } catch (err) {
+    console.error("Neon DB SiteSetting read error, returning in-memory defaults:", err);
     return key ? DEFAULT_SITE_SETTINGS[key] : DEFAULT_SITE_SETTINGS;
   }
 }
 
-export async function updateSiteSetting(key: string, value: any): Promise<any> {
+export async function updateSiteSetting(key: SiteSettingsKey, value: any) {
   const updated = await prisma.siteSetting.upsert({
     where: { key },
     update: { value },
     create: { key, value },
   });
-  return updated.value;
+  return updated;
 }

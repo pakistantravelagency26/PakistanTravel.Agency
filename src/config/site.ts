@@ -4,14 +4,14 @@
  * HARD RULES:
  * - Pure marketplace model: The platform owner is an intermediary, has NO license of their own,
  *   and has NO personal phone/WhatsApp number published.
- * - Independent tour operators and hotels publish and manage their own listings.
+ * - Independent tour operators publish and manage their own tour packages.
  * - Never invent legal numbers, license numbers, company names, or statistics.
  * - Every page, footer, metadata, voucher, and chatbot prompt must read from this config.
  */
 
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pakistantravel.agency";
 export const COMMISSION_PERCENT = Number(process.env.NEXT_PUBLIC_COMMISSION_PERCENT || 10);
-export const PAYOUT_TIMING = "within 48 hours of trip departure or guest check-in";
+export const PAYOUT_TIMING = "within 48 hours of tour departure";
 
 export const ADMIN_NOTIFICATION_EMAILS: string[] = [
   process.env.ADMIN_ALERT_EMAIL || "ops@pakistantravel.agency",
@@ -90,7 +90,7 @@ export const siteConfig: SiteConfig = {
   legalBrand: "PakistanTravel.Agency",
   domain: "www.pakistantravel.agency",
   url: SITE_URL,
-  tagline: "Northern Pakistan Tours, Hotels & 4x4 Bookings",
+  tagline: "Northern Pakistan Tour Packages",
 
   contact: {
     // TODO: User to confirm public support email. If empty, the UI hides the email line.

@@ -93,7 +93,7 @@ export async function getListings(filters?: {
   let results = MOCK_LISTINGS.filter((l) => {
     const isVendorLive = isVendorEnabled(l.vendor?.id);
     const isApproved = !l.moderationStatus || l.moderationStatus === "APPROVED";
-    return isVendorLive && isApproved;
+    return l.type === "TOUR" && isVendorLive && isApproved;
   });
 
   if (filters?.destination) {
@@ -108,9 +108,8 @@ export async function getListings(filters?: {
     );
   }
 
-  if (filters?.type && filters.type !== "ALL") {
-    results = results.filter((l) => l.type === filters.type);
-  }
+  // Strictly TOUR only. Any query param type (HOTEL, RENTAL) is ignored.
+  results = results.filter((l) => l.type === "TOUR");
 
   if (filters?.minPrice !== undefined) {
     results = results.filter((l) => l.basePrice >= filters.minPrice!);
@@ -139,12 +138,12 @@ export function getActiveListings(): ListingData[] {
   return MOCK_LISTINGS.filter((l) => {
     const isVendorLive = isVendorEnabled(l.vendor?.id);
     const isApproved = !l.moderationStatus || l.moderationStatus === "APPROVED";
-    return isVendorLive && isApproved;
+    return l.type === "TOUR" && isVendorLive && isApproved;
   });
 }
 
 export async function getListingBySlugOrId(idOrSlug: string): Promise<ListingData | null> {
-  const found = MOCK_LISTINGS.find((l) => l.id === idOrSlug || l.slug === idOrSlug);
+  const found = MOCK_LISTINGS.find((l) => (l.id === idOrSlug || l.slug === idOrSlug) && l.type === "TOUR");
   return found || null;
 }
 

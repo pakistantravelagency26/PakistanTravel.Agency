@@ -11,11 +11,8 @@ import {
   Heart, 
   Check, 
   Star, 
-  ShieldCheck, 
   Sparkles,
   ArrowRight,
-  Filter,
-  Building2,
   Compass,
   Clock,
   RotateCcw
@@ -30,12 +27,10 @@ interface SearchClientViewProps {
 function SearchContent({ initialListings = [] }: SearchClientViewProps) {
   const searchParams = useSearchParams();
   const initialDestination = searchParams.get("destination") || "";
-  const initialType = searchParams.get("type") || "ALL";
 
   // Filter States
   const [destinationQuery, setDestinationQuery] = useState(initialDestination);
-  const [selectedType, setSelectedType] = useState<string>(initialType);
-  const [priceMax, setPriceMax] = useState<number>(85000);
+  const [priceMax, setPriceMax] = useState<number>(150000);
   const [minRating, setMinRating] = useState<number>(0);
   const [onlyFreeCancellation, setOnlyFreeCancellation] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("recommended");
@@ -50,7 +45,9 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
     );
   }
 
-  const [dbListings, setDbListings] = useState<ListingData[]>(initialListings);
+  const [dbListings, setDbListings] = useState<ListingData[]>(
+    initialListings.filter((l) => l.type === "TOUR")
+  );
   const [loading, setLoading] = useState(initialListings.length === 0);
 
   useEffect(() => {
@@ -58,19 +55,17 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.listings)) {
-          setDbListings(data.listings);
+          // Strictly TOURS only
+          setDbListings(data.listings.filter((l: ListingData) => l.type === "TOUR"));
         }
       })
       .catch((err) => console.error("Error fetching live listings:", err))
       .finally(() => setLoading(false));
   }, []);
 
-  const hasTours = useMemo(() => dbListings.some((l) => l.type === "TOUR"), [dbListings]);
-  const hasHotels = useMemo(() => dbListings.some((l) => l.type === "HOTEL"), [dbListings]);
-
   // Filtered and Sorted Listings
   const filteredListings = useMemo(() => {
-    let list = [...dbListings];
+    let list = dbListings.filter((item) => item.type === "TOUR");
 
     if (destinationQuery.trim()) {
       const q = destinationQuery.toLowerCase().trim();
@@ -82,10 +77,6 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
           item.title?.toLowerCase().includes(q) ||
           item.province?.toLowerCase().includes(q)
       );
-    }
-
-    if (selectedType !== "ALL") {
-      list = list.filter((item) => item.type === selectedType);
     }
 
     if (priceMax) {
@@ -110,12 +101,11 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
     }
 
     return list;
-  }, [dbListings, destinationQuery, selectedType, priceMax, minRating, onlyFreeCancellation, sortBy]);
+  }, [dbListings, destinationQuery, priceMax, minRating, onlyFreeCancellation, sortBy]);
 
   function resetFilters() {
     setDestinationQuery("");
-    setSelectedType("ALL");
-    setPriceMax(85000);
+    setPriceMax(150000);
     setMinRating(0);
     setOnlyFreeCancellation(false);
     setSortBy("recommended");
@@ -133,46 +123,18 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
               type="text"
               value={destinationQuery}
               onChange={(e) => setDestinationQuery(e.target.value)}
-              placeholder="Search destination, valley, city (e.g. Hunza, Skardu, Swat, Kumrat)..."
+              placeholder="Search tour destination or valley (e.g. Hunza, Skardu, Swat, Kumrat)..."
               className="w-full pl-12 pr-4 py-3 text-xs sm:text-sm rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-emerald focus:bg-white transition"
             />
           </div>
 
-          {/* Type Toggle Pills (Only show categories with actual available listings) */}
-          {(hasTours || hasHotels) && (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-              {[
-                { id: "ALL", label: "All Experiences" },
-                ...(hasTours ? [{ id: "TOUR", label: "Tours & Treks", icon: Compass }] : []),
-                ...(hasHotels ? [{ id: "HOTEL", label: "Hotels & Stays", icon: Building2 }] : []),
-              ].map((t) => {
-                const Icon = t.icon;
-                const active = selectedType === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedType(t.id)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 ${
-                      active
-                        ? "bg-slate-900 text-white shadow-sm"
-                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                    }`}
-                  >
-                    {Icon && <Icon className="w-3.5 h-3.5" />}
-                    <span>{t.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Toggle Advanced Filters Button */}
           <button
+            type="button"
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className={`px-4 py-3 rounded-2xl border text-xs font-bold transition flex items-center justify-center gap-2 shrink-0 ${
+            className={`px-4 py-3 rounded-2xl border text-xs font-bold transition flex items-center justify-center gap-2 ${
               showAdvancedFilters
-                ? "bg-brand-emerald text-white border-brand-emerald"
-                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                ? "bg-slate-900 border-slate-900 text-white shadow-sm"
+                : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
             }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -180,23 +142,23 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
           </button>
         </div>
 
-        {/* Collapsible Advanced Filters Drawer */}
+        {/* Expandable Advanced Filters Drawer */}
         {showAdvancedFilters && (
-          <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in">
-            {/* Price Cap */}
+          <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in">
+            {/* Price Filter */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs font-bold text-slate-700">
-                <span>Max Budget:</span>
-                <span className="text-brand-emerald">PKR {priceMax.toLocaleString()}</span>
+                <span>Max Budget</span>
+                <span className="text-brand-emerald font-extrabold">PKR {priceMax.toLocaleString()}</span>
               </div>
               <input
                 type="range"
-                min="10000"
-                max="150000"
-                step="5000"
+                min={20000}
+                max={200000}
+                step={5000}
                 value={priceMax}
                 onChange={(e) => setPriceMax(Number(e.target.value))}
-                className="w-full accent-brand-emerald cursor-pointer"
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-emerald"
               />
             </div>
 
@@ -247,7 +209,7 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
         <div>
           <span>Showing </span>
           <span className="text-slate-900 font-extrabold">{filteredListings.length}</span>
-          <span> experiences in Pakistan</span>
+          <span> tour packages across Pakistan</span>
         </div>
 
         {/* Sort Dropdown */}
@@ -278,9 +240,9 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
           <div className="space-y-8">
             <div className="p-8 text-center rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-3 max-w-xl mx-auto">
               <Compass className="w-10 h-10 text-slate-400 mx-auto" />
-              <h3 className="text-lg font-bold text-slate-900">No active fixed-date packages found</h3>
+              <h3 className="text-lg font-bold text-slate-900">No active tour packages found</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                No problem! You can custom-plan your journey directly with our local partner network below.
+                No problem! You can custom-plan your guided northern tour with our local operator network below.
               </p>
               {destinationQuery && (
                 <button
@@ -294,8 +256,8 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
 
             <CustomTripEnquiryForm
               initialDestination={destinationQuery ? destinationQuery : "Hunza Valley & Attabad"}
-              title="Request a Custom Northern Pakistan Journey"
-              subtitle="Tell us where you want to go. Our team and local partner operators will custom-design your itinerary with direct pricing."
+              title="Request a Custom Northern Pakistan Tour"
+              subtitle="Tell us where you want to go. Our team and verified local tour operators will custom-design your itinerary with direct pricing."
             />
           </div>
         ) : (
@@ -319,17 +281,8 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
 
                     {/* Type Badge */}
                     <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-slate-900 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
-                      {item.type === "TOUR" ? (
-                        <>
-                          <Compass className="w-3 h-3 text-orange-500" />
-                          <span>Tour Package</span>
-                        </>
-                      ) : (
-                        <>
-                          <Building2 className="w-3 h-3 text-emerald-600" />
-                          <span>Hotel Stay</span>
-                        </>
-                      )}
+                      <Compass className="w-3 h-3 text-orange-500" />
+                      <span>Tour Package</span>
                     </span>
 
                     {/* Wishlist Button */}
@@ -399,7 +352,7 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
                 <div className="p-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
                   <div>
                     <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">
-                      {item.type === "HOTEL" ? "Per Night" : "Per Person"}
+                      Per Traveler (Twin Share)
                     </span>
                     <p className="text-lg font-extrabold text-slate-900 leading-tight">
                       PKR {item.basePrice.toLocaleString()}
@@ -410,7 +363,7 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
                     href={`/listing/${item.slug}`}
                     className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition shadow-md shadow-orange-500/20 flex items-center gap-1.5 group-hover:scale-105"
                   >
-                    <span>{item.type === "TOUR" ? "Book Tour" : "Reserve Room"}</span>
+                    <span>Book Tour</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -425,7 +378,7 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
 
 export function SearchClientView({ initialListings }: SearchClientViewProps) {
   return (
-    <Suspense fallback={<div className="min-h-screen p-12 text-center text-xs text-slate-400">Loading experiences across Pakistan...</div>}>
+    <Suspense fallback={<div className="min-h-screen p-12 text-center text-xs text-slate-400">Loading tour packages across Pakistan...</div>}>
       <SearchContent initialListings={initialListings} />
     </Suspense>
   );

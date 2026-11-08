@@ -21,10 +21,10 @@ const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Pakistan Travel | Northern Pakistan Tours & Mountain Stays",
+    absolute: "Northern Pakistan Tour Packages | PakistanTravel",
   },
   description:
-    "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
+    "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators.",
   alternates: {
     canonical: siteUrl,
   },
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
     locale: "en_PK",
     url: siteUrl,
     siteName: "PakistanTravel",
-    title: "Pakistan Travel | Northern Pakistan Tours & Mountain Stays",
+    title: "Northern Pakistan Tour Packages | PakistanTravel",
     description:
-      "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
+      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pakistan Travel | Northern Pakistan Tours & Mountain Stays",
+    title: "Northern Pakistan Tour Packages | PakistanTravel",
     description:
-      "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
+      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators.",
     images: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
   },
 };
@@ -60,11 +60,8 @@ export default async function HomePage() {
   const hero = settings.HERO;
   const announcement = settings.ANNOUNCEMENT;
 
-  // Filter dropdown destinations and experience types strictly by real available listings
+  // Filter dropdown destinations strictly by real available tour listings
   const activeDestinationSlugs = new Set(listings.map((l) => l.destinationSlug));
-  const hasHotels = listings.some((l) => l.type === "HOTEL");
-  const hasTours = listings.some((l) => l.type === "TOUR");
-  const hasRentals = listings.some((l) => l.type === "RENTAL");
 
   const allDestinations = [
     { slug: "hunza", label: "Hunza Valley & Attabad" },
@@ -72,7 +69,7 @@ export default async function HomePage() {
     { slug: "kumrat", label: "Kumrat Valley & Dir" },
     { slug: "swat", label: "Swat & Kalam" },
     { slug: "neelum", label: "Neelum Valley" },
-    { slug: "murree", label: "Murree & Bhurban" },
+    { slug: "murree", label: "Murree & Galyat" },
   ];
 
   const availableDestinations = allDestinations.filter(
@@ -101,7 +98,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-sky-800 text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>{hero?.badgeText || "Northern Pakistan Multi-Vendor Travel Marketplace"}</span>
+            <span>{hero?.badgeText || "Northern Pakistan Tour Operator Marketplace"}</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">
@@ -109,19 +106,19 @@ export default async function HomePage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            {hero?.subtitle || "Compare and book tour packages and mountain stays directly from independent local operators across northern Pakistan."}
+            {hero?.subtitle || "Compare and book guided tour packages directly from independent local operators across northern Pakistan."}
           </p>
         </div>
 
         {/* Clean Floating Search Bar */}
-        <div className="max-w-5xl mx-auto mt-10">
+        <div className="max-w-4xl mx-auto mt-10">
           <form
             action="/search"
             method="GET"
             className="bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 grid grid-cols-1 md:grid-cols-12 gap-3"
           >
             {/* Destination */}
-            <div className="md:col-span-4 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
+            <div className="md:col-span-6 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
               <MapPin className="w-5 h-5 text-sky-600 shrink-0" />
               <div className="w-full text-left">
                 <label htmlFor="destination-select" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Where in Pakistan?</label>
@@ -131,7 +128,7 @@ export default async function HomePage() {
                   className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 outline-none cursor-pointer"
                   defaultValue=""
                 >
-                  <option value="">All Destinations</option>
+                  <option value="">All Northern Destinations</option>
                   {availableDestinations.map((d) => (
                     <option key={d.slug} value={d.slug}>
                       {d.label}
@@ -155,33 +152,14 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Experience Category */}
-            <div className="md:col-span-3 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
-              <Compass className="w-5 h-5 text-orange-500 shrink-0" />
-              <div className="w-full text-left">
-                <label htmlFor="type-select" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Experience Type</label>
-                <select
-                  id="type-select"
-                  name="type"
-                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-slate-800 outline-none cursor-pointer"
-                  defaultValue=""
-                >
-                  <option value="">All Categories</option>
-                  {(hasTours || (!hasHotels && !hasRentals)) && <option value="TOUR">Northern Guided Tours</option>}
-                  {hasHotels && <option value="HOTEL">Hotels & Resorts</option>}
-                  {hasRentals && <option value="RENTAL">4x4 Mountain Jeeps</option>}
-                </select>
-              </div>
-            </div>
-
             {/* Submit Button */}
-            <div className="md:col-span-2 flex items-center">
+            <div className="md:col-span-3 flex items-center">
               <button
                 type="submit"
                 className="w-full h-full min-h-[52px] bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0"
               >
                 <Search className="w-4 h-4" />
-                <span>Search</span>
+                <span>Search Tours</span>
               </button>
             </div>
           </form>
@@ -195,7 +173,7 @@ export default async function HomePage() {
             </div>
             <div>
               <span className="font-bold text-slate-900 block group-hover:text-emerald-700">
-                {hero?.badge1Title || "Independent Local Operators"}
+                {hero?.badge1Title || "Independent Local Tour Operators"}
               </span>
               <span className="text-[11px] text-slate-400">
                 {hero?.badge1Sub || "Regional Partner Network · Partner Information"}

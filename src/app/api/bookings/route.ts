@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { createBooking, getAllBookings, getBookingsByEmail, getBookingsByVendorId } from "@/services/booking.service";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
@@ -118,6 +119,18 @@ export async function POST(req: Request) {
       cnicOrPassport,
       specialRequests,
     } = parsed.data;
+
+    // Validate that listing is an active Tour
+    const listingCheck = await prisma.listing.findUnique({
+      where: { id: listingId },
+      select: { type: true },
+    });
+    if (listingCheck && listingCheck.type !== "TOUR") {
+      return NextResponse.json(
+        { error: "This listing is not available for booking as PakistanTravel.Agency is a tours-only marketplace." },
+        { status: 400 }
+      );
+    }
 
     // Resolve payment status and booking flow status
     // Cash on arrival: status is PENDING_PAYMENT (Hold reservation request, balance due at property)

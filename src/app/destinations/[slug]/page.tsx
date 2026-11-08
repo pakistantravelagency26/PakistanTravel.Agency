@@ -11,7 +11,6 @@ import {
   ShieldCheck, 
   Compass, 
   HelpCircle,
-  Building2,
   ChevronRight,
   CheckCircle2,
   Sparkles
@@ -282,7 +281,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
                 <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Comfort / Mid-Range</span>
                 <p className="text-2xl font-black text-emerald-950">{dest.approximateCosts.midRangePerDay}</p>
-                <p className="text-[11px] text-emerald-800">Per room per day with 3-star mountain hotel and guided transport.</p>
+                <p className="text-[11px] text-emerald-800">Estimated per traveler with standard hotel accommodation and guided transport.</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-2">
@@ -328,17 +327,17 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
-                Available Tours &amp; Stays
+                Available Guided Tours
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                Tours &amp; Hotels in {dest.name}
+                Tour Packages in {dest.name}
               </h2>
             </div>
             <Link
               href={`/search?destination=${dest.slug}`}
               className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1 self-start sm:self-auto"
             >
-              <span>View all in search</span>
+              <span>View all tour packages</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -346,13 +345,13 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           {listings.length === 0 ? (
             <div className="bg-white rounded-3xl p-8 border border-slate-200 text-center space-y-3">
               <p className="text-sm font-bold text-slate-700">
-                New seasonal packages for {dest.name} are currently being onboarded by local operators.
+                New seasonal tour packages for {dest.name} are currently being onboarded by local operators.
               </p>
               <Link
                 href="/search"
                 className="inline-block px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition"
               >
-                Browse All Northern Packages →
+                Browse All Northern Tour Packages →
               </Link>
             </div>
           ) : (
@@ -371,17 +370,8 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                     />
                     <span className="absolute bottom-2.5 left-2.5 bg-slate-950/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      {item.type === "HOTEL" ? (
-                        <>
-                          <Building2 className="w-3 h-3 text-sky-400" />
-                          <span>Luxury Stay</span>
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="w-3 h-3 text-orange-400" />
-                          <span>{item.duration || "Multi-Day Tour"}</span>
-                        </>
-                      )}
+                      <Clock className="w-3 h-3 text-orange-400" />
+                      <span>{item.duration || "Multi-Day Tour"}</span>
                     </span>
                   </div>
 
@@ -402,7 +392,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
 
                     <div className="pt-3 border-t border-slate-100 flex items-baseline justify-between">
                       <span className="text-[10px] text-slate-400 uppercase font-semibold">
-                        {item.type === "HOTEL" ? "From / Night" : "From / Person"}
+                        From / Person
                       </span>
                       <span className="text-base font-extrabold text-slate-900">
                         PKR {item.basePrice.toLocaleString()}

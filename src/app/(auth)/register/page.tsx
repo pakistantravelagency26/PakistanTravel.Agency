@@ -92,8 +92,8 @@ function RegisterForm() {
           </h2>
           <p className="text-xs text-slate-500">
             {role === "VENDOR"
-              ? `List tours & hotel rooms on ${siteConfig.name}`
-              : "Book authentic northern Pakistan tours & luxury stays"}
+              ? `List guided tour packages on ${siteConfig.name}`
+              : "Book authentic northern Pakistan guided tour packages"}
           </p>
         </div>
 
@@ -119,7 +119,7 @@ function RegisterForm() {
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            List Tour / Hotel (Partner)
+            Tour Operator (Partner)
           </button>
         </div>
 
@@ -216,7 +216,7 @@ function RegisterForm() {
           {role === "VENDOR" && (
             <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3.5 animate-in fade-in">
               <p className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                <Building className="w-4 h-4 text-emerald-700" /> Operator or Hotel Business Details
+                <Building className="w-4 h-4 text-emerald-700" /> Tour Operator Business Details
               </p>
 
               <div>
@@ -228,7 +228,7 @@ function RegisterForm() {
                   required
                   value={formData.businessName}
                   onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  placeholder="e.g. Karakoram Expeditions or Hunza Serena Inn"
+                  placeholder="e.g. Karakoram Expeditions or Hunza Adventure Tours"
                   className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -277,15 +277,12 @@ function RegisterForm() {
                   <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
                     Primary Service
                   </label>
-                  <select
-                    value={formData.listingType}
-                    onChange={(e) => setFormData({ ...formData, listingType: e.target.value })}
-                    className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="TOUR">Guided Tours &amp; Trips</option>
-                    <option value="HOTEL">Hotels &amp; Mountain Stays</option>
-                    <option value="RENTAL">4x4 Jeeps &amp; Transport</option>
-                  </select>
+                  <input
+                    type="text"
+                    readOnly
+                    value="Tour Operator (Tours Only)"
+                    className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-100 text-slate-700 font-semibold focus:outline-none"
+                  />
                 </div>
               </div>
 

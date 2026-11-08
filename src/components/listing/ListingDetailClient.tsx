@@ -189,7 +189,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               href="#booking-table"
               className="px-6 py-2.5 rounded-xl bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm transition shadow-md flex items-center gap-2"
             >
-              <span>{isTour ? "Book Tour" : "Reserve Room"}</span>
+              <span>Book Tour Package</span>
             </a>
           </div>
         </div>
@@ -252,13 +252,13 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
         <div className="sticky top-20 z-40 bg-white border-y border-slate-200 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 shadow-sm flex gap-6 overflow-x-auto text-xs font-bold text-slate-600">
           <a href="#overview" className="hover:text-brand-emerald transition whitespace-nowrap">Overview</a>
           <a href="#booking-table" className="text-brand-emerald transition whitespace-nowrap">
-            {isTour ? "Tour Packages & Seats" : "Rooms & Pricing"}
+            Tour Packages &amp; Seats
           </a>
           <a href="#amenities" className="hover:text-brand-emerald transition whitespace-nowrap">
-            {isTour ? "Inclusions & Perks" : "Facilities & Amenities"}
+            Inclusions &amp; Perks
           </a>
           <a href="#policies" className="hover:text-brand-emerald transition whitespace-nowrap">
-            {isTour ? "Schedule & Guidelines" : "House Rules & Policies"}
+            Schedule &amp; Guidelines
           </a>
           <a href="#safety" className="hover:text-brand-emerald transition whitespace-nowrap">Permits &amp; Safety</a>
           <a href="#reviews" className="hover:text-brand-emerald transition whitespace-nowrap">Guest Reviews ({listing.totalReviews})</a>
@@ -292,21 +292,19 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               </div>
             </section>
 
-            {/* Room / Unit Selection Table */}
+            {/* Tour Package / Seat Tier Selection Table */}
             <section id="booking-table" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">
-                    {isTour ? "Available Tour Packages & Seat Tiers" : "Available Rooms & Packages"}
+                    Available Tour Packages &amp; Seat Tiers
                   </h2>
                   <p className="text-xs text-slate-500">
-                    {isTour
-                      ? "Prices are per person / traveler including mountain transport and stays"
-                      : `Prices are per room for ${nightsCount} nights including Pakistani taxes`}
+                    Prices are per person / traveler including mountain transport, activities, and hotel stays
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-brand-emerald bg-brand-emeraldLight px-3 py-1 rounded-full">
-                  {isTour ? "Guaranteed Departures" : "Real-time Availability"}
+                  Guaranteed Departures
                 </span>
               </div>
 
@@ -366,9 +364,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                               }`}
                             >
-                              {isCurrent
-                                ? (isTour ? "Selected Package" : "Selected Room")
-                                : (isTour ? "Choose this Package" : "Choose this Room")}
+                              {isCurrent ? "Selected Package" : "Choose this Package"}
                             </button>
                           </div>
                         </div>
@@ -413,19 +409,10 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                     <span className="font-semibold text-slate-800 block mb-1">
-                      {isTour ? "Tour Schedule & Timings" : "Check-in / Check-out"}
+                      Tour Schedule &amp; Timings
                     </span>
-                    {isTour ? (
-                      <>
-                        <p>Assembly Time: 06:00 AM sharp</p>
-                        <p>Departure: 06:30 AM from pickup terminal</p>
-                      </>
-                    ) : (
-                      <>
-                        <p>Check-in: 02:00 PM</p>
-                        <p>Check-out: 12:00 PM (Noon)</p>
-                      </>
-                    )}
+                    <p>Assembly Time: 06:00 AM sharp</p>
+                    <p>Departure: 06:30 AM from pickup terminal</p>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
                     <span className="font-semibold text-slate-800 block mb-1">Cancellation Guarantee</span>
@@ -555,7 +542,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
             <div className="sticky top-36 bg-white p-6 rounded-2xl border border-slate-200 shadow-xl space-y-5">
               <div>
                 <span className="text-xs text-slate-400 uppercase font-semibold">
-                  {isTour ? "Tour Booking Summary" : "Total Stay Estimate"}
+                  Tour Booking Summary
                 </span>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-xs font-bold text-slate-700">PKR</span>
@@ -564,15 +551,12 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  {isTour
-                    ? `For ${selectedQuantity} ${selectedQuantity > 1 ? "Travelers / Seats" : "Traveler / Seat"} · All taxes included`
-                    : `For ${nightsCount} nights · ${selectedQuantity} ${selectedQuantity > 1 ? "rooms" : "room"} (Taxes included)`}
+                  For {selectedQuantity} {selectedQuantity > 1 ? "Travelers / Seats" : "Traveler / Seat"} · All taxes included
                 </p>
               </div>
 
               {/* Tour Fixed Departures & Auto-calculated Date */}
-              {isTour ? (
-                <div className="space-y-3">
+              <div className="space-y-3">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
                       Select Fixed Departure Date *
@@ -636,41 +620,15 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                      Check-in
-                    </label>
-                    <input
-                      type="date"
-                      value={checkInDate}
-                      onChange={(e) => setCheckInDate(e.target.value)}
-                      className="w-full bg-transparent font-semibold text-slate-800 focus:outline-none"
-                    />
-                  </div>
-                  <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                      Check-out
-                    </label>
-                    <input
-                      type="date"
-                      value={checkOutDate}
-                      onChange={(e) => setCheckOutDate(e.target.value)}
-                      className="w-full bg-transparent font-semibold text-slate-800 focus:outline-none"
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* Traveler Capacity Selection */}
               <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
                 <div>
                   <span className="text-slate-600 font-medium block">
-                    {isTour ? "Travelers / Seats" : "Rooms"}
+                    Travelers / Seats
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    Max Capacity: {maxCapacity} {isTour ? "seats max" : "guests max"}
+                    Max Capacity: {maxCapacity} seats max
                   </span>
                 </div>
                 <select
@@ -680,7 +638,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 >
                   {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((num) => (
                     <option key={num} value={num}>
-                      {num} {isTour ? (num > 1 ? "Travelers / Seats" : "Traveler / Seat") : (num > 1 ? "Rooms" : "Room")}
+                      {num} {num > 1 ? "Travelers / Seats" : "Traveler / Seat"}
                     </option>
                   ))}
                 </select>
@@ -734,7 +692,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 onClick={handleReserve}
                 className="w-full py-3.5 bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold text-sm rounded-xl transition shadow-lg flex items-center justify-center gap-2"
               >
-                <span>{isTour ? "Book Tour Now" : "Reserve Room Now"}</span>
+                <span>Book Tour Package Now</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -744,7 +702,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 </p>
                 <p className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-brand-emerald shrink-0" /> 
-                  {isTour ? "Guaranteed seat reservation & trip voucher" : "Guaranteed booking confirmation voucher"}
+                  Guaranteed seat reservation &amp; official tour voucher
                 </p>
               </div>
             </div>

@@ -97,7 +97,7 @@ function CheckoutContent() {
   const isSolo = searchParams.get("isSolo") === "1" || (isTour && qty === 1);
   const unit = (listing.units || []).find((u) => u.id === unitId) || listing.units?.[0] || {
     id: `${listing.id}-default`,
-    title: isTour ? "Standard Tour Seat" : "Standard Room",
+    title: "Standard Tour Seat Package",
     basePrice: listing.basePrice,
     maxGuests: 2,
   };
@@ -301,7 +301,7 @@ function CheckoutContent() {
 
                 <div>
                   <label htmlFor="checkout-guest-cnic" className="block text-xs font-semibold text-slate-700 uppercase mb-1">
-                    CNIC or Passport No. <span className="text-slate-400 font-normal">(Required for check-in)</span>
+                    CNIC or Passport No. <span className="text-slate-400 font-normal">(Required for security checkpoints &amp; manifest)</span>
                   </label>
                   <input
                     id="checkout-guest-cnic"
@@ -321,7 +321,7 @@ function CheckoutContent() {
                   rows={2}
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
-                  placeholder="e.g. High floor room with mountain view, early check-in, heater setup..."
+                  placeholder="e.g. Dietary preferences, pickup point, luggage assistance..."
                   className="w-full px-3.5 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-emerald"
                 />
               </div>
@@ -517,7 +517,7 @@ function CheckoutContent() {
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
                   <span className="font-bold block">Reservation Hold Request (Status: Pending)</span>
                   <p>
-                    Your booking request will be placed on hold without any instant deduction. The tour operator will confirm seat availability, and you can pay the full amount of PKR {totalAmount.toLocaleString()} directly at check-in.
+                    Your booking request will be placed on hold without any instant deduction. The tour operator will confirm seat availability, and you can pay the full amount of PKR {totalAmount.toLocaleString()} directly at departure.
                   </p>
                 </div>
               )}
@@ -563,7 +563,7 @@ function CheckoutContent() {
                 />
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-brand-emerald uppercase">
-                    {isTour ? "Tour Package" : "Hotel Stay"}
+                    Tour Package
                   </span>
                   <h4 className="text-xs font-bold text-slate-900 line-clamp-2">{listing.title}</h4>
                   <p className="text-[11px] text-slate-500 flex items-center gap-1">
@@ -576,13 +576,13 @@ function CheckoutContent() {
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-slate-500 font-medium">
-                    {isTour ? "Package / Seat Tier:" : "Accommodation:"}
+                    Package / Seat Tier:
                   </span>
                   <span className="font-bold text-slate-800">{unit.title}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500 font-medium">
-                    {isTour ? "Tour Schedule:" : "Dates:"}
+                    Tour Schedule:
                   </span>
                   <span className="font-bold text-slate-800">{startParam} to {autoEndDate}</span>
                 </div>
@@ -594,12 +594,10 @@ function CheckoutContent() {
                 )}
                 <div className="flex justify-between">
                   <span className="text-slate-500 font-medium">
-                    {isTour ? "Travelers:" : "Duration:"}
+                    Travelers:
                   </span>
                   <span className="font-bold text-slate-800">
-                    {isTour 
-                      ? `${qty} ${qty > 1 ? "Travelers / Seats" : "Traveler / Seat"}`
-                      : `${nightsCount} Nights · ${qty} ${qty > 1 ? "Rooms" : "Room"}`}
+                    {qty} {qty > 1 ? "Travelers / Seats" : "Traveler / Seat"}
                   </span>
                 </div>
               </div>
@@ -608,9 +606,7 @@ function CheckoutContent() {
               <div className="space-y-1.5 text-xs pt-2 border-t border-slate-100">
                 <div className="flex justify-between text-slate-600">
                   <span>
-                    {isTour 
-                      ? `Base tour package (${qty} ${qty > 1 ? "travelers" : "traveler"}):`
-                      : `Room charges (${nightsCount} nights):`}
+                    Base tour package ({qty} {qty > 1 ? "travelers" : "traveler"}):
                   </span>
                   <span>PKR {baseRate.toLocaleString()}</span>
                 </div>

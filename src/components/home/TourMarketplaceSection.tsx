@@ -1,37 +1,40 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { 
-  Compass, 
-  Building2, 
   MapPin, 
-  Clock, 
   Star, 
   ShieldCheck, 
-  Search, 
-  SlidersHorizontal,
+  Clock, 
+  Sparkles, 
   ArrowRight,
-  Sparkles
+  SlidersHorizontal,
+  Search,
+  Compass
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
-import type { MarketplaceSectionSettings } from "@/services/siteSettings.service";
 import { CustomTripEnquiryForm } from "@/components/common/CustomTripEnquiryForm";
 
-interface Props {
+interface TourMarketplaceSectionProps {
   initialListings: ListingData[];
-  customSettings?: MarketplaceSectionSettings;
+  customSettings?: {
+    badgeText?: string;
+    title?: string;
+    subtitle?: string;
+  };
 }
 
-export function TourMarketplaceSection({ initialListings, customSettings }: Props) {
+export function TourMarketplaceSection({ initialListings = [], customSettings }: TourMarketplaceSectionProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const categories = useMemo(() => {
-    const tourCount = initialListings.filter(l => l.type === "TOUR").length;
-    const hotelCount = initialListings.filter(l => l.type === "HOTEL").length;
+  const tourListings = useMemo(() => {
+    return initialListings.filter((l) => l.type === "TOUR");
+  }, [initialListings]);
 
+  const categories = useMemo(() => {
     const destinationNames: Record<string, string> = {
       hunza: "Hunza Valley",
       skardu: "Skardu & Deosai",
@@ -42,7 +45,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
     };
 
     const destMap = new Map<string, { label: string; count: number }>();
-    initialListings.forEach((item) => {
+    tourListings.forEach((item) => {
       const slug = item.destinationSlug || "other";
       const label = destinationNames[slug] || item.destinationName || slug;
       const cur = destMap.get(slug);
@@ -54,9 +57,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
     });
 
     const list = [
-      { id: "ALL", label: "All Experiences", count: initialListings.length },
-      ...(tourCount > 0 ? [{ id: "TOUR", label: "Tour Packages", count: tourCount }] : []),
-      ...(hotelCount > 0 ? [{ id: "HOTEL", label: "Hotels & Stays", count: hotelCount }] : []),
+      { id: "ALL", label: "All Tour Packages", count: tourListings.length },
     ];
 
     destMap.forEach((val, slug) => {
@@ -64,17 +65,13 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
     });
 
     return list.filter((cat) => cat.count > 0);
-  }, [initialListings]);
+  }, [tourListings]);
 
   const filteredListings = useMemo(() => {
-    return initialListings.filter((item) => {
+    return tourListings.filter((item) => {
       // Category filter
       let matchCat = true;
-      if (selectedCategory === "TOUR") {
-        matchCat = item.type === "TOUR";
-      } else if (selectedCategory === "HOTEL") {
-        matchCat = item.type === "HOTEL";
-      } else if (selectedCategory !== "ALL") {
+      if (selectedCategory !== "ALL") {
         matchCat = item.destinationSlug === selectedCategory || item.city.toLowerCase().includes(selectedCategory);
       }
 
@@ -91,7 +88,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
 
       return matchCat && matchQuery;
     });
-  }, [initialListings, selectedCategory, searchQuery]);
+  }, [tourListings, selectedCategory, searchQuery]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -100,13 +97,13 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>{customSettings?.badgeText || "Multi-Vendor Tourism Marketplace"}</span>
+            <span>{customSettings?.badgeText || "Verified Tour Operator Marketplace"}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {customSettings?.title || "Explore Northern Tours & Luxury Stays"}
+            {customSettings?.title || "Explore Northern Tour Packages"}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            {customSettings?.subtitle || "Compare tour packages and mountain resorts from independent local operators across Pakistan"}
+            {customSettings?.subtitle || "Compare guided tour packages from independent local tour operators across Pakistan"}
           </p>
         </div>
 
@@ -117,7 +114,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tours, hotels or vendors..."
+            placeholder="Search tour packages or operators..."
             className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
           />
           {searchQuery && (
@@ -162,17 +159,17 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
         })}
       </div>
 
-      {/* 4 Tours/Hotels per row Grid */}
-      {initialListings.length === 0 ? (
+      {/* 4 Tours per row Grid */}
+      {tourListings.length === 0 ? (
         <div className="py-6">
           <CustomTripEnquiryForm
-            title="Plan Your Custom Northern Pakistan Trip"
+            title="Plan Your Custom Northern Pakistan Tour"
             subtitle="While seasonal operator quotas are being updated, our team and partner operators will custom-design your itinerary with direct operator pricing."
           />
         </div>
       ) : filteredListings.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 space-y-3">
-          <p className="text-sm font-bold text-slate-700">No experiences match your filter.</p>
+          <p className="text-sm font-bold text-slate-700">No tour packages match your filter.</p>
           <button
             onClick={() => {
               setSelectedCategory("ALL");
@@ -209,19 +206,10 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
                   </span>
                 )}
 
-                {/* Duration or Type Bottom Left */}
+                {/* Duration Bottom Left */}
                 <span className="absolute bottom-2.5 left-2.5 bg-slate-950/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  {item.type === "HOTEL" ? (
-                    <>
-                      <Building2 className="w-3 h-3 text-sky-400" />
-                      <span>Luxury Stay</span>
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-3 h-3 text-orange-400" />
-                      <span>{item.duration || "Multi-Day Tour"}</span>
-                    </>
-                  )}
+                  <Clock className="w-3 h-3 text-orange-400" />
+                  <span>{item.duration || "Multi-Day Tour"}</span>
                 </span>
               </div>
 
@@ -260,7 +248,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
 
                   <div className="text-right">
                     <span className="text-[9px] text-slate-400 uppercase tracking-wider block font-semibold">
-                      {item.type === "HOTEL" ? "From / Night" : "Starting"}
+                      Per Person
                     </span>
                     <p className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
                       PKR {item.basePrice.toLocaleString()}
@@ -279,7 +267,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
           href="/search"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-bold text-xs shadow-sm transition"
         >
-          <span>View All Pakistan Tours & Hotels Catalog</span>
+          <span>View All Northern Tour Packages Catalog</span>
           <ArrowRight className="w-4 h-4 text-orange-500" />
         </Link>
       </div>

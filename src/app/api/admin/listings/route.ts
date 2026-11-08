@@ -17,10 +17,11 @@ export async function GET() {
     const dbVendors = await prisma.vendor.findMany({ select: { id: true } });
     const validVendorIds = new Set(dbVendors.map((v) => v.id));
 
-    // 2. Query ONLY listings that belong to currently existing vendors
+    // 2. Query ONLY listings that belong to currently existing vendors and are TOUR type
     const dbListings = await prisma.listing.findMany({
       where: {
         vendorId: { in: Array.from(validVendorIds) },
+        type: "TOUR",
       },
       include: {
         vendor: true,
@@ -33,7 +34,7 @@ export async function GET() {
       id: l.id,
       slug: l.slug,
       title: l.title,
-      type: l.type as any,
+      type: "TOUR",
       duration: "5 Days / 4 Nights",
       destinationSlug: l.destination?.slug || "hunza",
       destinationName: l.destination?.name || l.city,
@@ -48,7 +49,7 @@ export async function GET() {
       isFeatured: l.isFeatured,
       freeCancellation: true,
       freeCancellationDays: l.freeCancellationDays,
-      badge: l.type === "TOUR" ? "Guided Tour" : "Mountain Stay",
+      badge: "Guided Tour Package",
       photos: l.photos.length > 0 ? l.photos : [
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
       ],

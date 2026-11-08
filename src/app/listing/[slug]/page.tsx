@@ -28,19 +28,17 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
 
   if (!listing) {
     return {
-      title: "Experience Not Found | Pakistan Travel Agency",
-      description: "Explore tour packages, mountain stays and travel experiences across northern Pakistan.",
+      title: "Tour Not Found | Pakistan Travel Agency",
+      description: "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat and Kumrat.",
     };
   }
 
-  const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
-  
   // Format Title strictly targeting 50-60 characters
-  let title = `${listing.title} | ${isTour ? "Tour" : "Hotel"} in ${listing.city}`;
+  let title = `${listing.title} | Tour in ${listing.city}`;
   if (title.length > 60) {
-    title = `${listing.title.slice(0, 44)} | ${listing.city} Trip`;
+    title = `${listing.title.slice(0, 44)} | ${listing.city} Tour`;
   } else if (title.length < 50) {
-    title = `${listing.title} | ${isTour ? "Tour Package" : "Hotel"} in ${listing.city}, Pakistan`;
+    title = `${listing.title} | Tour Package in ${listing.city}, Pakistan`;
     if (title.length > 60) {
       title = `${listing.title} | ${listing.city}, Pakistan`;
     }
@@ -48,12 +46,12 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   if (title.length > 60) title = title.slice(0, 60);
 
   // Format Description strictly targeting 140-155 characters (complete sentence, no "...")
-  let description = `Book ${listing.title} in ${listing.city} with local host ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with check-in vouchers.`;
+  let description = `Book ${listing.title} in ${listing.city} with local operator ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with instant digital tour vouchers.`;
   if (description.length > 155) {
-    description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital check-in vouchers.`;
+    description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with official tour vouchers.`;
   }
   if (description.length < 140) {
-    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital check-in vouchers and traveler assistance.`;
+    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital tour vouchers and verified local guidance.`;
   }
   if (description.length > 155) {
     description = description.slice(0, 154).trim();
@@ -98,38 +96,18 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
   const listing = await getDbListingBySlugOrId(params.slug);
   const siteUrl = SITE_URL;
 
-  if (!listing) {
-    return (
-      <div className="min-h-[65vh] flex flex-col items-center justify-center text-center px-4 py-16 bg-slate-50">
-        <span className="text-xs font-bold text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-wider mb-3">
-          404 · Tour Not Found
-        </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
-          Experience Listing Not Available
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
-          This package may have been updated, archived, or is awaiting vendor review. Explore our other northern journeys.
-        </p>
-        <Link 
-          href="/search" 
-          className="px-6 py-3 bg-brand-emerald hover:bg-brand-emeraldDark text-white font-bold rounded-xl text-xs transition shadow-md"
-        >
-          Explore All Tours &amp; Hotels →
-        </Link>
-      </div>
-    );
+  if (!listing || listing.type !== "TOUR") {
+    notFound();
   }
 
-  const isTour = listing.type === "TOUR" || listing.type === "ACTIVITY";
-
-  // Google Rich Results Structured Data JSON-LD
+  // Google Rich Results Structured Data JSON-LD (strictly TouristTrip schema)
   const mainJsonLd: Record<string, any> = {
     "@context": "https://schema.org",
-    "@type": isTour ? "TouristTrip" : "Hotel",
+    "@type": "TouristTrip",
     name: listing.title,
     description: listing.description,
     image: listing.photos,
-    touristType: isTour ? "Adventure Travel, Sightseeing" : undefined,
+    touristType: "Adventure Travel, Sightseeing",
     address: {
       "@type": "PostalAddress",
       streetAddress: listing.address,

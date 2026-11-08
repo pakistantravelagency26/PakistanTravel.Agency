@@ -74,7 +74,7 @@ export default function AdminBookingsPage() {
               <tr>
                 <th className="py-3 px-4">Booking Ref</th>
                 <th className="py-3 px-4">Guest</th>
-                <th className="py-3 px-4">Partner Hotel / Tour</th>
+                <th className="py-3 px-4">Tour Package</th>
                 <th className="py-3 px-4">Gross (PKR)</th>
                 <th className="py-3 px-4">Platform Fee</th>
                 <th className="py-3 px-4">Partner Share</th>

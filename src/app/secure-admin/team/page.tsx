@@ -56,7 +56,7 @@ const PERMISSION_OPTIONS: PermissionOption[] = [
     key: "LISTINGS",
     label: "Listing Moderation",
     department: "Quality & Catalog",
-    description: "Approve or reject vendor submitted tours & hotel packages, set per-tour commission %.",
+    description: "Approve or reject vendor submitted tour packages, set per-tour commission %.",
     badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
     icon: Building2,
   },
