@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pta-web:latest
+    container_name: pta-web
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_SITE_URL=https://www.pakistantravel.agency
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - pta-network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: pta-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      # Optional: Mount Cloudflare Origin Certificates if using Cloudflare Full (Strict) SSL
+      # - ./certs:/etc/caddy/certs:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - pta-network
+
+networks:
+  pta-network:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

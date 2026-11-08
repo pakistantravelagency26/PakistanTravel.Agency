@@ -1,0 +1,39 @@
+# -------------------------------------------------------------
+# PakistanTravel.Agency - Caddy Reverse Proxy Configuration
+# Supports Cloudflare Full (Strict) SSL and Automated Let's Encrypt
+# -------------------------------------------------------------
+
+# 1. Apex Domain 301 Permanent Redirect to www
+pakistantravel.agency {
+    redir https://www.pakistantravel.agency{uri} permanent
+}
+
+# 2. Canonical Production Domain
+www.pakistantravel.agency {
+    # If using Cloudflare Origin CA certificates, uncomment below:
+    # tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+    # Otherwise Caddy automatically issues and renews free Let's Encrypt TLS certificates:
+    # tls admin@pakistantravel.agency
+
+    # Gzip and Zstandard compression
+    encode zstd gzip
+
+    # Static Assets Aggressive Caching
+    @static {
+        path /_next/static/*
+        path /favicon.png
+        path /icon-192.png
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # Reverse Proxy to Next.js Standalone Container
+    reverse_proxy web:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        # Pass Cloudflare real client IP if proxied through Cloudflare
+        header_up CF-Connecting-IP {header.CF-Connecting-IP}
+        header_up X-Forwarded-Host {host}
+    }
+}
