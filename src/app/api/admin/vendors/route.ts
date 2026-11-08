@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { getAllVendors, createVendorAccount, VENDORS_STORE } from "@/services/vendor.service";
 import { getAllListingsForAdmin } from "@/services/listing.service";
+import { COMMISSION_PERCENT } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,7 @@ export async function POST(req: Request) {
           cnicOrTaxNumber: body.tourismLicense || "PENDING",
           phone: body.phone1 || "03000000000",
           status: "VERIFIED",
-          commissionRate: 12.0,
+          commissionRate: COMMISSION_PERCENT,
           bankDetails: {
             phone1: body.phone1,
             phone2: body.phone2 || "",

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { siteConfig, COMMISSION_PERCENT, PAYOUT_TIMING } from "@/config/site";
 
 export interface GeneralSettings {
   siteName: string;
@@ -246,12 +247,17 @@ export const DEFAULT_SITE_SETTINGS = {
     {
       id: "faq-2",
       q: "How does payment work on PakistanTravel.Agency?",
-      a: "We support JazzCash, EasyPaisa, Direct Bank Transfer, and Pakistani Debit/Credit cards. We do not store financial credentials or charge unauthorized fees.",
+      a: "We support JazzCash, EasyPaisa, Direct Bank Transfer (IBAN), and Pakistani Debit/Credit cards. Travelers pay direct operator rates with zero booking fees. Operator disbursements are processed to verified Pakistani commercial bank accounts within 48 hours of departure or check-in.",
     },
     {
       id: "faq-direct-rates",
       q: "What is the Direct Operator Rates Policy?",
-      a: "All tours and hotel rooms listed on PakistanTravel.Agency are priced directly by the local operators and hotel owners themselves. We do not inflate or mark up operator prices for travelers. You receive direct local rates with transparent inclusions and zero booking fees.",
+      a: `All tours and hotel rooms listed on PakistanTravel.Agency are priced directly by the local operators and hotel owners themselves. We do not inflate or mark up operator prices for travelers. Travelers pay direct local rates with zero booking fees. A flat ${COMMISSION_PERCENT}% platform commission is deducted from the operator's payout on completed bookings.`,
+    },
+    {
+      id: "faq-operator-payout",
+      q: "When and how are operators paid for bookings?",
+      a: `Operator payouts are disbursed ${PAYOUT_TIMING} via direct Pakistani commercial bank transfer (IBAN). The platform deducts the ${COMMISSION_PERCENT}% platform commission and applicable payment gateway processing fees from the gross booking amount.`,
     },
     {
       id: "faq-cancellation",

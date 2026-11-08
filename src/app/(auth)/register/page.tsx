@@ -319,7 +319,7 @@ function RegisterForm() {
                     <Link href="/terms" target="_blank" className="text-emerald-800 font-bold underline">
                       Marketplace Partner Agreement
                     </Link>{" "}
-                    (10% platform commission on completed bookings, standard cancellation policy, direct traveler contract, and anti-circumvention rules).
+                    ({siteConfig.marketplace.commissionPercent}% platform commission on completed bookings, standard cancellation policy, direct traveler contract, and anti-circumvention rules).
                   </span>
                 </label>
               </div>

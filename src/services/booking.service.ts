@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { generateBookingConfirmationHtml } from "@/lib/notifications";
 import { calculateBookingPricing } from "@/lib/bookingPricing";
 import { resolveBookingVendorContact } from "@/lib/antiLeakage";
+import { COMMISSION_PERCENT } from "@/config/site";
 import crypto from "crypto";
 
 export interface BookingRecord {
@@ -156,7 +157,7 @@ export async function createBooking(data: {
     }
 
     const unitId = listing.units[0]?.id || data.listingId;
-    const commissionRate = listing.commissionRate || 12.0;
+    const commissionRate = listing.commissionRate || COMMISSION_PERCENT;
     const platformFee = Math.round((calculatedTotalAmount * commissionRate) / 100);
     const vendorEarnings = calculatedTotalAmount - platformFee;
 

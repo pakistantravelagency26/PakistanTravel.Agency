@@ -41,7 +41,7 @@ export function formatDbListing(l: any): ListingData {
     city: l.city,
     vendorPrice: l.vendorPrice !== undefined && l.vendorPrice !== null ? Number(l.vendorPrice) : Number(l.basePrice),
     basePrice: Number(l.basePrice),
-    commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : 12.0,
+    commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : siteConfig.marketplace.commissionPercent,
     avgRating: l.avgRating || 4.9,
     totalReviews: l.totalReviews || 1,
     isFeatured: l.isFeatured,

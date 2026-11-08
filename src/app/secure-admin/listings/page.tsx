@@ -25,6 +25,7 @@ import {
   Percent
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
+import { COMMISSION_PERCENT } from "@/config/site";
 
 export default function AdminListingsPage() {
   const [listings, setListings] = useState<ListingData[]>([]);
@@ -43,7 +44,7 @@ export default function AdminListingsPage() {
 
   // Approval & Commission Modal State
   const [approvingTour, setApprovingTour] = useState<ListingData | null>(null);
-  const [commissionRate, setCommissionRate] = useState<number>(12.0);
+  const [commissionRate, setCommissionRate] = useState<number>(COMMISSION_PERCENT);
 
   useEffect(() => {
     fetchListings();
@@ -79,7 +80,7 @@ export default function AdminListingsPage() {
 
   function handleOpenApproval(tour: ListingData) {
     setApprovingTour(tour);
-    setCommissionRate(tour.commissionRate !== undefined ? tour.commissionRate : 12.0);
+    setCommissionRate(tour.commissionRate !== undefined ? tour.commissionRate : COMMISSION_PERCENT);
   }
 
   async function handleConfirmApproval() {

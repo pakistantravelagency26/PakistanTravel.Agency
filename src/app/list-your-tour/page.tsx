@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export default function ListYourTourPage() {
-  const commissionRate = siteConfig.marketplace.defaultCommissionRate || 10;
+  const commissionRate = siteConfig.marketplace.commissionPercent;
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -56,7 +56,7 @@ export default function ListYourTourPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            List your northern Pakistan tours, family-run hotels, or 4x4 mountain rentals on Pakistan&apos;s dedicated multi-vendor marketplace. Zero monthly software fees—you only pay a simple {commissionRate}% commission on completed bookings.
+            List your northern Pakistan tours, family-run hotels, or 4x4 mountain rentals on Pakistan&apos;s dedicated multi-vendor marketplace. Zero monthly software fees—you only pay a simple {commissionRate}% platform commission on completed bookings. Travelers pay zero booking fees.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
@@ -214,7 +214,7 @@ export default function ListYourTourPage() {
                 {commissionRate}% <span className="text-lg font-medium text-emerald-200">Commission</span>
               </h3>
               <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                No monthly subscription, no setup costs, no hidden software fees. You only pay a flat {commissionRate}% commission on successfully fulfilled bookings.
+                No monthly subscription, no setup costs, no hidden software fees. You only pay a flat {commissionRate}% commission deducted from fulfilled bookings. Travelers pay zero booking fees.
               </p>
             </div>
 
@@ -225,7 +225,11 @@ export default function ListYourTourPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Zero fees if a customer cancels within free refund window</span>
+                <span>Zero traveler booking fees—travelers pay your listing price</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Disbursements {siteConfig.marketplace.payoutTiming}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />

@@ -10,6 +10,8 @@
  */
 
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pakistantravel.agency";
+export const COMMISSION_PERCENT = Number(process.env.NEXT_PUBLIC_COMMISSION_PERCENT || 10);
+export const PAYOUT_TIMING = "within 48 hours of trip departure or guest check-in";
 
 export interface SiteConfig {
   name: string;
@@ -36,8 +38,15 @@ export interface SiteConfig {
     summary: string;
   };
   marketplace: {
-    // TODO: Confirm marketplace commission percentage with owner (default: 10%)
+    // Platform commission percentage (Single source of truth)
+    commissionPercent: number;
     defaultCommissionRate: number;
+    commissionModel: "deducted_from_vendor";
+    commissionExplanation: string;
+    gatewayFeesDeductedSeparately: boolean;
+    gatewayFeesNote: string;
+    payoutTiming: string;
+    payoutMethods: string[];
     // Operator contact visibility: "after_booking" (default) or "always"
     contactVisibility: "after_booking" | "always";
   };
@@ -83,8 +92,15 @@ export const siteConfig: SiteConfig = {
   },
 
   marketplace: {
-    // TODO: Awaiting user confirmation for actual vendor commission percentage
-    defaultCommissionRate: 0.10, // 10%
+    // Single source of truth commission: COMMISSION_PERCENT (default: 10%)
+    commissionPercent: COMMISSION_PERCENT,
+    defaultCommissionRate: COMMISSION_PERCENT / 100,
+    commissionModel: "deducted_from_vendor",
+    commissionExplanation: `A flat ${COMMISSION_PERCENT}% platform commission is deducted from the operator's gross listing price on completed bookings. Travelers pay direct operator rates with zero booking fees.`,
+    gatewayFeesDeductedSeparately: true,
+    gatewayFeesNote: "Payment gateway processing fees (JazzCash, credit/debit cards, bank transfer) are deducted separately from operator disbursements.",
+    payoutTiming: PAYOUT_TIMING,
+    payoutMethods: ["Pakistani Commercial Bank Account (IBAN)"],
     contactVisibility: "after_booking", // Prevents platform commission bypass before confirmed booking
   },
 

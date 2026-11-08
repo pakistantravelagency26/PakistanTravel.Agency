@@ -138,28 +138,35 @@ export default function TermsPage() {
             </div>
           </section>
 
-          {/* Section 3 */}
+          {/* Section 3: Payments, Platform Commission and Payouts */}
+          {/* DRAFT - NEEDS LEGAL REVIEW BY PAKISTANI COUNSEL. Single source of truth: src/config/site.ts */}
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>3. Platform Responsibilities: Payments &amp; Support</span>
+              <span>3. Payments, Platform Commission and Operator Payouts</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
-                While {siteConfig.name} does not operate the on-ground tours, we actively safeguard the marketplace experience through:
+                {siteConfig.name} operates as a multi-vendor booking intermediary technology platform. The financial and settlement terms are governed as follows:
               </p>
               <ul className="list-disc pl-5 space-y-1.5">
                 <li>
-                  <strong>Payment Collection &amp; Holding:</strong> Collecting guest deposits via local Pakistani payment channels (JazzCash, EasyPaisa, Pakistani credit/debit cards, and direct bank transfers) and releasing funds to operators according to agreed payout milestones.
+                  <strong>Traveler Booking Fees:</strong> Travelers pay the direct operator listing price. The platform charges zero booking fees to travelers.
                 </li>
                 <li>
-                  <strong>Voucher &amp; Contact Protection:</strong> Issuing verifiable booking vouchers and safely sharing host contact coordination numbers once a booking is confirmed.
+                  <strong>Platform Commission:</strong> A standardized {siteConfig.marketplace.commissionPercent}% platform commission is deducted from the operator&apos;s gross booking value upon completed reservations. Operators receive the remaining {100 - siteConfig.marketplace.commissionPercent}% net of applicable payment processing charges.
                 </li>
                 <li>
-                  <strong>Cancellation &amp; Refund Enforcement:</strong> Ensuring refunds are strictly calculated and processed in accordance with the platform&apos;s cancellation policy.
+                  <strong>Payment Processing Fees:</strong> Third-party payment gateway and transaction processing fees (including JazzCash, debit/credit card merchant fees, or interbank IBFT charges) are deducted separately from operator disbursements.
                 </li>
                 <li>
-                  <strong>Customer Assistance:</strong> Providing our 24/7 AI travel desk and human email support desk for resolving discrepancies.
+                  <strong>Payout Timing &amp; Settlement:</strong> Operator disbursements are initiated {siteConfig.marketplace.payoutTiming} via direct Pakistani commercial bank transfer (IBAN). Payouts are contingent upon the traveler successfully checking in or commencing the tour without unresolved failure of service.
+                </li>
+                <li>
+                  <strong>Voucher &amp; Contact Protection:</strong> Verifiable booking check-in vouchers and host contact coordination details are issued immediately upon confirmation of guest deposit or payment.
+                </li>
+                <li>
+                  <strong>Cancellation &amp; Refund Enforcement:</strong> Refunds are strictly calculated and processed in accordance with Section 4 below.
                 </li>
               </ul>
             </div>

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAllListingsForAdmin, ListingData } from "@/services/listing.service";
+import { COMMISSION_PERCENT } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export async function GET() {
       city: l.city,
       vendorPrice: l.vendorPrice !== undefined && l.vendorPrice !== null ? Number(l.vendorPrice) : Number(l.basePrice),
       basePrice: Number(l.basePrice),
-      commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : 12.0,
+      commissionRate: l.commissionRate !== undefined && l.commissionRate !== null ? Number(l.commissionRate) : COMMISSION_PERCENT,
       avgRating: l.avgRating || 5.0,
       totalReviews: l.totalReviews || 1,
       isFeatured: l.isFeatured,

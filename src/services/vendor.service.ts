@@ -1,5 +1,6 @@
 import { hashPassword } from "@/lib/password";
 import { USERS_STORE, LocalUser } from "@/services/user.service";
+import { COMMISSION_PERCENT } from "@/config/site";
 
 export interface VendorAccount {
   id: string;
@@ -70,7 +71,7 @@ export async function createVendorAccount(data: {
     email: data.email.toLowerCase().trim(),
     loginId: data.loginId.trim(),
     status: "ENABLED",
-    commissionRate: 12.0,
+    commissionRate: COMMISSION_PERCENT,
     createdAt: new Date().toISOString(),
   };
 

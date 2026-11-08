@@ -11,6 +11,7 @@ import {
 } from "@/services/listing.service";
 import { formatDbListing } from "@/services/serverListing.service";
 import { prisma } from "@/lib/prisma";
+import { COMMISSION_PERCENT } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 
@@ -169,7 +170,7 @@ export async function POST(req: Request) {
           phone: session.user.phone || "03000000000",
           city: body.city || "Islamabad",
           status: "VERIFIED",
-          commissionRate: 12.0,
+          commissionRate: COMMISSION_PERCENT,
         },
       });
       vendorId = newVendor.id;
@@ -212,7 +213,7 @@ export async function POST(req: Request) {
       city: body.city || "Karimabad",
       vendorPrice: Number(body.basePrice),
       basePrice: Number(body.basePrice),
-      commissionRate: 12.0,
+      commissionRate: COMMISSION_PERCENT,
       avgRating: 5.0,
       totalReviews: 1,
       isFeatured: body.isFeatured ?? true,
@@ -335,7 +336,7 @@ export async function POST(req: Request) {
           freeCancellationDays: newListing.freeCancellationDays,
           vendorPrice: Number(body.basePrice),
           basePrice: newListing.basePrice,
-          commissionRate: 12.0,
+          commissionRate: COMMISSION_PERCENT,
           isFeatured: true,
         },
       });

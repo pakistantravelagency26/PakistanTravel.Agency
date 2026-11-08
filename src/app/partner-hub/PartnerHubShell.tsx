@@ -18,6 +18,7 @@ import {
   Settings,
   LogOut
 } from "lucide-react";
+import { COMMISSION_PERCENT } from "@/config/site";
 
 export default function PartnerHubShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -111,7 +112,7 @@ export default function PartnerHubShell({ children }: { children: React.ReactNod
                 <span className="flex items-center gap-1 text-emerald-700 font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Verified Partner
                 </span>
-                <span className="font-bold text-orange-600">10% Comm.</span>
+                <span className="font-bold text-orange-600">{COMMISSION_PERCENT}% Comm.</span>
               </div>
             </div>
           </div>

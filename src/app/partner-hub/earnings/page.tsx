@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   AlertCircle
 } from "lucide-react";
+import { COMMISSION_PERCENT, PAYOUT_TIMING } from "@/config/site";
 
 export default function VendorEarningsPage() {
   const [requested, setRequested] = useState(false);
@@ -52,10 +53,10 @@ export default function VendorEarningsPage() {
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
-            Platform Commission (12%)
+            Platform Commission ({COMMISSION_PERCENT}%)
           </span>
           <p className="text-2xl font-extrabold text-amber-600">PKR 0</p>
-          <p className="text-[11px] text-slate-400">Fixed contracted partner rate</p>
+          <p className="text-[11px] text-slate-400">Fixed contracted partner rate deducted on completed bookings</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-brand-emerald/40 bg-emerald-50/20 shadow-sm space-y-2">
@@ -63,7 +64,7 @@ export default function VendorEarningsPage() {
             Net Available Balance
           </span>
           <p className="text-2xl font-extrabold text-brand-emerald">PKR 0</p>
-          <p className="text-[11px] text-emerald-700 font-medium">Ready for withdrawal to linked bank</p>
+          <p className="text-[11px] text-emerald-700 font-medium">Disbursed {PAYOUT_TIMING}</p>
         </div>
       </div>
 
@@ -74,27 +75,27 @@ export default function VendorEarningsPage() {
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
               <Building2 className="w-4 h-4 text-brand-emerald" /> Linked Pakistani Settlement Account
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Verified by Antigravity Compliance Team</p>
+            <p className="text-xs text-slate-500 mt-0.5">Verified Commercial Bank Account</p>
           </div>
           <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" /> Raast & 1LINK Active
+            <ShieldCheck className="w-3 h-3" /> Commercial Bank IBAN Active
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs">
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <span className="text-slate-400 block text-[10px] uppercase font-bold">Bank Name</span>
-            <span className="font-bold text-slate-800 text-sm">Meezan Bank Limited</span>
+            <span className="font-bold text-slate-800 text-sm">Pakistani Commercial Bank</span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <span className="text-slate-400 block text-[10px] uppercase font-bold">Account Title</span>
-            <span className="font-bold text-slate-800 text-sm">Hunza Serena Hospitality Ltd</span>
+            <span className="font-bold text-slate-800 text-sm">Operator Business Title</span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <span className="text-slate-400 block text-[10px] uppercase font-bold">IBAN Number</span>
-            <span className="font-mono font-bold text-slate-800 text-sm">PK36MEZN0001234567890123</span>
+            <span className="font-mono font-bold text-slate-800 text-sm">PK36XXXX0001234567890123</span>
           </div>
         </div>
       </div>
