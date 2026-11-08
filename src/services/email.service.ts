@@ -324,3 +324,45 @@ export async function sendBookingCancellationEmails(bookingIdOrNumber: string): 
 
   return { customerOutboxId, vendorOutboxId, adminOutboxIds };
 }
+
+/**
+ * Background / Retry Engine: Process pending emails with retry limit (< 5 attempts)
+ */
+export async function processPendingEmailOutbox(batchSize: number = 25, specificIds?: string[]): Promise<{
+  processed: number;
+  succeeded: number;
+  failed: number;
+}> {
+  const whereClause: any = {
+    status: "PENDING",
+    attempts: { lt: 5 },
+  };
+  if (specificIds && specificIds.length > 0) {
+    whereClause.id = { in: specificIds };
+  }
+
+  const pending = await prisma.emailOutbox.findMany({
+    where: whereClause,
+    orderBy: { createdAt: "asc" },
+    take: batchSize,
+  });
+
+  let succeeded = 0;
+  let failed = 0;
+
+  for (const item of pending) {
+    const res = await deliverOutboxEmail(item.id);
+    if (res.success) {
+      succeeded++;
+    } else {
+      failed++;
+    }
+  }
+
+  return {
+    processed: pending.length,
+    succeeded,
+    failed,
+  };
+}
+

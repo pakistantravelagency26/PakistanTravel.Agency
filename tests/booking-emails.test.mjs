@@ -14,7 +14,10 @@ import {
   deliverOutboxEmail,
   sendBookingConfirmationEmails,
   sendBookingCancellationEmails,
+  processPendingEmailOutbox,
 } from "../src/services/email.service.ts";
+import fs from "node:fs";
+import path from "node:path";
 import { SITE_URL, COMMISSION_PERCENT, PAYOUT_TIMING, siteConfig } from "../src/config/site.ts";
 
 describe("Phase 6: Transactional Booking Emails Test Suite", () => {
@@ -273,6 +276,74 @@ describe("Phase 6: Transactional Booking Emails Test Suite", () => {
       });
       assert.strictEqual(customerOutbox?.status, "SENT");
       assert.strictEqual(customerOutbox?.eventType, "BOOKING_CANCELLED");
+    });
+  });
+
+  describe("Outbox Retry Engine & Background Worker", () => {
+    it("processes a batch of pending emails and updates their state to SENT", async () => {
+      const id1 = await queueEmail({
+        to: "batch1@example.pk",
+        recipientRole: "CUSTOMER",
+        subject: "Batch Test 1",
+        htmlBody: "<p>Batch 1</p>",
+        textBody: "Batch 1",
+        eventType: "BOOKING_CONFIRMED",
+      });
+
+      const id2 = await queueEmail({
+        to: "batch2@example.pk",
+        recipientRole: "VENDOR",
+        subject: "Batch Test 2",
+        htmlBody: "<p>Batch 2</p>",
+        textBody: "Batch 2",
+        eventType: "BOOKING_CONFIRMED",
+      });
+
+      const result = await processPendingEmailOutbox(10, [id1, id2]);
+      assert.strictEqual(result.processed, 2, "Should process exactly the 2 targeted queued emails");
+      assert.strictEqual(result.succeeded, 2, "Should succeed delivery for both emails");
+
+      const item1 = await prisma.emailOutbox.findUnique({ where: { id: id1 } });
+      const item2 = await prisma.emailOutbox.findUnique({ where: { id: id2 } });
+
+      assert.strictEqual(item1?.status, "SENT");
+      assert.strictEqual(item2?.status, "SENT");
+      assert.strictEqual(item1?.attempts, 1);
+      assert.strictEqual(item2?.attempts, 1);
+    });
+
+    it("does not process emails that have reached 5 failed attempts", async () => {
+      const exhausted = await prisma.emailOutbox.create({
+        data: {
+          to: "exhausted@example.pk",
+          recipientRole: "CUSTOMER",
+          subject: "Exhausted Email",
+          htmlBody: "<p>Exhausted</p>",
+          textBody: "Exhausted",
+          eventType: "BOOKING_CONFIRMED",
+          status: "FAILED",
+          attempts: 5,
+        },
+      });
+
+      const result = await processPendingEmailOutbox(5);
+      const check = await prisma.emailOutbox.findUnique({ where: { id: exhausted.id } });
+      assert.strictEqual(check?.status, "FAILED");
+      assert.strictEqual(check?.attempts, 5, "Exhausted email attempts should not increase");
+    });
+  });
+
+  describe("SPF, DKIM, and DMARC DNS Documentation", () => {
+    it("verifies that docs/EMAIL_DNS_SETUP.md contains valid SPF, DKIM, and DMARC specs", () => {
+      const docPath = path.resolve(process.cwd(), "docs/EMAIL_DNS_SETUP.md");
+      assert.ok(fs.existsSync(docPath), "EMAIL_DNS_SETUP.md must exist in docs/");
+
+      const content = fs.readFileSync(docPath, "utf-8");
+      assert.ok(content.includes("v=spf1"), "Must document SPF record with v=spf1");
+      assert.ok(content.includes("DKIM"), "Must document DKIM configuration");
+      assert.ok(content.includes("v=DMARC1"), "Must document DMARC policy with v=DMARC1");
+      assert.ok(content.includes("rua=mailto:"), "Must document DMARC aggregate reporting address");
+      assert.ok(content.includes("pakistantravel.agency"), "Must be scoped to pakistantravel.agency");
     });
   });
 });
