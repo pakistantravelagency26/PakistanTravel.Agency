@@ -23,12 +23,12 @@ interface ListingPageProps {
 
 export async function generateMetadata({ params }: ListingPageProps): Promise<Metadata> {
   const listing = await getDbListingBySlugOrId(params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
   if (!listing) {
     return {
       title: "Experience Not Found | Pakistan Travel Agency",
-      description: "Explore verified tour packages, mountain stays and travel experiences across northern Pakistan.",
+      description: "Explore tour packages, mountain stays and travel experiences across northern Pakistan.",
     };
   }
 
@@ -47,12 +47,12 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   if (title.length > 60) title = title.slice(0, 60);
 
   // Format Description strictly targeting 140-155 characters (complete sentence, no "...")
-  let description = `Book ${listing.title} in ${listing.city} with verified operator ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with instant confirmation vouchers.`;
+  let description = `Book ${listing.title} in ${listing.city} with local host ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with check-in vouchers.`;
   if (description.length > 155) {
-    description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with guaranteed instant vouchers.`;
+    description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital check-in vouchers.`;
   }
   if (description.length < 140) {
-    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with guaranteed instant vouchers and 24/7 support.`;
+    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital check-in vouchers and traveler assistance.`;
   }
   if (description.length > 155) {
     description = description.slice(0, 154).trim();
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
       type: "website",
       locale: "en_PK",
       url: canonicalUrl,
-      siteName: "PakistanTravel.Agency",
+      siteName: "PakistanTravel",
       title,
       description,
       images: [
@@ -95,7 +95,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
 
 export default async function ListingDetailPage({ params }: ListingPageProps) {
   const listing = await getDbListingBySlugOrId(params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
   if (!listing) {
     return (
@@ -107,7 +107,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
           Experience Listing Not Available
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
-          This package may have been updated, archived, or is awaiting vendor review. Explore our other verified northern journeys.
+          This package may have been updated, archived, or is awaiting vendor review. Explore our other northern journeys.
         </p>
         <Link 
           href="/search" 

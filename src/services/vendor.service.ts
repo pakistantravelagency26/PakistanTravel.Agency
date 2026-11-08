@@ -11,7 +11,6 @@ export interface VendorAccount {
   phone3: string; // Emergency / Tour Guide
   email: string;
   loginId: string; // Custom username/ID set by admin
-  passwordPlain: string; // Password set by admin
   status: "ENABLED" | "DISABLED";
   commissionRate: number;
   createdAt: string;
@@ -52,7 +51,8 @@ export async function createVendorAccount(data: {
   phone3: string;
   email: string;
   loginId: string;
-  passwordPlain: string;
+  password?: string;
+  passwordPlain?: string;
 }): Promise<VendorAccount> {
   const cleanId = `v-${data.companyName
     .toLowerCase()
@@ -69,7 +69,6 @@ export async function createVendorAccount(data: {
     phone3: data.phone3.trim(),
     email: data.email.toLowerCase().trim(),
     loginId: data.loginId.trim(),
-    passwordPlain: data.passwordPlain.trim(),
     status: "ENABLED",
     commissionRate: 12.0,
     createdAt: new Date().toISOString(),
@@ -77,8 +76,9 @@ export async function createVendorAccount(data: {
 
   VENDORS_STORE.unshift(newVendor);
 
-  // Sync with USERS_STORE so the vendor can immediately log in to /partner-hub/login
-  const passwordHash = await hashPassword(newVendor.passwordPlain);
+  // Sync with USERS_STORE using strong bcrypt hash only
+  const rawPass = (data.password || data.passwordPlain || "").trim();
+  const passwordHash = rawPass ? await hashPassword(rawPass) : "";
   const newUserRecord: LocalUser = {
     id: `usr-${cleanId}`,
     name: newVendor.companyName,

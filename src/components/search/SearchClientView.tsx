@@ -21,6 +21,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
+import { CustomTripEnquiryForm } from "@/components/common/CustomTripEnquiryForm";
 
 interface SearchClientViewProps {
   initialListings?: ListingData[];
@@ -63,6 +64,9 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
       .catch((err) => console.error("Error fetching live listings:", err))
       .finally(() => setLoading(false));
   }, []);
+
+  const hasTours = useMemo(() => dbListings.some((l) => l.type === "TOUR"), [dbListings]);
+  const hasHotels = useMemo(() => dbListings.some((l) => l.type === "HOTEL"), [dbListings]);
 
   // Filtered and Sorted Listings
   const filteredListings = useMemo(() => {
@@ -134,31 +138,33 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
             />
           </div>
 
-          {/* Type Toggle Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            {[
-              { id: "ALL", label: "All Experiences" },
-              { id: "TOUR", label: "Tours & Treks", icon: Compass },
-              { id: "HOTEL", label: "Hotels & Stays", icon: Building2 },
-            ].map((t) => {
-              const Icon = t.icon;
-              const active = selectedType === t.id;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedType(t.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 ${
-                    active
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  {Icon && <Icon className="w-3.5 h-3.5" />}
-                  <span>{t.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Type Toggle Pills (Only show categories with actual available listings) */}
+          {(hasTours || hasHotels) && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+              {[
+                { id: "ALL", label: "All Experiences" },
+                ...(hasTours ? [{ id: "TOUR", label: "Tours & Treks", icon: Compass }] : []),
+                ...(hasHotels ? [{ id: "HOTEL", label: "Hotels & Stays", icon: Building2 }] : []),
+              ].map((t) => {
+                const Icon = t.icon;
+                const active = selectedType === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedType(t.id)}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 ${
+                      active
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
+                  >
+                    {Icon && <Icon className="w-3.5 h-3.5" />}
+                    <span>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Toggle Advanced Filters Button */}
           <button
@@ -269,18 +275,28 @@ function SearchContent({ initialListings = [] }: SearchClientViewProps) {
             ))}
           </div>
         ) : filteredListings.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-white border border-slate-200 space-y-4">
-            <Compass className="w-12 h-12 text-slate-300 mx-auto" />
-            <h3 className="text-lg font-bold text-slate-900">No matching tours or stays found</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Try adjusting your search criteria, widening the budget filter, or resetting filters.
-            </p>
-            <button
-              onClick={resetFilters}
-              className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs"
-            >
-              Reset All Filters
-            </button>
+          <div className="space-y-8">
+            <div className="p-8 text-center rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-3 max-w-xl mx-auto">
+              <Compass className="w-10 h-10 text-slate-400 mx-auto" />
+              <h3 className="text-lg font-bold text-slate-900">No active fixed-date packages found</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                No problem! You can custom-plan your journey directly with our local partner network below.
+              </p>
+              {destinationQuery && (
+                <button
+                  onClick={resetFilters}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                >
+                  Clear Search Filters
+                </button>
+              )}
+            </div>
+
+            <CustomTripEnquiryForm
+              initialDestination={destinationQuery ? destinationQuery : "Hunza Valley & Attabad"}
+              title="Request a Custom Northern Pakistan Journey"
+              subtitle="Tell us where you want to go. Our team and local partner operators will custom-design your itinerary with direct pricing."
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -5,6 +5,11 @@ import FacebookProvider from "next-auth/providers/facebook";
 import { prisma } from "@/lib/prisma";
 import { findUserByIdentifier } from "@/services/user.service";
 import { verifyPassword } from "@/lib/password";
+import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
+
+if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET) {
+  console.error("FATAL SECURITY WARNING: NEXTAUTH_SECRET environment variable is not defined!");
+}
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -19,12 +24,12 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "dummy-client-id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy-client-secret",
-      allowDangerousEmailAccountLinking: true,
+      allowDangerousEmailAccountLinking: false,
     }),
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID || "dummy-fb-id",
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "dummy-fb-secret",
-      allowDangerousEmailAccountLinking: true,
+      allowDangerousEmailAccountLinking: false,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -38,48 +43,36 @@ export const authOptions: NextAuthOptions = {
         }
 
         const identifier = credentials.email.trim();
-        const user = await findUserByIdentifier(identifier);
 
-        if (!user) {
-          throw new Error("No account found with this Login ID / Email");
+        // 1. Rate limiting & Brute force protection per identifier (5 attempts per 5 minutes)
+        const rateCheck = checkRateLimit(`login-auth:${identifier.toLowerCase()}`, 5, 5 * 60 * 1000);
+        if (!rateCheck.success) {
+          throw new Error(`Too many login attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.`);
         }
 
-        // Verify password via bcrypt hash or known fallback passwords
+        const user = await findUserByIdentifier(identifier);
+
+        if (!user || !user.passwordHash) {
+          // Constant error message to prevent user enumeration
+          throw new Error("Invalid Login ID or password");
+        }
+
+        // 2. Cryptographic password verification (bcrypt)
         let isValid = false;
         try {
-          if (user.passwordHash) {
-            isValid = await verifyPassword(credentials.password, user.passwordHash);
-          }
+          isValid = await verifyPassword(credentials.password, user.passwordHash);
         } catch {
           isValid = false;
         }
 
-        // Reliable fallback for standard accounts & dynamic vendors
         if (!isValid) {
-          const pass = credentials.password;
-          if (user.role === "VENDOR") {
-            const { getVendorById } = await import("@/services/vendor.service");
-            const vendorObj = user.vendorId ? getVendorById(user.vendorId) : null;
-            if (
-              pass === "vendor123" ||
-              pass === "123456" ||
-              pass === "karakoram123" ||
-              (vendorObj && vendorObj.passwordPlain === pass)
-            ) {
-              isValid = true;
-            }
-          } else if (user.role === "ADMIN" && (pass === "Emra@91173259" || pass === "admin123" || pass === "123456")) {
-            isValid = true;
-          } else if (user.role === "CUSTOMER" && (pass === "customer123" || pass === "123456")) {
-            isValid = true;
-          }
+          throw new Error("Invalid Login ID or password");
         }
 
-        if (!isValid) {
-          throw new Error("Invalid password");
-        }
+        // Clear rate limiter on successful password verification
+        resetRateLimit(`login-auth:${identifier.toLowerCase()}`);
 
-        // Verify that vendor account is not disabled by Super Admin
+        // 3. Verify that vendor account is not disabled by Super Admin
         if (user.role === "VENDOR" && user.vendorId) {
           const { isVendorEnabled } = await import("@/services/vendor.service");
           if (!isVendorEnabled(user.vendorId)) {
@@ -93,8 +86,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           image: null,
           role: user.role,
-          staffRole: user.staffRole || "SUPER_ADMIN",
-          permissions: (user as any).permissions || (user.email === "emraanirshad88@gmail.com" ? "ALL" : "BOOKINGS"),
+          staffRole: user.staffRole || (user.role === "ADMIN" ? "SUPER_ADMIN" : "CUSTOMER"),
+          permissions: (user as any).permissions || (user.role === "ADMIN" ? "ALL" : "NONE"),
           vendorId: user.vendorId || null,
           phone: user.phone,
         };
@@ -150,6 +143,20 @@ export const authOptions: NextAuthOptions = {
         token.phone = user.phone;
       }
 
+      // Auto-load vendorId from Neon DB if not present in existing session token
+      if (token.id && !token.vendorId && (token.role === "VENDOR" || token.role === "ADMIN")) {
+        try {
+          const dbVendor = await prisma.vendor.findFirst({
+            where: { userId: token.id as string },
+          });
+          if (dbVendor) {
+            token.vendorId = dbVendor.id;
+          }
+        } catch {
+          // ignore DB error
+        }
+      }
+
       if (trigger === "update" && session) {
         token.name = session.name || token.name;
         token.role = session.role || token.role;
@@ -164,12 +171,23 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as "CUSTOMER" | "VENDOR" | "ADMIN";
-        session.user.staffRole = (token.staffRole as string) || "SUPER_ADMIN";
-        session.user.permissions = (token.permissions as string) || (session.user.email === "emraanirshad88@gmail.com" ? "ALL" : "BOOKINGS");
+        session.user.staffRole = (token.staffRole as string) || (token.role === "ADMIN" ? "SUPER_ADMIN" : "CUSTOMER");
+        session.user.permissions = (token.permissions as string) || (token.role === "ADMIN" ? "ALL" : "NONE");
         session.user.vendorId = token.vendorId as string | null;
         session.user.phone = token.phone as string | null;
       }
       return session;
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
     },
   },
   secret: process.env.NEXTAUTH_SECRET || "pakistantravel-agency-secret-token",

@@ -1,4 +1,5 @@
 import { BookingRecord } from "@/services/booking.service";
+import { siteConfig } from "@/config/site";
 
 export interface NotificationPayload {
   toEmail: string;
@@ -66,6 +67,12 @@ export function generateBookingConfirmationHtml(booking: BookingRecord): string 
                 <span>PKR ${booking.totalAmount.toLocaleString()}</span>
               </div>
             </div>
+            <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin: 16px 0; border: 1px solid #e2e8f0;">
+              <span style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 4px;">Your Host for this trip:</span>
+              <strong style="color: #0f172a; font-size: 13px;">${booking.vendor?.businessName || "Local Partner Operator"}</strong>
+              ${booking.vendor?.phone ? `<div style="font-size: 12px; color: #475569; margin-top: 4px;">Host Phone: <strong>${booking.vendor.phone}</strong></div>` : ""}
+              ${booking.vendor?.whatsapp ? `<div style="font-size: 12px; color: #0A5C36; margin-top: 2px;">Host WhatsApp: <strong>${booking.vendor.whatsapp}</strong></div>` : ""}
+            </div>
             <p style="font-size: 12px; color: #64748b;">
               Please present this voucher or your CNIC (${booking.cnicOrPassport}) at check-in.
             </p>
@@ -76,8 +83,8 @@ export function generateBookingConfirmationHtml(booking: BookingRecord): string 
             </div>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} PakistanTravel.agency. Blue Area, Islamabad, Pakistan.</p>
-            <p>24/7 Helpline: +92 (51) 111-TRAVEL (872835)</p>
+            <p>© ${new Date().getFullYear()} ${siteConfig.name}. Northern Pakistan Tourism Marketplace.</p>
+            <p>Support: ${siteConfig.contact.supportEmail}</p>
           </div>
         </div>
       </body>
@@ -86,18 +93,19 @@ export function generateBookingConfirmationHtml(booking: BookingRecord): string 
 }
 
 export function generateWhatsAppMessage(booking: BookingRecord): string {
-  return `*Booking Confirmed - PakistanTravel.agency* 🇵🇰
+  return `*Booking Confirmed - ${siteConfig.name}* 🇵🇰
 Assalam-o-Alaikum ${booking.guestName},
 
 Your reservation has been confirmed:
 *Booking Ref:* ${booking.bookingNumber}
 *Stay:* ${booking.listingTitle}
-*Dates:* ${booking.startDate} - ${booking.endDate}
+*Host:* ${booking.vendor?.businessName || "Local Partner Operator"}
+${booking.vendor?.whatsapp || booking.vendor?.phone ? `*Host Contact:* ${booking.vendor.whatsapp || booking.vendor.phone}\n` : ""}*Dates:* ${booking.startDate} - ${booking.endDate}
 *Total:* PKR ${booking.totalAmount.toLocaleString()} (${booking.paymentStatus})
 
 View & Download your Check-in Voucher:
 https://pakistantravel.agency/confirmation/${booking.bookingNumber}
 
-24/7 Helpline: +92 51 111 872835
+Customer Support: ${siteConfig.contact.supportEmail}
 Safe travels to the Northern Areas!`;
 }

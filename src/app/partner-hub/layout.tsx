@@ -15,6 +15,7 @@ import {
   MessageSquare, 
   ShieldCheck, 
   ExternalLink,
+  Settings,
   LogOut
 } from "lucide-react";
 
@@ -74,6 +75,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     { href: "/partner-hub/bookings", label: "Bookings", icon: BookOpenCheck },
     { href: "/partner-hub/earnings", label: "Earnings & Payouts", icon: Wallet },
     { href: "/partner-hub/reviews", label: "Guest Reviews", icon: MessageSquare },
+    { href: "/partner-hub/profile", label: "Profile & Host Contact", icon: Settings },
   ];
 
   return (

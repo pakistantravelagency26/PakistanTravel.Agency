@@ -12,7 +12,6 @@ import {
   Menu, 
   X,
   Heart,
-  MessageCircle,
   Phone
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -23,7 +22,6 @@ export function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [whatsapp, setWhatsapp] = useState("+92 322 2327096");
   const [navLinks, setNavLinks] = useState<NavLinkItem[]>(DEFAULT_SITE_SETTINGS.NAVBAR_LINKS);
 
   useEffect(() => {
@@ -31,9 +29,6 @@ export function Navbar() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.settings) {
-          if (data.settings.GENERAL?.whatsappNumber) {
-            setWhatsapp(data.settings.GENERAL.whatsappNumber);
-          }
           if (data.settings.NAVBAR_LINKS && Array.isArray(data.settings.NAVBAR_LINKS) && data.settings.NAVBAR_LINKS.length > 0) {
             setNavLinks(data.settings.NAVBAR_LINKS);
           }
@@ -65,24 +60,29 @@ export function Navbar() {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1 font-medium text-slate-700">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Pakistan&apos;s Verified Tourism Marketplace
+              Compare and book tours from independent local operators
             </span>
-            <span className="text-slate-300 hidden md:inline">|</span>
-            <a
-              href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}?text=Hi%20PakistanTravel.Agency%20Support`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold transition"
-            >
-              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-              <span>WhatsApp: {whatsapp}</span>
-            </a>
           </div>
 
           {/* Right items: Currency & Customer Sign In / Up */}
           <div className="flex items-center gap-3">
+            <Link
+              href="/list-your-tour"
+              className="text-slate-700 hover:text-sky-600 font-semibold hidden md:inline-flex items-center gap-1 text-[11px]"
+            >
+              List your tour / hotel
+            </Link>
+            <span className="text-slate-300 hidden md:inline">|</span>
             <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
             <span className="text-slate-300 hidden sm:inline">|</span>
+            <Link
+              href="/ur"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] transition border border-emerald-200"
+              title="Urdu Version / اردو ورژن"
+            >
+              <span>اردو</span>
+            </Link>
+            <span className="text-slate-300">|</span>
 
             {isCustomerLoggedIn ? (
               <div className="relative">
@@ -185,8 +185,15 @@ export function Navbar() {
             ))}
           </nav>
 
-          {/* Right Action: Explore Catalog button */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Right Action: Explore Catalog button & Urdu Switcher */}
+          <div className="hidden sm:flex items-center gap-2.5">
+            <Link
+              href="/ur"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold transition flex items-center gap-1"
+              title="Urdu Version"
+            >
+              <span className="text-emerald-700 font-extrabold text-xs">اردو</span>
+            </Link>
             <Link
               href="/search"
               className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
@@ -213,12 +220,30 @@ export function Navbar() {
         <div className="lg:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3">
           <div className="space-y-2 text-sm font-semibold">
             <Link
+              href="/ur"
+              className="py-2.5 px-3 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold flex items-center justify-between"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span>اردو ورژن (Urdu Version)</span>
+              <span className="text-[11px] bg-emerald-700 text-white px-2 py-0.5 rounded font-extrabold">اردو</span>
+            </Link>
+
+            <Link
               href="/search"
               className="block py-2.5 px-3 rounded-xl bg-slate-50 text-slate-800 font-bold hover:text-sky-600 flex items-center justify-between"
               onClick={() => setIsMenuOpen(false)}
             >
               <span>Search Tours & Hotels Catalog</span>
               <Compass className="w-4 h-4 text-orange-500" />
+            </Link>
+
+            <Link
+              href="/list-your-tour"
+              className="block py-2.5 px-3 rounded-xl bg-sky-50 text-sky-900 font-bold hover:bg-sky-100 flex items-center justify-between"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span>List Your Tour or Hotel</span>
+              <Building2 className="w-4 h-4 text-sky-600" />
             </Link>
 
             <div className="pt-2 pb-1 border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider px-3">

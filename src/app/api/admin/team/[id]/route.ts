@@ -16,6 +16,19 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const userPerms = (session.user as any)?.permissions || "";
+    const isSuperAdmin =
+      session.user.staffRole === "SUPER_ADMIN" ||
+      userPerms.includes("ALL") ||
+      userPerms.includes("TEAM");
+
+    if (!isSuperAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Forbidden: Only Super Administrators can modify staff accounts." },
+        { status: 403 }
+      );
+    }
+
     const { id } = params;
     const body = await req.json();
     const { name, phone, permissions, staffRole, password } = body;
@@ -32,6 +45,12 @@ export async function PATCH(
     if (name) updateData.name = name.trim();
     if (phone !== undefined) updateData.phone = phone ? phone.trim() : null;
     if (password && password.trim().length > 0) {
+      if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+        return NextResponse.json(
+          { success: false, error: "Password must be at least 8 characters long and contain both letters and numbers." },
+          { status: 400 }
+        );
+      }
       updateData.passwordHash = await bcrypt.hash(password.trim(), 10);
     }
 
@@ -82,6 +101,19 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     if (!session || session.user?.role !== "ADMIN") {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userPerms = (session.user as any)?.permissions || "";
+    const isSuperAdmin =
+      session.user.staffRole === "SUPER_ADMIN" ||
+      userPerms.includes("ALL") ||
+      userPerms.includes("TEAM");
+
+    if (!isSuperAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Forbidden: Only Super Administrators can delete staff accounts." },
+        { status: 403 }
+      );
     }
 
     const { id } = params;

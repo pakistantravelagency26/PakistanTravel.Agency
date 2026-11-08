@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
 import type { MarketplaceSectionSettings } from "@/services/siteSettings.service";
+import { CustomTripEnquiryForm } from "@/components/common/CustomTripEnquiryForm";
 
 interface Props {
   initialListings: ListingData[];
@@ -105,7 +106,7 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
             {customSettings?.title || "Explore Northern Tours & Luxury Stays"}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            {customSettings?.subtitle || "Compare tour packages and mountain resorts from verified local operators across Pakistan"}
+            {customSettings?.subtitle || "Compare tour packages and mountain resorts from independent local operators across Pakistan"}
           </p>
         </div>
 
@@ -163,25 +164,11 @@ export function TourMarketplaceSection({ initialListings, customSettings }: Prop
 
       {/* 4 Tours/Hotels per row Grid */}
       {initialListings.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200/80 p-8 space-y-4 max-w-xl mx-auto shadow-sm">
-          <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto">
-            <Compass className="w-7 h-7" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900">
-              {customSettings?.emptyStateTitle || "Marketplace Ready for Listings"}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              {customSettings?.emptyStateDesc || "Vendors and partners can log in to the Partner Hub to publish verified tours, hotels, and expeditions."}
-            </p>
-          </div>
-          <Link
-            href="/partner-hub/login"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition"
-          >
-            <span>Partner Login / Add Tour</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+        <div className="py-6">
+          <CustomTripEnquiryForm
+            title="Plan Your Custom Northern Pakistan Trip"
+            subtitle="While seasonal operator quotas are being updated, our team and partner operators will custom-design your itinerary with direct operator pricing."
+          />
         </div>
       ) : filteredListings.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 space-y-3">

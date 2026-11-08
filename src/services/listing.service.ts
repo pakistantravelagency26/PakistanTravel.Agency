@@ -56,6 +56,7 @@ export interface ListingData {
   vendor: {
     id: string;
     businessName: string;
+    city?: string;
     verified: boolean;
     joinedYear: number;
     rating: number;

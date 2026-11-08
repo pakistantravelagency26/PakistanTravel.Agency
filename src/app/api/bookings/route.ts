@@ -1,12 +1,40 @@
 import { NextResponse } from "next/server";
-import { createBooking, getAllBookings } from "@/services/booking.service";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { createBooking, getAllBookings, getBookingsByEmail, getBookingsByVendorId } from "@/services/booking.service";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const bookings = await getAllBookings();
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
+
+    // Role-based authorization to prevent IDOR and mass data disclosure
+    if (session.user.role === "ADMIN") {
+      const bookings = await getAllBookings();
+      return NextResponse.json({ success: true, bookings });
+    }
+
+    if (session.user.role === "VENDOR") {
+      const vendorId = session.user.vendorId;
+      if (!vendorId) {
+        return NextResponse.json({ success: false, error: "No vendor profile linked" }, { status: 403 });
+      }
+      const bookings = await getBookingsByVendorId(vendorId);
+      return NextResponse.json({ success: true, bookings });
+    }
+
+    // Customer: only see their own bookings
+    const customerEmail = session.user.email;
+    if (!customerEmail) {
+      return NextResponse.json({ success: true, bookings: [] });
+    }
+    const bookings = await getBookingsByEmail(customerEmail);
     return NextResponse.json({ success: true, bookings });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -41,6 +69,19 @@ const bookingSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown-ip";
+
+    const rateCheck = checkRateLimit(`booking-ip:${clientIp}`, 10, 10 * 60 * 1000);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { error: `Too many booking attempts. Please retry after ${rateCheck.retryAfterSeconds} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const parsed = bookingSchema.safeParse(body);
 

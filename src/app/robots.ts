@@ -1,8 +1,8 @@
 import { MetadataRoute } from "next";
 
-export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
@@ -10,12 +10,9 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",
+          "/search",
           "/login",
           "/register",
-          "/dashboard",
-          "/admin",
-          "/secure-admin/",
-          "/partner-hub/",
           "/checkout/",
           "/account/",
           "/confirmation/",

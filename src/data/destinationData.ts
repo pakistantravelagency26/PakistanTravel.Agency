@@ -38,13 +38,13 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     province: "Gilgit-Baltistan",
     heroImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Jewel of the Karakoram Highway & Land of Peaks",
-    seoTitle: "Hunza Valley Tours & Hotels | Pakistan Travel Agency",
-    seoDescription: "Book verified Hunza Valley tour packages and mountain view hotels. Explore Karimabad, Attabad Lake, and Passu Cones with instant confirmed vouchers.",
+    seoTitle: "Hunza Valley Tours & Stays",
+    seoDescription: "Book Hunza Valley tour packages and mountain view hotels. Explore Karimabad, Attabad Lake, and Passu Cones with instant booking vouchers.",
     overview: [
       "Perched high amidst the majestic Karakoram Range in northern Gilgit-Baltistan, Hunza Valley stands as one of the most mesmerizing mountain sanctuaries on earth. Famed globally for its exceptionally welcoming Wakhi and Burusho communities, pristine turquoise glacial waters, and soaring 7,000-meter sentinels like Rakaposhi, Ladyfinger Peak, and Ultar Sar, Hunza captures the imagination of travelers seeking both serenity and high-altitude adventure.",
-      "The historical heartbeat of Hunza beats within Karimabad, once the royal capital of the princely state of Hunza. Here, two ancient UNESCO-awarded stone fortresses—Baltit Fort, dating back over 700 years with distinct Tibetan architecture, and the 900-year-old Altit Fort perched dramatically over the roaring Hunza River—stand as testaments to centuries of silk route heritage. Walking through the stone alleyways of Karimabad, visitors discover family-run apricot oil presses, walnut wood workshops, and gemstone boutiques.",
+      "The historical heartbeat of Hunza beats within Karimabad, once the royal capital of the princely state of Hunza. Here, two ancient UNESCO Asia-Pacific Heritage Award-winning stone fortresses—Baltit Fort, dating back over 700 years with Tibetan architectural influences, and the 900-year-old Altit Fort (both on Pakistan's World Heritage tentative list)—stand as testaments to centuries of Silk Road heritage. Walking through the stone alleyways of Karimabad, visitors discover family-run apricot oil presses, walnut wood workshops, and gemstone boutiques.",
       "Upper Hunza, known locally as Gojal, unfolds into breathtaking glacial landscapes. The world-famous Attabad Lake, formed in 2010 following a massive mountain landslide, dazzles visitors with electric turquoise water framed by towering slate cliffs. Further north, the jagged cathedral spires of the Passu Cones (Tupopdan) pierce the alpine sky alongside the vast Passu Glacier and the daring Passu suspension bridge swaying gently across the glacial river.",
-      "Beyond scenic wonders, Hunza is renowned for culinary excellence rooted in organic mountain agriculture. Savor traditional chapshuro (Karakoram meat pies baked over stone fires), ghol-ghol, apricot kernel soup, and fresh cherries plucked right from terrace orchards. With exceptional literacy rates and exemplary mountain hospitality, Hunza consistently ranks as Pakistan's safest and most rewarding travel destination for families, couples, and solo travelers alike."
+      "Beyond scenic wonders, Hunza is renowned for culinary excellence rooted in organic mountain agriculture. Savor traditional chapshuro (Karakoram meat pies baked over stone fires), ghol-ghol, apricot kernel soup, and fresh cherries plucked right from terrace orchards. With exceptionally high literacy rates and exemplary mountain hospitality, Hunza consistently ranks as one of Pakistan's safest and most rewarding travel destinations for families, couples, and solo travelers alike."
     ],
     bestTimeToVisit: {
       peakSeason: "May to August (Summer)",
@@ -58,7 +58,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 7,500 – 12,000",
       midRangePerDay: "PKR 18,000 – 35,000",
       luxuryPerDay: "PKR 45,000 – 85,000+",
-      notes: "Costs include hotel stay, meals, and localized mountain transport. Dedicated 4x4 private Prado/Prado TX rentals average PKR 15,000 to 22,000 per day including fuel."
+      notes: "Estimated costs are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. Dedicated 4x4 private Prado rentals average PKR 15,000 to 22,000 per day including fuel."
     },
     topAttractions: [
       { name: "Baltit & Altit Forts", description: "Ancient royal stone citadels offering panoramic views of Rakaposhi and the valley terraces." },
@@ -71,15 +71,15 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     faqs: [
       {
         q: "How do I reach Hunza Valley from Islamabad?",
-        a: "You can either take a scenic 45-minute commercial flight from Islamabad to Gilgit Airport followed by a smooth 2-hour drive up the Karakoram Highway, or travel by road along the Hazara Motorway and N-15 via Babusar Top (approx. 14 to 16 hours in summer)."
+        a: "You can either take a commercial flight from Islamabad to Gilgit Airport (approx. 45–60 minutes, strictly weather-dependent under Visual Flight Rules) followed by a 2-hour drive up the Karakoram Highway, or travel overland via the Hazara Motorway and N-15 via Babusar Top (approx. 14 to 16 hours during summer). In winter and spring (or whenever Babusar Pass is closed due to snow), overland travel proceeds via the Karakoram Highway (KKH / N-35) through Besham, Kohistan, and Chilas.",
       },
       {
         q: "Is Hunza Valley safe for solo female and family travelers?",
-        a: "Hunza is celebrated as one of the safest travel destinations in Asia, boasting nearly 100% literacy, zero street crime, and deeply hospitable local communities welcoming tourists warmly."
+        a: "Hunza is celebrated as one of Pakistan's safest travel regions, boasting exceptionally high literacy, a peaceful community atmosphere, and deeply hospitable local hosts who welcome tourists warmly.",
       },
       {
         q: "What network connectivity is available in Hunza?",
-        a: "SCOM (Special Communications Organization) provides reliable 4G high-speed cellular coverage throughout Karimabad, Aliabad, and Attabad Lake. Zong and Jazz also offer coverage in central towns."
+        a: "SCOM is the primary network provider in Gilgit-Baltistan with 4G in major towns like Karimabad, Aliabad, and Attabad Lake; other networks have limited or no coverage outside main hubs. Travelers are advised to buy a local SCOM SIM on arrival for dependable data.",
       }
     ]
   },
@@ -89,17 +89,17 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     province: "Gilgit-Baltistan",
     heroImage: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&auto=format&fit=crop&q=80",
     tagline: "Gateway to K2, High Glaciers & The Roof of the World",
-    seoTitle: "Skardu Tours & Luxury Stays | Pakistan Travel Agency",
-    seoDescription: "Explore Skardu tour packages, Deosai Plains safaris, and luxury resort stays. Book verified northern expeditions in Baltistan with guaranteed vouchers.",
+    seoTitle: "Skardu Tours & Luxury Stays",
+    seoDescription: "Explore Skardu tour packages, Deosai Plains safaris, and luxury resort stays. Book verified northern expeditions in Baltistan with confirmed vouchers.",
     overview: [
       "Surrounded by the most concentrated gathering of eight-thousand-meter peaks on planet Earth, Skardu is the mystical capital of Baltistan and the world capital of high-altitude mountaineering. Situated along the confluence of the Indus and Shigar Rivers, this ancient valley blends high-altitude sand dunes, alpine lakes, and centuries of Tibetan-Islamic Balti heritage.",
       "Skardu serves as the starting springboard for worldwide expeditions to K2, Broad Peak, Gasherbrum I & II, and the legendary Trango Towers. Yet, beyond extreme mountaineering, Skardu has transformed into Pakistan's premier luxury leisure tourism hub. Modern travelers fly directly into Skardu International Airport to witness the world-famous Katpana and Sarfaranga Cold Deserts, where snow-dusted dunes meet craggy alpine cliffs under starry skies.",
       "Just an hour south lies Deosai National Park, affectionately nicknamed 'The Land of the Giants'. Spanning over 3,000 square kilometers at an average elevation of 4,114 meters, it is the second-highest alpine plateau on the planet. During mid-summer, Deosai bursts into millions of wild alpine blossoms surrounding the crystal waters of Sheosar Lake, while providing habitat for the endangered Himalayan Brown Bear.",
-      "Baltistan's cultural architecture is equally captivating. In Shigar Valley, the 400-year-old Serena Shigar Fort (Fong-Khar) offers restored heritage living inside ancient timber-and-stone walls. Nearby Khaplu Palace, the Chaqchan Mosque built in 1370, and Manthal Buddha Rock date back over a thousand years to when Baltistan flourished on the ancient trans-Himalayan Buddhist trade routes."
+      "Baltistan's cultural architecture is equally captivating. In Shigar Valley, the 400-year-old Serena Shigar Fort (Fong-Khar) offers restored heritage living inside ancient timber-and-stone walls. Nearby Khaplu Palace, the Chaqchan Mosque built in the 14th century, and the 8th-century Manthal Buddha Rock reflect Baltistan's rich heritage along historical Karakoram and trans-Himalayan crossroads."
     ],
     bestTimeToVisit: {
       peakSeason: "June to September (Summer)",
-      peakDescription: "Warm days around 22°C to 30°C. Deosai National Park road opens fully, Shangrila Resort gardens blossom, and direct jet flights operate daily from Islamabad, Lahore, and Karachi.",
+      peakDescription: "Warm days around 22°C to 30°C. Deosai National Park road opens fully, Shangrila Resort gardens blossom, and direct flights operate from Islamabad year-round (weather permitting), with seasonal connections from Lahore and Karachi.",
       shoulderSeason: "October to November (Golden Autumn)",
       shoulderDescription: "Baltistan's poplar and apricot groves ignite in brilliant golden-yellow hues. Crisp mountain air and snow-dusted mountain peaks provide ideal photography conditions.",
       offSeason: "December to March (Winter Wonderland)",
@@ -109,7 +109,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 8,500 – 14,000",
       midRangePerDay: "PKR 22,000 – 42,000",
       luxuryPerDay: "PKR 55,000 – 110,000+",
-      notes: "Dedicated 4x4 mountain vehicles (Land Cruiser / Prado) are essential for accessing Deosai Plains, Basho Valley, and Upper Kachura Lake."
+      notes: "Estimated costs are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. Dedicated 4x4 mountain vehicles (Land Cruiser / Prado) are essential for accessing Deosai Plains, Basho Valley, and Upper Kachura Lake."
     },
     topAttractions: [
       { name: "Deosai Plains & Sheosar Lake", description: "Second-highest alpine plateau on Earth, famed for Himalayan brown bears and wild flower carpets." },
@@ -122,15 +122,15 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     faqs: [
       {
         q: "Are there direct flights to Skardu?",
-        a: "Yes! Pakistan International Airlines (PIA) operates regular direct commercial flights to Skardu International Airport from Islamabad, Lahore, and Karachi, subject to weather conditions."
+        a: "Direct commercial flights operate from Islamabad year-round via PIA, with seasonal summer flights connecting Lahore and Karachi. All flights to Skardu operate strictly under Visual Flight Rules (VFR) and are weather-dependent; departures may be delayed or cancelled during poor mountain visibility or cloud cover. Travelers should always maintain 1–2 contingency buffer days in their itinerary."
       },
       {
         q: "When is the Deosai National Park road open?",
-        a: "Deosai is typically accessible from late June through late September. In winter and spring, heavy snowdrifts keep the plateau road closed to vehicles."
+        a: "Deosai Plains (average elevation 4,114 meters) is typically accessible from late June through late September. In winter and spring, heavy snowdrifts and sub-zero temperatures keep the plateau tracks closed to motor vehicles."
       },
       {
         q: "Do I need special permits to visit Skardu?",
-        a: "Pakistani citizens only require valid original CNIC. Foreign tourists can visit Skardu, Shigar, Khaplu, and Deosai freely, though certain restricted military border zones require NOC clearance."
+        a: "Pakistani citizens require their original CNIC. International tourists must register at local tourist police checkpoints upon arrival. While leisure valleys like Skardu, Shigar, and Khaplu are accessible with standard registration, restricted high-altitude expeditions (like Baltoro Glacier and K2 Base Camp) require an official permit and licensed alpine guide."
       }
     ]
   },
@@ -140,8 +140,8 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     province: "Khyber Pakhtunkhwa",
     heroImage: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Switzerland of the East & Verdant Alpine Paradise",
-    seoTitle: "Swat Valley Tours & Hotels | Pakistan Travel Agency",
-    seoDescription: "Book verified Swat Valley tours, Kalam riverside hotels, and Malam Jabba ski packages. Guaranteed instant vouchers and local 24/7 travel assistance.",
+    seoTitle: "Swat Valley Tours & Kalam Stays",
+    seoDescription: "Book Swat Valley tours, Kalam riverside hotels, and Malam Jabba ski packages with instant booking vouchers and dedicated local support.",
     overview: [
       "Nestled along the pristine Hindu Kush foothills of Khyber Pakhtunkhwa, Swat Valley has rightfully earned its enduring title as the 'Switzerland of the East'. Characterized by lush alpine pine meadows, roaring glacial rivers, snow-capped peaks, and an ancient tapestry of Gandharan Buddhist civilization, Swat is one of Pakistan's most accessible and richly rewarding travel destinations.",
       "The journey into Swat is now swift and seamless via the modern Swat Motorway. Arriving in Mingora and Saidu Sharif, travelers can explore ancient Buddhist archaeological sites such as Butkara Stupa, which date back to Emperor Ashoka's era in the 3rd century BCE. Nearby, the historic White Palace of Marghazar, built in 1940 entirely of white Swati marble by the Wali of Swat, showcases regal craftsmanship amidst tranquil gardens.",
@@ -160,7 +160,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 6,000 – 10,000",
       midRangePerDay: "PKR 15,000 – 28,000",
       luxuryPerDay: "PKR 35,000 – 70,000+",
-      notes: "Swat is exceptionally cost-effective due to direct motorway access from Islamabad (under 3.5 hours)."
+      notes: "Estimated costs are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. Swat is easily accessible via the Swat Motorway."
     },
     topAttractions: [
       { name: "Malam Jabba Ski Resort & Chairlift", description: "Premier winter sports hub with modern chairlifts, ski slopes, zip-lining, and 5-star mountain hotels." },
@@ -191,8 +191,8 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     province: "Khyber Pakhtunkhwa",
     heroImage: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&auto=format&fit=crop&q=80",
     tagline: "Untouched Deodar Forests, Alpine Meadows & Hidden Glacial Tarns",
-    seoTitle: "Kumrat Valley Tours & Camping | Pakistan Travel Agency",
-    seoDescription: "Discover Kumrat Valley expeditions, Jahaz Banda treks, and river glamping in Upper Dir. Book verified northern wilderness tours with instant vouchers.",
+    seoTitle: "Kumrat Valley Tours & Camping",
+    seoDescription: "Discover Kumrat Valley expeditions, Jahaz Banda treks, and river glamping in Upper Dir. Book verified northern wilderness tours with clear vouchers.",
     overview: [
       "Tucked away in the secluded Upper Dir district of Khyber Pakhtunkhwa, Kumrat Valley is one of Pakistan's most pristine and unspoiled alpine wildernesses. Famous for its towering deodar pine forest canopy, roaring Panjkora River, and emerald-colored glacial tarns, Kumrat provides an authentic escape for eco-travelers, campers, and wilderness adventurers.",
       "The gateway to Kumrat begins at the historic village of Thal, famous for its centuries-old wooden Friday Mosque, built entirely of deodar cedar without a single iron nail, adorned with intricate geometric timber carvings. Crossing from Thal into the valley, the paved road gives way to scenic 4x4 mountain trails flanked by rushing glacial waters.",
@@ -211,7 +211,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 6,500 – 11,000",
       midRangePerDay: "PKR 16,000 – 30,000",
       luxuryPerDay: "PKR 35,000 – 65,000+",
-      notes: "4x4 mountain jeeps are required from Thal onwards into Kumrat Forest and the Jahaz Banda base point."
+      notes: "Estimated costs are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. 4x4 mountain jeeps are required from Thal onwards into Kumrat Forest and the Jahaz Banda base point."
     },
     topAttractions: [
       { name: "Dense Kumrat Pine Forest", description: "Towering deodar cedar forest canopy along the crystal-clear roaring Panjkora River." },
@@ -242,8 +242,8 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     province: "Punjab",
     heroImage: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Queen of the Hills & Historic Colonial Hill Station",
-    seoTitle: "Murree & Bhurban Resorts | Pakistan Travel Agency",
-    seoDescription: "Book verified Murree hotels, luxury Bhurban golf resorts, and Galyat weekend getaways. Instant confirmation vouchers and verified partner rates.",
+    seoTitle: "Murree & Bhurban Mountain Resorts",
+    seoDescription: "Book Murree hotels, luxury Bhurban golf resorts, and Galyat weekend getaways. Transparent partner rates with instant confirmation vouchers.",
     overview: [
       "Perched in the Pir Panjal range of the Himalayas, Murree and the surrounding Galyat region have served as Pakistan's most famous and beloved hill station retreat for more than a century. Originally founded as a summer sanatorium for British colonial troops in the 1850s, Murree sits at an altitude of approximately 2,291 meters, offering refreshing pine-scented breezes, scenic ridge walks, and sweeping views of the Kashmir and Punjab plains.",
       "The epicenter of social life in Murree is the bustling Mall Road, a vibrant pedestrian promenade lined with historic colonial buildings, traditional Kashmiri tea shops, dry fruit vendors, and local artisan crafts. Strolling down Mall Road to the historic 1857 Holy Trinity Church and Pindi Point provides quintessential hill-station charm.",
@@ -262,7 +262,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 5,000 – 9,000",
       midRangePerDay: "PKR 14,000 – 26,000",
       luxuryPerDay: "PKR 35,000 – 80,000+",
-      notes: "Just 1 hour drive from Islamabad via the modern 4-lane Murree Expressway."
+      notes: "Estimated costs are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. Murree is located just 1 hour from Islamabad via the Murree Expressway."
     },
     topAttractions: [
       { name: "Mall Road & Pindi Point", description: "Famous pedestrian street filled with souvenir shops, Kashmiri chai stalls, and historic colonial vantage points." },
@@ -293,8 +293,8 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     province: "Azad Kashmir",
     heroImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Blue Gem of Azad Kashmir & Land of Alpine Fairytales",
-    seoTitle: "Neelum Valley Tours & Stays | Pakistan Travel Agency",
-    seoDescription: "Book verified Neelum Valley tour packages, riverside resorts in Keran & Arang Kel stays in Azad Kashmir. Instant vouchers & local travel guidance.",
+    seoTitle: "Neelum Valley Tours & Stays",
+    seoDescription: "Book Neelum Valley tour packages, riverside resorts in Keran, and Arang Kel stays in Azad Kashmir with local booking guidance.",
     overview: [
       "Stretching like a turquoise ribbon across the northern reaches of Azad Jammu & Kashmir, Neelum Valley is an enchanting 240-kilometer alpine corridor renowned for its lush terraced slopes, cascading mountain waterfalls, and the crystal-clear Neelum River (historically known as the Kishanganga). With panoramic vistas of thick pine and fir forests, traditional timber houses, and soaring green peaks, Neelum is celebrated as one of the most romantic destinations in Pakistan.",
       "The scenic journey begins from Muzaffarabad, following the winding river road past cascading streams and wooden footbridges. Stopping at Dhani Waterfall and Kutton, travelers enter Keran, where the Neelum River forms the international Line of Control. Here, visitors stroll along manicured riverside lawns, watching life unfold along the opposite bank mere meters away.",
@@ -313,7 +313,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 6,000 – 10,000",
       midRangePerDay: "PKR 15,000 – 28,000",
       luxuryPerDay: "PKR 32,000 – 60,000+",
-      notes: "4x4 mountain jeeps are required to access high-altitude alpine lakes such as Ratti Gali and Baboon Valley."
+      notes: "Estimated costs are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. 4x4 mountain jeeps are required to access high-altitude alpine lakes such as Ratti Gali and Baboon Valley."
     },
     topAttractions: [
       { name: "Arang Kel Fairy-tale Village", description: "Breathtaking car-free plateau meadow accessible by cable-lift and hike, perched above the roaring river." },

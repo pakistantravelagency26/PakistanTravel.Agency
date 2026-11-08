@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ListingData } from "@/services/listing.service";
 import { calculateBookingPricing } from "@/lib/bookingPricing";
+import { siteConfig } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 
@@ -233,7 +234,7 @@ function CheckoutContent() {
         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-200 gap-2">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Secure Reservation & Checkout</h1>
-            <p className="text-xs text-slate-500">Official voucher issued instantly upon completion</p>
+            <p className="text-xs text-slate-500">Official confirmed voucher issued upon payment confirmation or deposit receipt</p>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
             <Lock className="w-3.5 h-3.5" />
@@ -334,7 +335,7 @@ function CheckoutContent() {
               </h2>
 
               {/* Payment Option Selector */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className={`grid grid-cols-1 ${siteConfig.paymentGateways.cashOnArrival ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-3`}>
                 <button
                   type="button"
                   onClick={() => setPaymentChoice("DEPOSIT")}
@@ -381,28 +382,30 @@ function CheckoutContent() {
                   </span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setPaymentChoice("ON_ARRIVAL")}
-                  className={`p-4 rounded-xl border-2 text-left transition flex flex-col justify-between ${
-                    paymentChoice === "ON_ARRIVAL"
-                      ? "border-amber-500 bg-amber-50/40 shadow-sm ring-1 ring-amber-500"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
-                  }`}
-                >
-                  <div>
-                    <span className="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800 mb-2">
-                      Reservation Request
+                {siteConfig.paymentGateways.cashOnArrival && (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentChoice("ON_ARRIVAL")}
+                    className={`p-4 rounded-xl border-2 text-left transition flex flex-col justify-between ${
+                      paymentChoice === "ON_ARRIVAL"
+                        ? "border-amber-500 bg-amber-50/40 shadow-sm ring-1 ring-amber-500"
+                        : "border-slate-200 hover:border-slate-300 bg-white"
+                    }`}
+                  >
+                    <div>
+                      <span className="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800 mb-2">
+                        Reservation Request
+                      </span>
+                      <h3 className="font-bold text-xs text-slate-900">Pay on Arrival</h3>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        No instant charge. Hold request subject to operator seat confirmation.
+                      </p>
+                    </div>
+                    <span className="text-xs font-extrabold text-amber-700 mt-3 block">
+                      PKR 0 Due Now
                     </span>
-                    <h3 className="font-bold text-xs text-slate-900">Pay on Arrival</h3>
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      No instant charge. Hold request subject to operator seat confirmation.
-                    </p>
-                  </div>
-                  <span className="text-xs font-extrabold text-amber-700 mt-3 block">
-                    PKR 0 Due Now
-                  </span>
-                </button>
+                  </button>
+                )}
               </div>
 
               {/* Online Gateways for Deposit or Full */}
@@ -411,7 +414,7 @@ function CheckoutContent() {
                   <span className="text-xs font-bold text-slate-700 block">
                     Select Online Gateway for PKR {amountToPayNow.toLocaleString()} Payment:
                   </span>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className={`grid grid-cols-1 ${siteConfig.paymentGateways.stripe ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-3`}>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("JAZZCASH")}
@@ -440,19 +443,21 @@ function CheckoutContent() {
                       <span className="text-[10px] text-slate-500">Wallet / QR</span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("STRIPE")}
-                      className={`p-3 rounded-xl border-2 text-left transition ${
-                        paymentMethod === "STRIPE"
-                          ? "border-blue-700 bg-blue-50/30 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300 bg-white"
-                      }`}
-                    >
-                      <CreditCard className="w-5 h-5 text-blue-700 mb-1.5" />
-                      <span className="text-xs font-bold text-slate-900 block">Debit / Card</span>
-                      <span className="text-[10px] text-slate-500">Visa / Mastercard</span>
-                    </button>
+                    {siteConfig.paymentGateways.stripe && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("STRIPE")}
+                        className={`p-3 rounded-xl border-2 text-left transition ${
+                          paymentMethod === "STRIPE"
+                            ? "border-blue-700 bg-blue-50/30 shadow-sm"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
+                        }`}
+                      >
+                        <CreditCard className="w-5 h-5 text-blue-700 mb-1.5" />
+                        <span className="text-xs font-bold text-slate-900 block">Debit / Card</span>
+                        <span className="text-[10px] text-slate-500">Visa / Mastercard</span>
+                      </button>
+                    )}
                   </div>
 
                   {(paymentMethod === "JAZZCASH" || paymentMethod === "EASYPAISA") && (
@@ -512,7 +517,7 @@ function CheckoutContent() {
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
                   <span className="font-bold block">Reservation Hold Request (Status: Pending)</span>
                   <p>
-                    Your booking request will be placed on hold without any instant deduction. The verified tour operator will confirm seat availability, and you can pay the full amount of PKR {totalAmount.toLocaleString()} directly at check-in.
+                    Your booking request will be placed on hold without any instant deduction. The tour operator will confirm seat availability, and you can pay the full amount of PKR {totalAmount.toLocaleString()} directly at check-in.
                   </p>
                 </div>
               )}

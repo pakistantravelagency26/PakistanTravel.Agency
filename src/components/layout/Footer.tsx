@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, ShieldCheck, CreditCard, Mail, Headphones, Phone } from "lucide-react";
+import { Compass, ShieldCheck, CreditCard, Mail, Headphones, MessageSquare } from "lucide-react";
 import { DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
+import { siteConfig } from "@/config/site";
 
 export function Footer() {
   const pathname = usePathname();
@@ -38,6 +39,7 @@ export function Footer() {
 
   const general = settings.GENERAL;
   const footer = settings.FOOTER;
+  const supportEmail = siteConfig.contact.supportEmail || general.supportEmail;
 
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
@@ -49,10 +51,10 @@ export function Footer() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">{footer.card1Title || "Vetted Northern Partners"}</p>
+              <p className="font-bold text-white text-sm">{footer.card1Title || "Independent Local Partners"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                {footer.card1Desc || "Operators are verified against DTS licenses and SECP registration records."}{" "}
-                <Link href="/how-we-verify-partners" className="text-sky-400 hover:underline">Learn how</Link>
+                {footer.card1Desc || "Local tour operators and hotels publish and manage their own listings."}{" "}
+                <Link href="/partner-info" className="text-sky-400 hover:underline">Learn more</Link>
               </p>
             </div>
           </div>
@@ -64,7 +66,7 @@ export function Footer() {
             <div>
               <p className="font-bold text-white text-sm">{footer.card2Title || "JazzCash, EasyPaisa & Cards"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                {footer.card2Desc || "Zero hassle local Pakistani payments with instant PDF check-in voucher issuance."}
+                {footer.card2Desc || "Zero hassle local Pakistani payments with confirmed digital check-in vouchers."}
               </p>
             </div>
           </div>
@@ -74,9 +76,9 @@ export function Footer() {
               <Headphones className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">{footer.card3Title || "24/7 Online Assistance"}</p>
+              <p className="font-bold text-white text-sm">{footer.card3Title || "Customer Support Desk"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                {footer.card3Desc || "Dedicated on-ground emergency and route coordinators active during your journeys."}
+                {footer.card3Desc || "AI assistant available 24/7; human support by email during business working hours."}
               </p>
             </div>
           </div>
@@ -116,7 +118,7 @@ export function Footer() {
 
           <div>
             <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-teal-400">
-              {footer.col3Title || "Traveler Guarantees"}
+              {footer.col3Title || "Platform Information"}
             </p>
             <ul className="space-y-2 text-xs text-slate-400">
               {(footer.col3Links && footer.col3Links.length > 0 ? footer.col3Links : DEFAULT_SITE_SETTINGS.FOOTER.col3Links).map((link) => (
@@ -131,37 +133,37 @@ export function Footer() {
 
           <div>
             <p className="font-bold text-white text-xs mb-3 uppercase tracking-wider text-emerald-400">
-              {footer.col4Title || "Direct Support"}
+              {footer.col4Title || "Customer Support"}
             </p>
             <div className="space-y-2.5 text-xs text-slate-400">
-              <a
-                href={`https://wa.me/${general.whatsappNumber.replace(/[^0-9]/g, "")}?text=Hi%20PakistanTravel.Agency%20Support`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-white transition text-emerald-400 font-bold"
-              >
-                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{general.whatsappNumber} (WhatsApp / Helpline)</span>
-              </a>
-              <p className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{general.supportEmail}</span>
+              {supportEmail && (
+                <p className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <a href={`mailto:${supportEmail}`} className="hover:text-white transition">{supportEmail}</a>
+                </p>
+              )}
+              <p className="text-[11px] text-slate-400">
+                AI Assistant: Available 24/7 for instant answers
               </p>
-              <p className="pt-1 text-[11px] text-slate-500">
-                {general.address}
+              <p className="text-[11px] text-slate-400">
+                Email Desk: {siteConfig.contact.supportHours.humanEmail}
               </p>
-              <p className="pt-1">
-                <Link href="/how-we-verify-partners" className="text-sky-400 hover:text-white transition text-xs font-semibold">
-                  How We Verify Partners →
+              <div className="pt-2">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition border border-slate-700"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Send a Message</span>
                 </Link>
-              </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>{footer.copyrightNotice}</p>
+          <p>© 2026 {siteConfig.name}. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-5 font-medium">
             <Link href="/about" className="hover:text-white transition">About Us</Link>
             <Link href="/blog" className="hover:text-white transition">Blog</Link>

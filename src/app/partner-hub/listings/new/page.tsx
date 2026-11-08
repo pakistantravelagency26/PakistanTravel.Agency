@@ -151,6 +151,22 @@ export default function NewListingPage() {
       "https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1510312305653-8ed496efae75?w=1200&auto=format&fit=crop&q=80",
     ],
+    kumrat: [
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop&q=80",
+    ],
+    neelum: [
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&auto=format&fit=crop&q=80",
+    ],
+    naran: [
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&auto=format&fit=crop&q=80",
+    ],
+    "fairy-meadows": [
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1627894483216-2138af692e32?w=1200&auto=format&fit=crop&q=80",
+    ],
   };
 
   function toggleAmenity(a: string) {
@@ -226,6 +242,15 @@ export default function NewListingPage() {
     } else if (dest === "kumrat") {
       city = "Thal";
       province = "Khyber Pakhtunkhwa";
+    } else if (dest === "neelum") {
+      city = "Kutton";
+      province = "Azad Kashmir";
+    } else if (dest === "naran") {
+      city = "Naran";
+      province = "Khyber Pakhtunkhwa";
+    } else if (dest === "fairy-meadows") {
+      city = "Raikhot Bridge";
+      province = "Gilgit-Baltistan";
     }
 
     const defaultPhotos = presetPhotos[dest] || presetPhotos.hunza;
@@ -465,6 +490,9 @@ export default function NewListingPage() {
                 <option value="swat">Swat Valley &amp; Kalam</option>
                 <option value="murree">Murree &amp; Bhurban</option>
                 <option value="kumrat">Kumrat Valley &amp; Dir</option>
+                <option value="neelum">Neelum Valley &amp; Arang Kel</option>
+                <option value="naran">Naran &amp; Kaghan Valley</option>
+                <option value="fairy-meadows">Fairy Meadows &amp; Nanga Parbat</option>
               </select>
             </div>
 

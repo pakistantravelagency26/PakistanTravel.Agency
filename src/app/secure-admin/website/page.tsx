@@ -406,43 +406,17 @@ export default function AdminWebsiteManagerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Primary Support Phone</label>
-                  <input
-                    type="text"
-                    value={general.phonePrimary}
-                    onChange={(e) => setGeneral({ ...general, phonePrimary: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">24/7 Helpline Number</label>
-                  <input
-                    type="text"
-                    value={general.phoneHelpline}
-                    onChange={(e) => setGeneral({ ...general, phoneHelpline: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">WhatsApp Live Chat Number</label>
-                  <input
-                    type="text"
-                    value={general.whatsappNumber}
-                    onChange={(e) => setGeneral({ ...general, whatsappNumber: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Customer Support Email</label>
                   <input
                     type="email"
                     value={general.supportEmail}
                     onChange={(e) => setGeneral({ ...general, supportEmail: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="support@pakistantravel.agency"
                   />
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Platform support email for customer inquiries and ticket escalations. (No phone numbers are published for the platform owner.)
+                  </p>
                 </div>
 
                 <div>
@@ -457,7 +431,7 @@ export default function AdminWebsiteManagerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">DTS License Reference</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Tourism License Reference (Optional)</label>
                   <input
                     type="text"
                     value={general.dtsLicense}
@@ -753,7 +727,7 @@ export default function AdminWebsiteManagerPage() {
                         type="text"
                         value={hero.badge1Sub}
                         onChange={(e) => setHero({ ...hero, badge1Sub: e.target.value })}
-                        placeholder="DTS & SECP Vetted · Verified Partners"
+                        placeholder="Regional Partner Network · Partner Information"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px]"
                       />
                     </div>
@@ -782,14 +756,14 @@ export default function AdminWebsiteManagerPage() {
                         type="text"
                         value={hero.badge3Title}
                         onChange={(e) => setHero({ ...hero, badge3Title: e.target.value })}
-                        placeholder="24/7 Online Support"
+                        placeholder="Customer Support Desk"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
                       />
                       <input
                         type="text"
                         value={hero.badge3Sub}
                         onChange={(e) => setHero({ ...hero, badge3Sub: e.target.value })}
-                        placeholder="WhatsApp & Phone Desk"
+                        placeholder="24/7 AI Chat · Email Desk Mon-Sat"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px]"
                       />
                     </div>
@@ -833,7 +807,7 @@ export default function AdminWebsiteManagerPage() {
                         type="text"
                         value={hero.stat2Label}
                         onChange={(e) => setHero({ ...hero, stat2Label: e.target.value })}
-                        placeholder="DTS Verified Standards"
+                        placeholder="Direct Transparent Rates"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px]"
                       />
                     </div>
@@ -1114,7 +1088,7 @@ export default function AdminWebsiteManagerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Copyright Line & DTS Disclaimer</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Copyright Line &amp; Disclaimer</label>
                   <input
                     type="text"
                     value={footer.copyrightNotice}
@@ -1444,17 +1418,17 @@ export default function AdminWebsiteManagerPage() {
                   {/* Column 4 Title */}
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                     <label className="block text-[11px] font-bold text-emerald-700 uppercase tracking-wider mb-1">
-                      Column 4 Title (e.g. Direct Support)
+                      Column 4 Title (e.g. Contact Us)
                     </label>
                     <input
                       type="text"
                       value={footer.col4Title || ""}
                       onChange={(e) => setFooter({ ...footer, col4Title: e.target.value })}
                       className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold"
-                      placeholder="Direct Support"
+                      placeholder="Contact Us"
                     />
                     <p className="text-[11px] text-slate-400 mt-1">
-                      (The phone, WhatsApp, email, and address in this column are automatically linked to your General Settings.)
+                      (The support email and working hours in this column are automatically linked to your General Settings.)
                     </p>
                   </div>
                 </div>
@@ -1589,8 +1563,8 @@ export default function AdminWebsiteManagerPage() {
               className="space-y-6"
             >
               <div>
-                <h2 className="text-base font-extrabold text-slate-900">Partner Verification Page (/how-we-verify-partners)</h2>
-                <p className="text-xs text-slate-500">Edit quality standards, DTS licensing criteria, and verification steps</p>
+                <h2 className="text-base font-extrabold text-slate-900">Partner Information Page (/partner-info)</h2>
+                <p className="text-xs text-slate-500">Edit quality standards, partner guidelines, and marketplace steps</p>
               </div>
 
               <div className="space-y-4">
@@ -1670,8 +1644,8 @@ export default function AdminWebsiteManagerPage() {
               className="space-y-6"
             >
               <div>
-                <h2 className="text-base font-extrabold text-slate-900">About Us Page Content & Corporate Registry (/about)</h2>
-                <p className="text-xs text-slate-500">Edit mission statement, company story, and official SECP / FBR registration credentials</p>
+                <h2 className="text-base font-extrabold text-slate-900">About Us Page Content (/about)</h2>
+                <p className="text-xs text-slate-500">Edit mission statement, company story, and marketplace goals</p>
               </div>
 
               <div className="space-y-4">
@@ -1726,50 +1700,6 @@ export default function AdminWebsiteManagerPage() {
                   />
                 </div>
 
-                {/* SECP / FBR Credentials */}
-                <div className="pt-4 border-t border-slate-100">
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
-                    Official Corporate & Compliance Details (About Page Box)
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Operating Corporate Entity</label>
-                      <input
-                        type="text"
-                        value={about.corporateName}
-                        onChange={(e) => setAbout({ ...about, corporateName: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">SECP Corporate Identification Number (CUIN)</label>
-                      <input
-                        type="text"
-                        value={about.secpCuin}
-                        onChange={(e) => setAbout({ ...about, secpCuin: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Federal Board of Revenue (FBR) NTN</label>
-                      <input
-                        type="text"
-                        value={about.fbrNtn}
-                        onChange={(e) => setAbout({ ...about, fbrNtn: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Registered Head Office Address</label>
-                      <input
-                        type="text"
-                        value={about.registeredOffice}
-                        onChange={(e) => setAbout({ ...about, registeredOffice: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex justify-end">
@@ -1831,7 +1761,7 @@ export default function AdminWebsiteManagerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Operator Liability & DTS Compliance Notice</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Operator Liability &amp; Marketplace Notice</label>
                   <textarea
                     rows={3}
                     value={terms.liabilityNotice}

@@ -1,21 +1,61 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { 
-  Building2, 
-  Compass, 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Search, 
-  ShieldCheck, 
-  Sparkles, 
-  Headphones, 
-  CheckCircle2, 
+import {
+  Compass,
+  MapPin,
+  Calendar,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Headphones,
+  CheckCircle2,
 } from "lucide-react";
 import { getActiveDbListings } from "@/services/serverListing.service";
 import { TourMarketplaceSection } from "@/components/home/TourMarketplaceSection";
 import { getSiteSettings } from "@/services/siteSettings.service";
 
 export const revalidate = 60;
+
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Pakistan Travel | Northern Pakistan Tours & Mountain Stays",
+  },
+  description:
+    "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
+  alternates: {
+    canonical: siteUrl,
+    languages: {
+      "en-PK": siteUrl,
+      "ur-PK": `${siteUrl}/ur`,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_PK",
+    url: siteUrl,
+    siteName: "PakistanTravel",
+    title: "Pakistan Travel | Northern Pakistan Tours & Mountain Stays",
+    description:
+      "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+        width: 1200,
+        height: 630,
+        alt: "Hunza Valley Karakoram Mountain Landscape",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pakistan Travel | Northern Pakistan Tours & Mountain Stays",
+    description:
+      "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
+    images: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
+  },
+};
 
 export default async function HomePage() {
   const listings = await getActiveDbListings();
@@ -64,24 +104,24 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-sky-800 text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>{hero?.badgeText || "Pakistan's Verified Multi-Vendor Travel Network"}</span>
+            <span>{hero?.badgeText || "Northern Pakistan Multi-Vendor Travel Marketplace"}</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">
             {hero?.title || "Discover Pakistan's Majestic Mountains & Valleys"}
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            {hero?.subtitle || "Discover Pakistan's breathtaking destinations, explore tours from local operators, and book your perfect adventure—all in one place."}
+            {hero?.subtitle || "Compare and book tour packages and mountain stays directly from independent local operators across northern Pakistan."}
           </p>
         </div>
 
-        {/* Clean Floating Search Bar (Musandam.tours modern card style) */}
+        {/* Clean Floating Search Bar */}
         <div className="max-w-5xl mx-auto mt-10">
           <form
             action="/search"
             method="GET"
-            className="bg-white p-3 sm:p-4 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200/80 grid grid-cols-1 md:grid-cols-12 gap-3"
+            className="bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 grid grid-cols-1 md:grid-cols-12 gap-3"
           >
             {/* Destination */}
             <div className="md:col-span-4 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
@@ -152,16 +192,16 @@ export default async function HomePage() {
 
         {/* Confidence Badges */}
         <div className="max-w-4xl mx-auto mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-slate-600">
-          <Link href="/how-we-verify-partners" className="flex items-center gap-3 hover:opacity-80 transition group">
+          <Link href="/partner-info" className="flex items-center gap-3 hover:opacity-80 transition group">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:scale-105 transition">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
               <span className="font-bold text-slate-900 block group-hover:text-emerald-700">
-                {hero?.badge1Title || "Licensed Local Operators"}
+                {hero?.badge1Title || "Independent Local Operators"}
               </span>
               <span className="text-[11px] text-slate-400">
-                {hero?.badge1Sub || "DTS & SECP Vetted · How we verify"}
+                {hero?.badge1Sub || "Regional Partner Network · Partner Information"}
               </span>
             </div>
           </Link>
@@ -186,10 +226,10 @@ export default async function HomePage() {
             </div>
             <div>
               <span className="font-bold text-slate-900 block">
-                {hero?.badge3Title || "24/7 Online Support"}
+                {hero?.badge3Title || "Customer Support Desk"}
               </span>
               <span className="text-[11px] text-slate-400">
-                {hero?.badge3Sub || "WhatsApp & Phone Desk"}
+                {hero?.badge3Sub || "24/7 AI Chat · Email Desk Mon-Sat"}
               </span>
             </div>
           </div>
@@ -199,7 +239,7 @@ export default async function HomePage() {
       {/* Main Multi-Vendor Marketplace Catalog */}
       <TourMarketplaceSection 
         initialListings={listings} 
-        customSettings={settings.MARKETPLACE_SECTION}
+        customSettings={settings.MARKETPLACE_SECTION} 
       />
     </div>
   );

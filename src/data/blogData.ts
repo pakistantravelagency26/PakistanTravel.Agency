@@ -4,6 +4,7 @@ export interface BlogPost {
   seoTitle: string;
   metaDescription: string;
   date: string;
+  isoDate: string;
   author: {
     name: string;
     role: string;
@@ -26,12 +27,13 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "skardu-trip-cost-2026",
     title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown",
-    seoTitle: "Skardu Trip Cost 2026: Complete Budget & Luxury Guide",
-    metaDescription: "Plan your Skardu trip in 2026 with an exact cost breakdown for flights, 4x4 rentals, Deosai safaris, luxury hotels, and local food in northern Pakistan.",
-    date: "2026-05-10",
+    seoTitle: "Skardu Trip Cost 2026: Budget & Luxury Guide",
+    metaDescription: "Plan your Skardu trip in 2026 with an exact cost breakdown for flights, 4x4 rentals, Deosai safaris, luxury hotels, and local dining.",
+    date: "10 May 2026",
+    isoDate: "2026-05-10",
     author: {
-      name: "Qasim Balti",
-      role: "Lead Alpine Expeditions Director",
+      name: "PakistanTravel Editorial Team",
+      role: "Regional Destination Specialists",
     },
     readTime: "7 min read",
     category: "Cost & Budget Guides",
@@ -42,14 +44,16 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "Introduction: Why Skardu Budgeting Matters in 2026",
         paragraphs: [
-          "Skardu has evolved from a rugged mountaineering outpost into Pakistan's top luxury mountain destination. With regular commercial flights from Islamabad, Lahore, and Karachi landing at Skardu International Airport, access is easier than ever. However, remote mountain logistics make accurate budgeting essential for a seamless vacation.",
-          "Whether you are planning a solo backpacking photography tour, a family vacation to Shangrila, or a luxury glamping retreat in the Sarfaranga Cold Desert, this guide breaks down realistic 2026 expenses across transport, lodging, guided excursions, and permits."
+          "Skardu has evolved from a rugged mountaineering outpost into Pakistan's top luxury mountain destination. With direct commercial flights from Islamabad operating year-round (weather permitting) and seasonal connections from Lahore and Karachi during peak summer, access to Baltistan is more accessible than ever. However, remote mountain logistics make accurate budgeting essential for a seamless vacation.",
+          "Whether you are planning a solo backpacking photography tour, a family vacation to Shangrila, or a luxury glamping retreat in the Sarfaranga Cold Desert, this guide breaks down realistic 2026 expenses across transport, lodging, guided excursions, and permits.",
+          "Pricing Disclaimer: Estimated costs in this guide are based on 2026 market rates and fluctuate with inflation, season, and fuel prices. Confirm current rates with local operators before booking."
         ]
       },
       {
         heading: "1. Transportation Costs: Flights vs. Karakoram Highway Drive",
         paragraphs: [
-          "Transportation represents the largest variable in your Skardu budget. You can either fly directly into Skardu or take the scenic overland route via the Karakoram Highway and Jaglot-Skardu Road."
+          "Transportation represents the largest variable in your Skardu budget. You can either fly directly into Skardu or take the scenic overland route via the Karakoram Highway and Jaglot-Skardu Road.",
+          "Important Flight & Weather Notice: Commercial flights to Skardu International Airport operate under Visual Flight Rules (VFR) and are strictly weather-dependent. Mountain cloud cover or heavy rain over the Indus gorge can cause unexpected flight cancellations. Travelers should always maintain 1–2 contingency buffer days in their itinerary or be prepared for overland road travel via the Karakoram Highway."
         ],
         list: [
           "Commercial Flights (Islamabad – Skardu Return): PKR 38,000 – 62,000 per person depending on seasonal demand and booking lead time.",
@@ -95,12 +99,13 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "hunza-best-time-to-visit",
     title: "Best Time to Visit Hunza Valley: Cherry Blossom to Autumn Colors",
-    seoTitle: "Best Time to Visit Hunza Valley: Complete Seasonal Guide",
-    metaDescription: "Discover the best time to visit Hunza Valley with our seasonal guide covering spring cherry blossom, warm summer lakes, and vibrant golden autumn foliage.",
-    date: "2026-04-22",
+    seoTitle: "Best Time to Visit Hunza Valley: Seasonal Guide",
+    metaDescription: "Discover the best time to visit Hunza Valley with our seasonal guide covering spring cherry blossom, summer lakes, and golden autumn foliage.",
+    date: "22 Apr 2026",
+    isoDate: "2026-04-22",
     author: {
-      name: "Dr. Karim Hunzai",
-      role: "Cultural Geographer & Northern Guide",
+      name: "PakistanTravel Editorial Team",
+      role: "Regional Destination Specialists",
     },
     readTime: "6 min read",
     category: "Seasonal Travel Advice",
@@ -149,12 +154,13 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "kumrat-valley-route-tips",
     title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips",
-    seoTitle: "Kumrat Valley Travel Guide: Route, 4x4 Road & Tips 2026",
-    metaDescription: "Plan your trip to Kumrat Valley with our route guide from Islamabad, 4x4 jeep requirements, Jahaz Banda trek details, and riverside camping advice in Upper Dir.",
-    date: "2026-06-01",
+    seoTitle: "Kumrat Valley Travel Guide: Route & 4x4 Road",
+    metaDescription: "Plan your trip to Kumrat Valley with our route guide from Islamabad, 4x4 jeep requirements, Jahaz Banda trek details, and camping advice.",
+    date: "01 Jun 2026",
+    isoDate: "2026-06-01",
     author: {
-      name: "Tariq Khan Dirvi",
-      role: "Wilderness Trekking Specialist",
+      name: "PakistanTravel Editorial Team",
+      role: "Regional Destination Specialists",
     },
     readTime: "8 min read",
     category: "Adventure & Trekking",
@@ -196,12 +202,13 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "skardu-vs-hunza",
     title: "Skardu vs Hunza: Which Northern Destination Should You Visit First?",
-    seoTitle: "Skardu vs Hunza: Which Northern Pakistan Trip Is Best?",
-    metaDescription: "Comparing Skardu vs Hunza for your northern Pakistan journey: scenery, travel time, hotel quality, flight reliability, adventure activities, and trip costs.",
-    date: "2026-05-18",
+    seoTitle: "Skardu vs Hunza: Which Northern Trip Is Best?",
+    metaDescription: "Comparing Skardu vs Hunza for your northern Pakistan journey: mountain scenery, travel time, hotel quality, flight reliability, and expenses.",
+    date: "18 May 2026",
+    isoDate: "2026-05-18",
     author: {
-      name: "Sara Qureshi",
-      role: "Senior Travel Editor",
+      name: "PakistanTravel Editorial Team",
+      role: "Regional Destination Specialists",
     },
     readTime: "7 min read",
     category: "Destination Comparisons",
@@ -226,8 +233,8 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "2. Travel Accessibility: Flight Reliability vs. Smooth Highway",
         paragraphs: [
-          "Hunza is reached either via a flight to Gilgit Airport followed by a smooth 2-hour drive up the Karakoram Highway, or by road from Islamabad via the Hazara Motorway and Babusar Top (14–16 hours).",
-          "Skardu features a major international airport accommodating large jet aircraft (Airbus A320) directly from Islamabad, Lahore, and Karachi. However, mountain weather can occasionally cause flight delays, making overland contingency planning prudent."
+          "Hunza is reached either via a flight to Gilgit Airport (Visual Flight Rules apply; strictly weather-dependent) followed by a smooth 2-hour drive up the Karakoram Highway, or by road from Islamabad via Babusar Top during summer (14–16 hours) or the Karakoram Highway (KKH / N-35) via Besham and Kohistan in winter.",
+          "Skardu features an airport accommodating commercial jet aircraft (Airbus A320) directly from Islamabad, Lahore, and Karachi. However, northern mountain weather constraints (VFR operations) mean flights are subject to delays or cancellations during cloud cover, making flexible buffer days and overland contingency planning essential."
         ]
       },
       {
@@ -249,12 +256,13 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "northern-pakistan-packing-list",
     title: "Northern Pakistan Packing List: Essential Clothing & Trekking Gear",
-    seoTitle: "Northern Pakistan Packing List: Clothing & Trekking Gear",
-    metaDescription: "The ultimate packing checklist for northern Pakistan tours in Hunza, Skardu, and Swat: thermal layers, trekking footwear, electronics, permits, and medication.",
-    date: "2026-06-15",
+    seoTitle: "Northern Pakistan Packing List: Essential Gear",
+    metaDescription: "The essential packing checklist for northern Pakistan tours in Hunza, Skardu, and Swat: thermal layers, trekking boots, electronics, and medicine.",
+    date: "15 Jun 2026",
+    isoDate: "2026-06-15",
     author: {
-      name: "Hamza Malik",
-      role: "Equipment & Expedition Safety Officer",
+      name: "PakistanTravel Editorial Team",
+      role: "Regional Destination Specialists",
     },
     readTime: "6 min read",
     category: "Travel Checklists",

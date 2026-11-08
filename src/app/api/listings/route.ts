@@ -19,8 +19,18 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     includeAll = searchParams.get("all") === "true" || searchParams.get("includeDisabled") === "true";
-    const vendorId = searchParams.get("vendorId");
+    let vendorId = searchParams.get("vendorId");
     const singleId = searchParams.get("id") || searchParams.get("slug");
+
+    // Automatically scope partner listings to current vendor if not specified
+    const session = await getServerSession(authOptions);
+    if (includeAll && !vendorId && session?.user && session.user.role === "VENDOR") {
+      vendorId = session.user.vendorId || null;
+      if (!vendorId && session.user.id) {
+        const dbV = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
+        if (dbV) vendorId = dbV.id;
+      }
+    }
 
     // Direct single-query relational scan (fast latency)
     const whereCondition: any = {};
@@ -44,6 +54,9 @@ export async function GET(req: Request) {
         vendor: true,
         destination: true,
         units: true,
+        departures: {
+          orderBy: { startDate: "asc" },
+        },
         reviews: {
           include: {
             user: true,
@@ -79,6 +92,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
+    if (!session || !session.user || (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Vendor or Admin session required to create listings." },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
 
     if (!body.title || !body.basePrice) {
@@ -93,15 +113,61 @@ export async function POST(req: Request) {
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
-    const uniqueSlug = `${cleanSlug}-${Date.now().toString().slice(-4)}`;
+    const uniqueSlug = `${cleanSlug || "tour"}-${Date.now().toString().slice(-4)}`;
 
-    const vendorBusiness = session?.user?.name || body.vendorName || "Partner Agency";
-    const vendorId = (session?.user as any)?.vendorId || body.vendorId;
+    const vendorBusiness = session.user.name || "Partner Agency";
+    
+    // Strict & resilient vendorId resolution (auto-links if session lacks vendorId)
+    let vendorId: string | null = session.user.vendorId || null;
+
+    if (!vendorId && session.user.id) {
+      const dbVendor = await prisma.vendor.findFirst({
+        where: { userId: session.user.id },
+      });
+      if (dbVendor) {
+        vendorId = dbVendor.id;
+      }
+    }
+
+    if (!vendorId && session.user.email) {
+      const dbUser = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: { vendorProfile: true },
+      });
+      if (dbUser?.vendorProfile) {
+        vendorId = dbUser.vendorProfile.id;
+      }
+    }
+
+    if (session.user.role === "ADMIN") {
+      if (body.vendorId) {
+        vendorId = body.vendorId;
+      } else if (!vendorId) {
+        const firstVendor = await prisma.vendor.findFirst({
+          where: { status: "VERIFIED" },
+        }) || await prisma.vendor.findFirst();
+        vendorId = firstVendor?.id || "v-dkt-8394";
+      }
+    } else if (session.user.role === "VENDOR" && !vendorId && session.user.id) {
+      // Auto-provision verified vendor profile for vendor user so saving never gets blocked
+      const newVendor = await prisma.vendor.create({
+        data: {
+          id: `v-${Date.now().toString().slice(-6)}`,
+          userId: session.user.id,
+          businessName: session.user.name || "Local Tour Operator",
+          phone: session.user.phone || "03000000000",
+          city: body.city || "Islamabad",
+          status: "VERIFIED",
+          commissionRate: 12.0,
+        },
+      });
+      vendorId = newVendor.id;
+    }
 
     if (!vendorId) {
       return NextResponse.json(
-        { success: false, error: "Please log in to your vendor account to add listings." },
-        { status: 401 }
+        { success: false, error: "Unable to find or create a vendor profile for this account. Please contact support." },
+        { status: 403 }
       );
     }
 
@@ -141,7 +207,7 @@ export async function POST(req: Request) {
       isFeatured: body.isFeatured ?? true,
       freeCancellation: true,
       freeCancellationDays: Number(body.freeCancellationDays || 3),
-      badge: body.type === "TOUR" ? "Verified Tour" : "Verified Stay",
+      badge: body.type === "TOUR" ? "Guided Tour" : "Mountain Stay",
       photos: photosList,
       amenities: Array.isArray(body.amenities) && body.amenities.length > 0 
         ? body.amenities 
@@ -177,110 +243,159 @@ export async function POST(req: Request) {
       reviews: [],
     };
 
-    // 1. Save permanently to Neon PostgreSQL Database
-    try {
-      const dest = await prisma.destination.findFirst({
-        where: {
-          OR: [
-            { slug: body.destinationSlug || body.destination },
-            { name: { contains: body.city || "Hunza", mode: "insensitive" } },
-          ],
+    // 1. Resolve Destination & Category & Vendor records in DB
+    const destSlug = (body.destinationSlug || body.destination || "hunza").toLowerCase().trim();
+    let dest = await prisma.destination.findFirst({
+      where: {
+        OR: [
+          { slug: destSlug },
+          { name: { contains: body.city || "Hunza", mode: "insensitive" } },
+        ],
+      },
+    });
+
+    if (!dest) {
+      // Auto-create destination in Neon DB if not present so tour save never fails
+      const destName = body.destinationName || body.city || (destSlug.charAt(0).toUpperCase() + destSlug.slice(1));
+      dest = await prisma.destination.create({
+        data: {
+          slug: destSlug,
+          name: destName,
+          province: body.province || "Northern Pakistan",
+          image: photosList[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+          description: `Explore ${destName} with local guided expeditions and scenic mountain stays.`,
+          isFeatured: true,
         },
-      }) || await prisma.destination.findFirst();
-
-      const cat = await prisma.category.findFirst({
-        where: { type: body.type || "TOUR" },
-      }) || await prisma.category.findFirst();
-
-      const vendorRecord = await prisma.vendor.findFirst({
-        where: { id: vendorId },
-      }) || await prisma.vendor.findFirst();
-
-      if (dest && cat && vendorRecord) {
-        await prisma.listing.create({
-          data: {
-            id: newListing.id,
-            slug: newListing.slug,
-            title: newListing.title,
-            description: newListing.description,
-            type: newListing.type as any,
-            status: "PENDING_APPROVAL",
-            destinationId: dest.id,
-            categoryId: cat.id,
-            vendorId: vendorRecord.id,
-            address: newListing.address,
-            city: newListing.city,
-            photos: newListing.photos,
-            amenities: newListing.amenities,
-            durationDays: Number(body.durationDays) || (body.type === "HOTEL" ? 1 : 4),
-            durationNights: body.durationNights !== undefined ? Number(body.durationNights) : (body.type === "HOTEL" ? 1 : 3),
-            singleSupplement: Number(body.singleSupplement || 0),
-            depositPercent: Number(body.depositPercent || 25),
-            cancellationPolicy: newListing.cancellationPolicy,
-            freeCancellationDays: newListing.freeCancellationDays,
-            vendorPrice: Number(body.basePrice),
-            basePrice: newListing.basePrice,
-            commissionRate: 12.0,
-            isFeatured: true,
-          },
-        });
-
-        // Also create departures if provided or default for tour
-        if (body.type === "TOUR") {
-          const departureItems = Array.isArray(body.departures) && body.departures.length > 0
-            ? body.departures
-            : [
-                {
-                  startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                  endDate: new Date(Date.now() + (7 + (Number(body.durationDays) || 5)) * 24 * 60 * 60 * 1000),
-                  seatsTotal: Number(body.inventory || 12),
-                  seatsLeft: Number(body.inventory || 12),
-                  price: Number(body.basePrice),
-                },
-                {
-                  startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-                  endDate: new Date(Date.now() + (14 + (Number(body.durationDays) || 5)) * 24 * 60 * 60 * 1000),
-                  seatsTotal: Number(body.inventory || 12),
-                  seatsLeft: Number(body.inventory || 12),
-                  price: Number(body.basePrice),
-                },
-              ];
-
-          for (const dep of departureItems) {
-            await prisma.departure.create({
-              data: {
-                listingId: newListing.id,
-                startDate: new Date(dep.startDate),
-                endDate: new Date(dep.endDate),
-                seatsTotal: Number(dep.seatsTotal || 12),
-                seatsLeft: Number(dep.seatsLeft || dep.seatsTotal || 12),
-                price: dep.price ? Number(dep.price) : Number(body.basePrice),
-                status: "AVAILABLE",
-              },
-            });
-          }
-        }
-
-        // Also create unit in Neon DB
-        await prisma.listingUnit.create({
-          data: {
-            id: `${newListing.id}-unit-1`,
-            listingId: newListing.id,
-            title: body.unitTitle || (body.type === "HOTEL" ? "Deluxe Mountain View Room" : "Standard Tour Seat Package"),
-            description: body.type === "HOTEL" ? "Spacious room with scenic mountain views and ensuite bathroom" : "Full package inclusion with guided mountain transport and stay",
-            maxGuests: Number(body.maxGuests || 2),
-            totalQuantity: Number(body.inventory || 10),
-            basePrice: Number(body.basePrice),
-            photos: newListing.photos.slice(0, 2),
-            amenities: newListing.amenities.slice(0, 4),
-          },
-        });
-      }
-    } catch (dbErr) {
-      console.warn("DB listing create error:", dbErr);
+      });
     }
 
-    // 2. Also register in-memory
+    let cat = await prisma.category.findFirst({
+      where: { type: body.type || "TOUR" },
+    });
+
+    if (!cat) {
+      cat = await prisma.category.findFirst();
+    }
+
+    if (!cat) {
+      cat = await prisma.category.create({
+        data: {
+          name: body.type === "HOTEL" ? "Hotels & Resorts" : "Tour Packages",
+          slug: body.type === "HOTEL" ? "hotels" : "tours",
+          type: body.type || "TOUR",
+          icon: body.type === "HOTEL" ? "Building2" : "Compass",
+        },
+      });
+    }
+
+    const vendorRecord = await prisma.vendor.findFirst({
+      where: { id: vendorId },
+    }) || await prisma.vendor.findFirst();
+
+    if (!vendorRecord) {
+      return NextResponse.json(
+        { success: false, error: "No vendor profile found in database. Please contact support." },
+        { status: 400 }
+      );
+    }
+
+    // 2. Save permanently to Neon PostgreSQL Database
+    try {
+      await prisma.listing.create({
+        data: {
+          id: newListing.id,
+          slug: newListing.slug,
+          title: newListing.title,
+          description: newListing.description,
+          type: newListing.type as any,
+          status: "PENDING_APPROVAL",
+          destinationId: dest.id,
+          categoryId: cat.id,
+          vendorId: vendorRecord.id,
+          address: newListing.address,
+          city: newListing.city,
+          photos: newListing.photos,
+          amenities: newListing.amenities,
+          durationDays: Number(body.durationDays) || (body.type === "HOTEL" ? 1 : 4),
+          durationNights: body.durationNights !== undefined ? Number(body.durationNights) : (body.type === "HOTEL" ? 1 : 3),
+          singleSupplement: Number(body.singleSupplement || 0),
+          depositPercent: Number(body.depositPercent || 25),
+          cancellationPolicy: newListing.cancellationPolicy,
+          freeCancellationDays: newListing.freeCancellationDays,
+          vendorPrice: Number(body.basePrice),
+          basePrice: newListing.basePrice,
+          commissionRate: 12.0,
+          isFeatured: true,
+        },
+      });
+
+      // Also create departures if provided or default for tour
+      if (body.type === "TOUR") {
+        const departureItems = Array.isArray(body.departures) && body.departures.length > 0
+          ? body.departures
+          : [
+              {
+                startDate: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
+                endDate: new Date(Date.now() + (7 + (Number(body.durationDays) || 5)) * 86400000).toISOString().split("T")[0],
+                seatsTotal: Number(body.inventory || 12),
+                seatsLeft: Number(body.inventory || 12),
+                price: Number(body.basePrice),
+              },
+              {
+                startDate: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+                endDate: new Date(Date.now() + (14 + (Number(body.durationDays) || 5)) * 86400000).toISOString().split("T")[0],
+                seatsTotal: Number(body.inventory || 12),
+                seatsLeft: Number(body.inventory || 12),
+                price: Number(body.basePrice),
+              },
+            ];
+
+        for (const dep of departureItems) {
+          const s = dep.startDate ? new Date(dep.startDate) : new Date(Date.now() + 7 * 86400000);
+          const validStart = isNaN(s.getTime()) ? new Date(Date.now() + 7 * 86400000) : s;
+          const e = dep.endDate ? new Date(dep.endDate) : new Date(validStart.getTime() + (Number(body.durationDays) || 5) * 86400000);
+          const validEnd = isNaN(e.getTime()) ? new Date(validStart.getTime() + (Number(body.durationDays) || 5) * 86400000) : e;
+
+          await prisma.departure.create({
+            data: {
+              listingId: newListing.id,
+              startDate: validStart,
+              endDate: validEnd,
+              seatsTotal: Number(dep.seatsTotal || 12),
+              seatsLeft: Number(dep.seatsLeft || dep.seatsTotal || 12),
+              price: dep.price ? Number(dep.price) : Number(body.basePrice),
+              status: "AVAILABLE",
+            },
+          });
+        }
+      }
+
+      // Also create unit in Neon DB
+      await prisma.listingUnit.create({
+        data: {
+          id: `${newListing.id}-unit-1`,
+          listingId: newListing.id,
+          title: body.unitTitle || (body.type === "HOTEL" ? "Deluxe Mountain View Room" : "Standard Tour Seat Package"),
+          description: body.type === "HOTEL" ? "Spacious room with scenic mountain views and ensuite bathroom" : "Full package inclusion with guided mountain transport and stay",
+          maxGuests: Number(body.maxGuests || 2),
+          totalQuantity: Number(body.inventory || 10),
+          basePrice: Number(body.basePrice),
+          photos: newListing.photos.slice(0, 2),
+          amenities: newListing.amenities.slice(0, 4),
+        },
+      });
+    } catch (dbErr: any) {
+      console.error("CRITICAL: Neon DB listing persistence failed:", dbErr);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Database save failed: ${dbErr?.message || "Unknown error"}. Please check your fields and retry.` 
+        },
+        { status: 500 }
+      );
+    }
+
+    // 3. Also update in-memory cache
     createNewListing(newListing);
 
     return NextResponse.json({
@@ -298,9 +413,33 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     if (!body.id) {
       return NextResponse.json({ success: false, error: "Listing ID is required" }, { status: 400 });
+    }
+
+    // IDOR Check: If vendor, verify that they own the listing
+    if (session.user.role === "VENDOR") {
+      const existing = await prisma.listing.findUnique({
+        where: { id: body.id },
+        select: { vendorId: true },
+      });
+      let currentVendorId = session.user.vendorId;
+      if (!currentVendorId && session.user.id) {
+        const v = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
+        currentVendorId = v?.id || null;
+      }
+      if (existing && existing.vendorId !== currentVendorId) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden: You cannot modify another vendor's listing." },
+          { status: 403 }
+        );
+      }
     }
 
     // 1. Update permanently in Neon PostgreSQL Database
@@ -312,7 +451,7 @@ export async function PUT(req: Request) {
           basePrice: body.basePrice ? Number(body.basePrice) : undefined,
           city: body.city,
           description: body.description,
-          status: "PENDING_APPROVAL", // Re-enters moderation
+          status: "PENDING_APPROVAL", // Re-enters moderation, vendors cannot self-approve
         },
       });
     } catch (dbErr) {
@@ -345,14 +484,39 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) {
       return NextResponse.json({ success: false, error: "Listing ID is required" }, { status: 400 });
     }
 
+    // IDOR Check: If vendor, verify that they own the listing
+    if (session.user.role === "VENDOR") {
+      const existing = await prisma.listing.findUnique({
+        where: { id },
+        select: { vendorId: true },
+      });
+      let currentVendorId = session.user.vendorId;
+      if (!currentVendorId && session.user.id) {
+        const v = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
+        currentVendorId = v?.id || null;
+      }
+      if (existing && existing.vendorId !== currentVendorId) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden: You cannot delete another vendor's listing." },
+          { status: 403 }
+        );
+      }
+    }
+
     // 1. Delete permanently from Neon PostgreSQL Database
     try {
+      await prisma.departure.deleteMany({ where: { listingId: id } }).catch(() => {});
       await prisma.listingUnit.deleteMany({ where: { listingId: id } }).catch(() => {});
       await prisma.review.deleteMany({ where: { listingId: id } }).catch(() => {});
       await prisma.booking.deleteMany({ where: { listingId: id } }).catch(() => {});

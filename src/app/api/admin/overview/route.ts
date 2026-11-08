@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAllVendors } from "@/services/vendor.service";
 import { getAllListingsForAdmin } from "@/services/listing.service";
@@ -7,6 +9,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
     // 1. Compute directly from Neon PostgreSQL Database for 100% persistent accuracy
     const dbVendors = await prisma.vendor.findMany({
       include: {
@@ -63,7 +69,7 @@ export async function GET() {
         id: v.id,
         companyName: v.businessName,
         city: v.city,
-        tourismLicense: v.cnicOrTaxNumber || "DTS-VERIFIED",
+        tourismLicense: v.cnicOrTaxNumber || "REG-PENDING",
         phone1: details.phone1 || v.phone,
         status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
         listingsCount: vendorListings.length,

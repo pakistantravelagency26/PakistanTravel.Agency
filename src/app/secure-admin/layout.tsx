@@ -15,6 +15,7 @@ import {
   MapPin, 
   Tag, 
   Globe,
+  Headphones,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -75,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const allNavItems = [
     { href: "/secure-admin/dashboard", label: "Overview & Analytics", icon: LayoutDashboard, perm: null },
+    { href: "/secure-admin/tickets", label: "Support Tickets & AI Logs", icon: Headphones, perm: null },
     { href: "/secure-admin/bookings", label: "Bookings & Refunds", icon: BookOpenCheck, perm: "BOOKINGS" },
     { href: "/secure-admin/payouts", label: "Disbursements & Raast", icon: ArrowDownToLine, perm: "FINANCE" },
     { href: "/secure-admin/listings", label: "Listing Moderation", icon: Building2, perm: "LISTINGS" },

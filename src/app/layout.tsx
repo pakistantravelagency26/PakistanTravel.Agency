@@ -3,9 +3,10 @@ import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { WhatsAppButton } from "@/components/common/WhatsAppButton";
+import SupportChatWidget from "@/components/chat/SupportChatWidget";
+import { siteConfig } from "@/config/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
 export const viewport: Viewport = {
   themeColor: "#059669",
@@ -17,37 +18,16 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Pakistan Travel Agency | Verified Tours & Hotels in Pakistan",
+    default: "PakistanTravel.Agency | Northern Pakistan Tours & Mountain Stays",
     template: "%s | PakistanTravel.Agency",
   },
-  description: "Book verified northern Pakistan tour packages, luxury mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat with instant confirmation vouchers.",
   authors: [{ name: "PakistanTravel.Agency", url: siteUrl }],
   creator: "PakistanTravel.Agency",
   publisher: "PakistanTravel.Agency",
-  alternates: {
-    canonical: siteUrl,
-  },
   openGraph: {
     type: "website",
     locale: "en_PK",
-    url: siteUrl,
-    siteName: "PakistanTravel.Agency",
-    title: "Pakistan Travel Agency | Verified Tours & Hotels in Pakistan",
-    description: "Book verified northern Pakistan tour packages, luxury mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat with instant confirmation vouchers.",
-    images: [
-      {
-        url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
-        width: 1200,
-        height: 630,
-        alt: "Pakistan Travel Agency Northern Tourism Marketplace",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Pakistan Travel Agency | Verified Tours & Hotels in Pakistan",
-    description: "Book verified northern Pakistan tour packages, luxury mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat with instant confirmation vouchers.",
-    images: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
+    siteName: siteConfig.name,
   },
   robots: {
     index: true,
@@ -76,30 +56,10 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "TravelAgency",
-        "@id": `${siteUrl}/#organization`,
-        name: "PakistanTravel.Agency",
-        url: siteUrl,
-        logo: `${siteUrl}/favicon.png`,
-        description: "Official booking marketplace for Pakistan tourism offering verified northern tours, mountain hotels, and 4x4 rentals.",
-        telephone: "+923222327096",
-        address: {
-          "@type": "PostalAddress",
-          addressCountry: "PK",
-          addressRegion: "Islamabad Capital Territory",
-          addressLocality: "Islamabad",
-        },
-        currenciesAccepted: "PKR",
-        paymentAccepted: "JazzCash, EasyPaisa, Debit Card, Credit Card, Cash on Arrival",
-      },
-      {
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,
         url: siteUrl,
-        name: "PakistanTravel.Agency",
-        publisher: {
-          "@id": `${siteUrl}/#organization`,
-        },
+        name: siteConfig.name,
         inLanguage: ["en-PK", "ur-PK"],
         potentialAction: {
           "@type": "SearchAction",
@@ -139,7 +99,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
-          <WhatsAppButton />
+          <SupportChatWidget />
         </AuthProvider>
       </body>
     </html>

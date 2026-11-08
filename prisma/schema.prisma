@@ -104,6 +104,7 @@ model Vendor {
   businessName    String
   cnicOrTaxNumber String?
   phone           String
+  whatsapp        String?
   address         String?
   city            String
   status          VendorStatus @default(PENDING)
@@ -423,4 +424,66 @@ model SiteSetting {
 
   @@index([key])
 }
+
+model Enquiry {
+  id              String   @id @default(uuid())
+  destination     String
+  travelDate      String?
+  travelers       Int      @default(1)
+  budgetRange     String?
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  specialRequests String?  @db.Text
+  status          String   @default("NEW")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SupportTicket {
+  id              String   @id @default(uuid())
+  ticketNumber    String   @unique
+  customerName    String
+  customerContact String
+  category        String   @default("GENERAL")
+  message         String   @db.Text
+  status          String   @default("OPEN")
+  priority        String   @default("MEDIUM")
+  adminNotes      String?  @db.Text
+  source          String   @default("CHATBOT")
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerContact])
+}
+
+model ChatSession {
+  id        String        @id @default(uuid())
+  ipHash    String?
+  language  String?       @default("en")
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String
+  content   String      @db.Text
+  createdAt DateTime    @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
 

@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { generateBookingConfirmationHtml } from "@/lib/notifications";
+import { calculateBookingPricing } from "@/lib/bookingPricing";
+import { resolveBookingVendorContact } from "@/lib/antiLeakage";
+import crypto from "crypto";
 
 export interface BookingRecord {
   id: string;
@@ -29,11 +32,18 @@ export interface BookingRecord {
   cnicOrPassport: string;
   specialRequests?: string;
   createdAt: string;
+  vendor?: {
+    id: string;
+    businessName: string;
+    city: string;
+    phone?: string;
+    whatsapp?: string;
+  };
 }
 
 export function generateBookingNumber(): string {
-  const random = Math.floor(10000 + Math.random() * 90000);
-  return `PKT-2026-${random}`;
+  const token = crypto.randomBytes(4).toString("hex").toUpperCase();
+  return `PKT-2026-${token}`;
 }
 
 export async function createBooking(data: {
@@ -54,6 +64,7 @@ export async function createBooking(data: {
   isSoloTraveler?: boolean;
   singleSupplement?: number;
   paymentMethod: "STRIPE" | "JAZZCASH" | "EASYPAISA" | "CASH_ON_ARRIVAL";
+  paymentChoice?: "FULL" | "DEPOSIT" | "ON_ARRIVAL";
   paymentStatus: "PAID" | "PENDING";
   status: "CONFIRMED" | "CANCELLED_BY_CUSTOMER" | "PENDING_PAYMENT";
   guestName: string;
@@ -63,39 +74,70 @@ export async function createBooking(data: {
   specialRequests?: string;
 }): Promise<BookingRecord> {
   const bookingNumber = generateBookingNumber();
-  const depositAmount = data.depositAmount !== undefined ? data.depositAmount : (data.paymentMethod === "CASH_ON_ARRIVAL" ? 0 : data.totalAmount);
-  const balanceDue = data.balanceDue !== undefined ? data.balanceDue : (data.totalAmount - depositAmount);
 
-  // Execute inside an ACID database transaction to strictly prevent overbooking
+  // Execute inside an ACID database transaction to strictly prevent overbooking and price tampering
   const result = await prisma.$transaction(async (tx) => {
-    // 1. If tour departure is specified, atomically check available seats & lock
+    // 1. Fetch official listing data to guarantee server-side pricing integrity
+    const listing = await tx.listing.findUnique({
+      where: { id: data.listingId },
+      include: { units: true },
+    });
+
+    if (!listing) {
+      throw new Error("The selected listing or tour could not be found.");
+    }
+
+    let departure = null;
     if (data.departureId) {
-      const departure = await tx.departure.findUnique({
-        where: { id: data.departureId },
+      // 2. Concurrency Control: Atomic compare-and-swap on available seats
+      const updatedDeparture = await tx.departure.updateMany({
+        where: {
+          id: data.departureId,
+          seatsLeft: { gte: data.guestsCount },
+        },
+        data: {
+          seatsLeft: { decrement: data.guestsCount },
+        },
       });
 
-      if (!departure) {
-        throw new Error("The selected departure date is no longer available.");
+      if (updatedDeparture.count === 0) {
+        throw new Error("Overbooking prevented: No seats remaining for this departure date.");
       }
 
-      if (departure.seatsLeft < data.guestsCount) {
-        throw new Error(
-          `Overbooking prevented: Only ${departure.seatsLeft} seat(s) remaining for departure on ${departure.startDate.toISOString().split("T")[0]}, but ${data.guestsCount} were requested.`
-        );
-      }
-
-      // Decrement seats atomically
-      const remaining = departure.seatsLeft - data.guestsCount;
-      await tx.departure.update({
+      departure = await tx.departure.findUnique({
         where: { id: data.departureId },
-        data: {
-          seatsLeft: remaining,
-          status: remaining <= 0 ? "SOLD_OUT" : "AVAILABLE",
-        },
       });
     }
 
-    // 2. Find or create traveler customer user
+    // 3. Server-side price calculation (never trust client amounts)
+    const isTour = listing.type === "TOUR";
+    const serverBasePrice = Number(departure?.price || listing.basePrice);
+    const pricing = calculateBookingPricing({
+      basePrice: serverBasePrice,
+      quantity: isTour ? data.guestsCount : (data.unitsCount || 1),
+      isTour,
+      nightsCount: Math.max(1, data.nightsCount),
+      isSoloTraveler: Boolean(data.isSoloTraveler),
+      singleSupplementAmount: listing.singleSupplement ? Number(listing.singleSupplement) : undefined,
+      depositPercent: listing.depositPercent ? Number(listing.depositPercent) : 25,
+      taxRate: 0.05,
+    });
+
+    const isCashOnArrival = data.paymentMethod === "CASH_ON_ARRIVAL" || data.paymentChoice === "ON_ARRIVAL";
+    let finalDepositAmount = pricing.totalAmount;
+    let finalBalanceDue = 0;
+
+    if (isCashOnArrival) {
+      finalDepositAmount = 0;
+      finalBalanceDue = pricing.totalAmount;
+    } else if (data.paymentChoice === "DEPOSIT") {
+      finalDepositAmount = pricing.depositAmount;
+      finalBalanceDue = pricing.balanceDue;
+    }
+
+    const calculatedTotalAmount = pricing.totalAmount;
+
+    // 4. Find or create traveler customer user
     let user = await tx.user.findFirst({
       where: {
         OR: [{ email: data.guestEmail }, { phone: data.guestPhone }],
@@ -113,18 +155,12 @@ export async function createBooking(data: {
       });
     }
 
-    // 3. Resolve listing and unit
-    const listing = await tx.listing.findUnique({
-      where: { id: data.listingId },
-      include: { units: true },
-    });
+    const unitId = listing.units[0]?.id || data.listingId;
+    const commissionRate = listing.commissionRate || 12.0;
+    const platformFee = Math.round((calculatedTotalAmount * commissionRate) / 100);
+    const vendorEarnings = calculatedTotalAmount - platformFee;
 
-    const unitId = listing?.units[0]?.id || data.listingId;
-    const commissionRate = listing?.commissionRate || 12.0;
-    const platformFee = Math.round((data.totalAmount * commissionRate) / 100);
-    const vendorEarnings = data.totalAmount - platformFee;
-
-    // 4. Create Booking
+    // 5. Create Booking with strictly server-verified amounts
     const booking = await tx.booking.create({
       data: {
         bookingNumber,
@@ -136,13 +172,13 @@ export async function createBooking(data: {
         endDate: new Date(data.endDate),
         guestsCount: data.guestsCount,
         unitsCount: data.unitsCount,
-        totalAmount: data.totalAmount,
-        depositAmount,
-        balanceDue,
+        totalAmount: calculatedTotalAmount,
+        depositAmount: finalDepositAmount,
+        balanceDue: finalBalanceDue,
         vendorEarnings,
         platformFee,
         isSoloTraveler: Boolean(data.isSoloTraveler),
-        singleSupplement: data.singleSupplement || 0,
+        singleSupplement: pricing.singleSupplement,
         status: data.status === "CONFIRMED" ? "CONFIRMED" : "PENDING_PAYMENT",
         guestName: data.guestName,
         guestEmail: data.guestEmail,
@@ -155,7 +191,7 @@ export async function createBooking(data: {
     await tx.payment.create({
       data: {
         bookingId: booking.id,
-        amount: depositAmount > 0 ? depositAmount : data.totalAmount,
+        amount: finalDepositAmount > 0 ? finalDepositAmount : calculatedTotalAmount,
         currency: "PKR",
         paymentMethod: data.paymentMethod,
         status: data.paymentStatus === "PAID" ? "PAID" : "PENDING",
@@ -181,9 +217,9 @@ export async function createBooking(data: {
     nightsCount: data.nightsCount,
     guestsCount: data.guestsCount,
     unitsCount: data.unitsCount,
-    totalAmount: data.totalAmount,
-    depositAmount,
-    balanceDue,
+    totalAmount: Number(result.totalAmount),
+    depositAmount: Number(result.depositAmount || 0),
+    balanceDue: Number(result.balanceDue || 0),
     isSoloTraveler: data.isSoloTraveler,
     singleSupplement: data.singleSupplement,
     paymentMethod: data.paymentMethod,
@@ -215,7 +251,7 @@ export async function getBookingById(idOrNumber: string): Promise<BookingRecord 
       },
       include: {
         listing: {
-          include: { destination: true },
+          include: { destination: true, vendor: true },
         },
         unit: true,
         departure: true,
@@ -233,6 +269,13 @@ export async function getBookingById(idOrNumber: string): Promise<BookingRecord 
           (1000 * 60 * 60 * 24)
       )
     );
+
+    const isConfirmedBooking =
+      dbBooking.status === "CONFIRMED" ||
+      dbBooking.status === "COMPLETED" ||
+      dbBooking.payment?.status === "PAID";
+    const rawVendor = dbBooking.listing?.vendor;
+    const vendorData = resolveBookingVendorContact(rawVendor, isConfirmedBooking);
 
     return {
       id: dbBooking.id,
@@ -262,6 +305,7 @@ export async function getBookingById(idOrNumber: string): Promise<BookingRecord 
       cnicOrPassport: dbBooking.specialRequests?.includes("CNIC:") ? dbBooking.specialRequests.replace("CNIC:", "").trim() : "Verified",
       specialRequests: dbBooking.specialRequests || undefined,
       createdAt: dbBooking.createdAt.toISOString(),
+      vendor: vendorData,
     };
   } catch (error) {
     console.error("Error fetching booking by id:", error);
@@ -356,6 +400,51 @@ export async function getBookingsByEmail(email: string): Promise<BookingRecord[]
   }
 }
 
+export async function getBookingsByVendorId(vendorId: string): Promise<BookingRecord[]> {
+  try {
+    const dbBookings = await prisma.booking.findMany({
+      where: {
+        listing: { vendorId },
+      },
+      include: {
+        listing: { include: { destination: true } },
+        unit: true,
+        payment: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return dbBookings.map((b) => ({
+      id: b.id,
+      bookingNumber: b.bookingNumber,
+      listingId: b.listingId,
+      listingTitle: b.listing?.title || "Northern Pakistan Trip",
+      listingPhoto: b.listing?.photos?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+      unitTitle: b.unit?.title || "Tour Package",
+      destination: `${b.listing?.city || "Pakistan"}`,
+      startDate: b.startDate.toISOString().split("T")[0],
+      endDate: b.endDate.toISOString().split("T")[0],
+      nightsCount: 3,
+      guestsCount: b.guestsCount,
+      unitsCount: b.unitsCount,
+      totalAmount: Number(b.totalAmount),
+      depositAmount: Number(b.depositAmount || 0),
+      balanceDue: Number(b.balanceDue || 0),
+      paymentMethod: (b.payment?.paymentMethod as any) || "CASH_ON_ARRIVAL",
+      paymentStatus: b.payment?.status === "PAID" ? "PAID" : "PENDING",
+      status: b.status === "CONFIRMED" ? "CONFIRMED" : b.status === "COMPLETED" ? "COMPLETED" : "PENDING_PAYMENT",
+      guestName: b.guestName,
+      guestEmail: b.guestEmail,
+      guestPhone: b.guestPhone,
+      cnicOrPassport: "Verified",
+      createdAt: b.createdAt.toISOString(),
+    }));
+  } catch (error) {
+    console.error("Error fetching bookings by vendorId:", error);
+    return [];
+  }
+}
+
 export async function cancelBooking(id: string): Promise<boolean> {
   try {
     await prisma.$transaction(async (tx) => {
@@ -412,6 +501,15 @@ export async function handlePaymentWebhookIdempotent(payload: {
           success: true,
           message: "Payment already processed previously (Idempotent replay).",
           bookingId: existingPayment.bookingId,
+        };
+      }
+
+      // Verify that paid amount is at least the required amount
+      const expectedAmount = Number(existingPayment.amount);
+      if (payload.amount < expectedAmount) {
+        return {
+          success: false,
+          message: `Underpayment: expected ${expectedAmount} PKR but received ${payload.amount} PKR.`,
         };
       }
 

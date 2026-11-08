@@ -7,27 +7,62 @@ import { getSiteSettings, type PageBlogSettings } from "@/services/siteSettings.
 
 export const revalidate = 60;
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Pakistan Travel Blog & Guides | Pakistan Travel Agency",
-  description: "Read expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat in northern Pakistan.",
+  title: "Northern Pakistan Travel Blog & Guides",
+  description:
+    "Explore expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat.",
   alternates: {
-    canonical: "/blog",
+    canonical: `${siteUrl}/blog`,
   },
   openGraph: {
-    title: "Pakistan Travel Blog & Guides | Pakistan Travel Agency",
-    description: "Read expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat in northern Pakistan.",
-    url: "/blog",
+    type: "website",
+    locale: "en_PK",
+    url: `${siteUrl}/blog`,
+    siteName: "PakistanTravel",
+    title: "Northern Pakistan Travel Blog & Guides",
+    description:
+      "Explore expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat.",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200",
+        width: 1200,
+        height: 630,
+        alt: "PakistanTravel Northern Expeditions and Guides",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pakistan Travel Blog & Guides | Pakistan Travel Agency",
-    description: "Read expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring northern Pakistan.",
+    title: "Northern Pakistan Travel Blog & Guides",
+    description:
+      "Explore expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat.",
+    images: ["https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200"],
   },
 };
 
 export default async function BlogIndexPage() {
   const settings: PageBlogSettings = await getSiteSettings("PAGE_BLOG");
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Travel Blog",
+        item: `${siteUrl}/blog`,
+      },
+    ],
+  };
 
   const blogJsonLd = {
     "@context": "https://schema.org",
@@ -51,6 +86,10 @@ export default async function BlogIndexPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8 text-slate-800">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}

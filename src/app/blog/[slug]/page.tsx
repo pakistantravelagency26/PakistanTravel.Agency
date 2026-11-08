@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, User, ArrowLeft, ChevronRight, Share2, Compass } from "lucide-react";
+import { Calendar, Clock, User, ArrowLeft, ChevronRight, Share2, Compass, HelpCircle } from "lucide-react";
 import { blogPosts } from "@/data/blogData";
 
 export const revalidate = 60;
@@ -19,7 +19,7 @@ interface BlogPostPageProps {
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const post = blogPosts.find((p) => p.slug === params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
   if (!post) {
     return {
@@ -40,10 +40,10 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       type: "article",
       locale: "en_PK",
       url: canonicalUrl,
-      siteName: "PakistanTravel.Agency",
+      siteName: "PakistanTravel",
       title: post.seoTitle,
       description: post.metaDescription,
-      publishedTime: post.date,
+      publishedTime: post.isoDate || post.date,
       authors: [post.author.name],
       images: [
         {
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const post = blogPosts.find((p) => p.slug === params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
   if (!post) {
     notFound();
@@ -86,7 +86,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     },
     publisher: {
       "@type": "Organization",
-      name: "PakistanTravel.Agency",
+      name: "PakistanTravel",
       logo: {
         "@type": "ImageObject",
         url: `${siteUrl}/favicon.png`,
@@ -227,6 +227,14 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </section>
         ))}
 
+        {/* 2026 Market Rates & Cost Disclaimer */}
+        <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-950 text-xs flex items-start gap-2.5">
+          <HelpCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong>Market Rates Disclaimer:</strong> Estimated costs and rates discussed in our travel guides are based on 2026 market benchmarks and fluctuate with seasonal demand, fuel prices, and regional conditions. Confirm current rates directly with operators before booking.
+          </p>
+        </div>
+
         {/* Call to action card */}
         <div className="bg-gradient-to-r from-slate-900 to-sky-950 text-white rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300">
@@ -234,10 +242,10 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <span>Ready for Adventure?</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold">
-            Explore Verified Tours with PakistanTravel.Agency
+            Explore Northern Tours with PakistanTravel.Agency
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-            Book verified guided expeditions in Hunza, Skardu, and Swat with certified local mountain operators, flexible cancellation, and instant voucher issuance.
+            Book guided expeditions in Hunza, Skardu, and Swat with local mountain operators, flexible cancellation, and digital voucher issuance.
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
             <Link

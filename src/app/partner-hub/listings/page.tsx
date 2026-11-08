@@ -18,7 +18,7 @@ import {
 import { ListingData } from "@/services/listing.service";
 
 export default function VendorListingsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [tours, setTours] = useState<ListingData[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingTour, setEditingTour] = useState<ListingData | null>(null);
@@ -34,6 +34,8 @@ export default function VendorListingsPage() {
   const vendorName = session?.user?.name || "Verified Partner Agency";
 
   useEffect(() => {
+    if (status === "loading") return;
+
     setLoading(true);
     const vendorId = (session?.user as any)?.vendorId;
     const url = vendorId 
@@ -49,7 +51,7 @@ export default function VendorListingsPage() {
       })
       .catch((err) => console.log("Listings fetch error:", err))
       .finally(() => setLoading(false));
-  }, [session]);
+  }, [session, status]);
 
   function openEditModal(tour: ListingData) {
     setEditingTour(tour);

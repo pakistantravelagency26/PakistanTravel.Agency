@@ -68,15 +68,12 @@ export default function NotFound() {
         {/* Support Link */}
         <p className="text-xs text-slate-400 pt-2">
           Need booking assistance?{" "}
-          <a
-            href="https://wa.me/923222327096?text=Hi%20PakistanTravel.Agency,%20I%20hit%20a%20404%20page%20and%20need%20help"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1"
+          <Link
+            href="/contact"
+            className="text-sky-600 font-bold hover:underline inline-flex items-center gap-1"
           >
-            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-            WhatsApp Customer Desk (+92 322 2327096)
-          </a>
+            Contact Customer Support Desk
+          </Link>
         </p>
       </div>
     </div>

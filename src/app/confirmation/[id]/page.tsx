@@ -6,16 +6,14 @@ import Link from "next/link";
 import { 
   CheckCircle2, 
   Printer, 
-  Share2, 
   MapPin, 
-  Calendar, 
-  Users, 
-  PhoneCall, 
   Download, 
   ShieldCheck, 
   Compass,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  ExternalLink,
+  PhoneCall
 } from "lucide-react";
 import type { BookingRecord } from "@/services/booking.service";
 
@@ -67,30 +65,47 @@ export default function ConfirmationPage() {
           href="/search"
           className="mt-5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition"
         >
-          Explore Verified Tours
+          Explore Tours &amp; Hotels
         </Link>
       </div>
     );
   }
 
+  const isConfirmed =
+    booking.status === "CONFIRMED" || booking.paymentStatus === "PAID";
+
   return (
     <div className="bg-slate-50 min-h-screen py-10 print:bg-white print:py-0">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Success Banner (Hidden on print) */}
-        <div className="bg-emerald-600 text-white rounded-2xl p-6 sm:p-8 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6 print:hidden">
+        {/* Banner (Hidden on print) */}
+        <div
+          className={`${
+            isConfirmed ? "bg-emerald-600" : "bg-slate-800"
+          } text-white rounded-2xl p-6 sm:p-8 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6 print:hidden`}
+        >
           <div className="flex items-center gap-4 text-center sm:text-left">
             <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-8 h-8 text-white" />
             </div>
             <div>
-              <span className="text-xs font-semibold text-emerald-200 uppercase tracking-widest block">
-                Booking Confirmed & Guaranteed
+              <span
+                className={`text-xs font-semibold ${
+                  isConfirmed ? "text-emerald-200" : "text-amber-300"
+                } uppercase tracking-widest block`}
+              >
+                {isConfirmed
+                  ? "Booking Confirmed & Guaranteed"
+                  : "Booking Request Received · Awaiting Payment / Confirmation"}
               </span>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-                Your trip is booked, {booking.guestName}!
+                {isConfirmed
+                  ? `Your trip is booked, ${booking.guestName}!`
+                  : `Request Received, ${booking.guestName}!`}
               </h1>
               <p className="text-xs text-white/80 mt-1">
-                We sent a confirmation copy and WhatsApp notification to {booking.guestPhone}.
+                {isConfirmed
+                  ? `We sent a confirmation copy and WhatsApp notification to ${booking.guestPhone}.`
+                  : `Your reservation request has been submitted. Confirmed voucher is issued once payment is verified.`}
               </p>
             </div>
           </div>
@@ -103,11 +118,11 @@ export default function ConfirmationPage() {
               className="px-4 py-2.5 rounded-xl bg-white text-emerald-800 hover:bg-slate-100 font-bold text-xs shadow transition flex items-center gap-1.5"
             >
               <Download className="w-4 h-4" />
-              <span>Download PDF Voucher</span>
+              <span>{isConfirmed ? "Download PDF Voucher" : "View Booking Slip"}</span>
             </a>
             <button
               onClick={() => window.print()}
-              className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow transition flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs shadow transition flex items-center gap-1.5"
             >
               <Printer className="w-4 h-4" />
               <span>Print</span>
@@ -132,7 +147,9 @@ export default function ConfirmationPage() {
                   PakistanTravel<span className="text-brand-amber">.agency</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1 font-medium">Official Check-in Voucher & Guest Pass</p>
+              <p className="text-xs text-slate-500 mt-1 font-medium">
+                {isConfirmed ? "Official Check-in Voucher & Guest Pass" : "Booking Request Summary (Pending Confirmation)"}
+              </p>
             </div>
 
             <div className="text-right">
@@ -140,7 +157,11 @@ export default function ConfirmationPage() {
               <span className="text-lg font-mono font-extrabold text-brand-emerald block">
                 {booking.bookingNumber}
               </span>
-              <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">
+              <span
+                className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded ${
+                  isConfirmed ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                } uppercase`}
+              >
                 {booking.status}
               </span>
             </div>
@@ -180,6 +201,52 @@ export default function ConfirmationPage() {
                 <span className="text-[10px] text-slate-500">Until 12:00 PM</span>
               </div>
             </div>
+          </div>
+
+          {/* Host & Operator Details (Anti-Leakage Protected: Released on Confirmed Bookings) */}
+          <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-emerald-800 uppercase tracking-wider font-extrabold flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                Your host for this trip: {booking.vendor?.businessName || "Local Partner Operator"}
+              </span>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                {isConfirmed ? "Contact Details Released" : "Contact Locked Until Confirmed"}
+              </span>
+            </div>
+
+            {isConfirmed ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-1">
+                <div>
+                  <span className="text-slate-500 block text-[11px] font-medium">Host Base / Location</span>
+                  <span className="font-bold text-slate-900">{booking.vendor?.city || booking.destination}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[11px] font-medium">Host Direct Phone</span>
+                  <span className="font-bold text-slate-900">{booking.vendor?.phone || "Included in welcome desk"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[11px] font-medium">Host WhatsApp</span>
+                  {booking.vendor?.whatsapp || booking.vendor?.phone ? (
+                    <a
+                      href={`https://wa.me/${(booking.vendor.whatsapp || booking.vendor.phone || "").replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold hover:underline"
+                    >
+                      <span>{booking.vendor.whatsapp || booking.vendor.phone}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ) : (
+                    <span className="text-slate-400">Available at reception</span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-600 italic">
+                Direct phone and WhatsApp numbers for <strong>{booking.vendor?.businessName || "your host"}</strong> are released immediately upon payment confirmation.
+              </p>
+            )}
           </div>
 
           {/* Guest Information */}
@@ -270,7 +337,7 @@ export default function ConfirmationPage() {
             <ul className="list-disc list-inside space-y-0.5 text-[11px]">
               <li>Please keep your original National Identity Card (CNIC) or Passport ready for presentation at check-in.</li>
               <li>Present this electronic or printed voucher upon arrival at the reception.</li>
-              <li>For round-the-clock ground assistance, contact our Pakistan Support: +92 322 2327096 / paksitantravel.agency@gmail.com.</li>
+              <li>For booking assistance, contact our support desk: support@pakistantravel.agency.</li>
             </ul>
           </div>
         </div>

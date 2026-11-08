@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
+import { siteConfig } from "@/config/site";
 
 export interface LocalUser {
   id: string;
@@ -14,17 +15,18 @@ export interface LocalUser {
   businessName?: string;
 }
 
-// In-memory persistent user repository with pre-configured authentic bcrypt credentials
+// In-memory fallback user repository with bcrypt hashed credentials
 export const USERS_STORE: LocalUser[] = [
-  // SUPER ADMIN (Controls entire website, vendors & payouts)
+  // SUPER ADMIN default record (used if database connection is offline)
   {
     id: "user-admin-emraan",
     name: "Emraan Irshad",
     email: "emraanirshad88@gmail.com",
     username: "emraanirshad88",
     phone: "03000000001",
-    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS", // Emra@91173259
+    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS",
     role: "ADMIN",
+    staffRole: "SUPER_ADMIN",
   },
 ];
 
@@ -32,12 +34,7 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
   const query = identifier.toLowerCase().trim();
   if (!query) return null;
 
-  // 1. Direct username shortcuts:
-  if (query === "admin" || query === "administrator") {
-    return USERS_STORE.find((u) => u.role === "ADMIN") || null;
-  }
-
-  // 2. Check Database first if online
+  // 1. Check Database first if online
   try {
     const isEmail = query.includes("@");
     const dbUser = isEmail
@@ -95,6 +92,7 @@ export async function registerLocalUser(data: {
   role: "CUSTOMER" | "VENDOR";
   businessName?: string;
   city?: string;
+  whatsapp?: string;
   cnicOrTaxNumber?: string;
 }): Promise<LocalUser> {
   const normalized = data.email.toLowerCase().trim();
@@ -120,9 +118,10 @@ export async function registerLocalUser(data: {
             businessName: data.businessName || `${data.name}'s Travel Agency`,
             city: data.city || "Islamabad",
             phone: data.phone.trim(),
+            whatsapp: data.whatsapp?.trim() || data.phone.trim(),
             cnicOrTaxNumber: data.cnicOrTaxNumber || null,
             status: "PENDING",
-            commissionRate: 12.0,
+            commissionRate: siteConfig.marketplace.defaultCommissionRate || 10.0,
           },
         });
         vendorId = v.id;

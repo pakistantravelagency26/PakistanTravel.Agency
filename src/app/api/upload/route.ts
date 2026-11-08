@@ -1,11 +1,56 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_MIME_TYPES: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/avif": ".avif",
+};
+
+function isValidImageHeader(buffer: Buffer, mime: string): boolean {
+  if (buffer.length < 4) return false;
+
+  if (mime === "image/jpeg") {
+    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  }
+  if (mime === "image/png") {
+    return (
+      buffer[0] === 0x89 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x4e &&
+      buffer[3] === 0x47
+    );
+  }
+  if (mime === "image/webp") {
+    // RIFF .... WEBP
+    return (
+      buffer.toString("ascii", 0, 4) === "RIFF" &&
+      buffer.toString("ascii", 8, 12) === "WEBP"
+    );
+  }
+  if (mime === "image/avif") {
+    // ftyp .... avif
+    return buffer.toString("ascii", 4, 8) === "ftyp";
+  }
+  return false;
+}
+
 export async function POST(req: Request) {
   try {
+    // 1. Authentication check
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized: Please log in to upload files." }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
     const singleFile = formData.get("file") as File | null;
@@ -24,6 +69,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No image files provided" }, { status: 400 });
     }
 
+    if (allFiles.length > 10) {
+      return NextResponse.json({ error: "Cannot upload more than 10 files at once." }, { status: 400 });
+    }
+
     const uploadedUrls: string[] = [];
 
     // Check if Cloudinary is configured
@@ -31,11 +80,37 @@ export async function POST(req: Request) {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    if (cloudName && apiKey && apiSecret) {
-      // Cloudinary direct upload
-      for (const file of allFiles) {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+    for (const file of allFiles) {
+      // 2. Size limit
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `File "${file.name}" exceeds the maximum allowed size of 5MB.` },
+          { status: 400 }
+        );
+      }
+
+      // 3. MIME type whitelist
+      const ext = ALLOWED_MIME_TYPES[file.type.toLowerCase()];
+      if (!ext) {
+        return NextResponse.json(
+          { error: `File type "${file.type}" is not allowed. Only JPEG, PNG, WEBP, and AVIF are permitted.` },
+          { status: 400 }
+        );
+      }
+
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // 4. Magic bytes header verification
+      if (!isValidImageHeader(buffer, file.type.toLowerCase())) {
+        return NextResponse.json(
+          { error: `File content of "${file.name}" does not match its claimed image type.` },
+          { status: 400 }
+        );
+      }
+
+      if (cloudName && apiKey && apiSecret) {
+        // Cloudinary upload
         const base64Data = buffer.toString("base64");
         const dataUri = `data:${file.type};base64,${base64Data}`;
 
@@ -53,15 +128,11 @@ export async function POST(req: Request) {
           const cloudJson = await cloudRes.json();
           uploadedUrls.push(cloudJson.secure_url || cloudJson.url);
         } else {
-          // Fallback to local
-          const localUrl = await saveLocalFile(file);
+          const localUrl = await saveSecureLocalFile(buffer, ext);
           uploadedUrls.push(localUrl);
         }
-      }
-    } else {
-      // Save locally to public/uploads
-      for (const file of allFiles) {
-        const localUrl = await saveLocalFile(file);
+      } else {
+        const localUrl = await saveSecureLocalFile(buffer, ext);
         uploadedUrls.push(localUrl);
       }
     }
@@ -80,16 +151,12 @@ export async function POST(req: Request) {
   }
 }
 
-async function saveLocalFile(file: File): Promise<string> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
+async function saveSecureLocalFile(buffer: Buffer, ext: string): Promise<string> {
   const uploadsDir = path.join(process.cwd(), "public", "uploads");
   await mkdir(uploadsDir, { recursive: true });
 
-  const ext = path.extname(file.name) || ".jpg";
-  const safeBaseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
-  const fileName = `${safeBaseName}_${Date.now()}_${Math.random().toString(36).slice(-4)}${ext}`;
+  // Cryptographically randomized UUID filename, never user-derived
+  const fileName = `${crypto.randomUUID()}${ext}`;
   const filePath = path.join(uploadsDir, fileName);
 
   await writeFile(filePath, buffer);

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Star, X, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Star, X, CheckCircle2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { containsContactLeakage } from "@/lib/antiLeakage";
 
 interface Props {
   listingId?: string;
@@ -27,6 +28,12 @@ export function WriteReviewModal({ listingId, listingTitle, isOpen, onClose, onS
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (containsContactLeakage(comment)) {
+      setError("Direct contact details (phone numbers, WhatsApp, emails) are not permitted in reviews. Please remove them to submit.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -82,8 +89,8 @@ export function WriteReviewModal({ listingId, listingTitle, isOpen, onClose, onS
       <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100">
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-[10px] font-bold text-brand-emerald uppercase tracking-wider flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" /> Verified Guest Review
+            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> Guest Review
             </span>
             <h2 id="review-modal-title" className="text-xl font-bold text-slate-900 mt-0.5">Rate your experience</h2>
             <p className="text-xs text-slate-500">{listingTitle}</p>
@@ -200,7 +207,7 @@ export function WriteReviewModal({ listingId, listingTitle, isOpen, onClose, onS
               disabled={submitting}
               className="w-full py-3 bg-brand-emerald hover:bg-brand-emeraldDark disabled:opacity-50 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-1.5"
             >
-              <span>{submitting ? "Verifying & Posting..." : "Post Verified Review"}</span>
+              <span>{submitting ? "Submitting..." : "Post Review"}</span>
             </button>
           </form>
         )}

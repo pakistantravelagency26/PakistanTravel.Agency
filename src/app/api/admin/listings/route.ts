@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getAllListingsForAdmin, ListingData } from "@/services/listing.service";
 
@@ -6,6 +8,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
     // 1. Fetch all currently existing vendor IDs from DB
     const dbVendors = await prisma.vendor.findMany({ select: { id: true } });
     const validVendorIds = new Set(dbVendors.map((v) => v.id));
@@ -41,7 +47,7 @@ export async function GET() {
       isFeatured: l.isFeatured,
       freeCancellation: true,
       freeCancellationDays: l.freeCancellationDays,
-      badge: l.type === "TOUR" ? "Verified Tour" : "Verified Stay",
+      badge: l.type === "TOUR" ? "Guided Tour" : "Mountain Stay",
       photos: l.photos.length > 0 ? l.photos : [
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
       ],

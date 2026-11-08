@@ -32,6 +32,13 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // 1b. Admin API protection (/api/admin)
+  if (path.startsWith("/api/admin")) {
+    if (!token || token.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
+  }
+
   // 2. Partner Hub Portal protection (/partner-hub)
   if (path.startsWith("/partner-hub") && path !== "/partner-hub/login") {
     if (!token || (token.role !== "VENDOR" && token.role !== "ADMIN")) {
@@ -50,7 +57,19 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+
+  // Admin exposure & indexing prevention (Send X-Robots-Tag on private areas)
+  if (
+    path.startsWith("/secure-admin") ||
+    path.startsWith("/partner-hub") ||
+    path.startsWith("/account") ||
+    path.startsWith("/api/admin")
+  ) {
+    res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+
+  return res;
 }
 
 export const config = {
@@ -59,5 +78,6 @@ export const config = {
     "/partner-hub/:path*",
     "/account/:path*",
     "/checkout/:path*",
+    "/api/admin/:path*",
   ],
 };

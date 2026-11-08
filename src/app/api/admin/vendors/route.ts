@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { getAllVendors, createVendorAccount, VENDORS_STORE } from "@/services/vendor.service";
@@ -8,6 +10,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
     // 1. Try querying Neon PostgreSQL Database first for 100% persistent data
     const dbVendors = await prisma.vendor.findMany({
       include: {
@@ -23,13 +29,12 @@ export async function GET() {
         id: v.id,
         companyName: v.businessName,
         city: v.city,
-        tourismLicense: v.cnicOrTaxNumber || "DTS-VERIFIED",
+        tourismLicense: v.cnicOrTaxNumber || "REG-PENDING",
         phone1: details.phone1 || v.phone,
         phone2: details.phone2 || "",
         phone3: details.phone3 || "",
         email: v.user?.email || details.email || "N/A",
         loginId: details.loginId || v.id.replace("v-", ""),
-        passwordPlain: details.passwordPlain || "vendor123",
         status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
         commissionRate: v.commissionRate,
         listingsCount: v.listings.length,
@@ -63,6 +68,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
+
     const body = await req.json();
 
     if (!body.companyName || !body.city || !body.email || !body.loginId || !body.passwordPlain) {
@@ -100,7 +110,7 @@ export async function POST(req: Request) {
           userId: user.id,
           businessName: body.companyName.trim(),
           city: body.city.trim(),
-          cnicOrTaxNumber: body.tourismLicense || "DTS-PENDING",
+          cnicOrTaxNumber: body.tourismLicense || "PENDING",
           phone: body.phone1 || "03000000000",
           status: "VERIFIED",
           commissionRate: 12.0,
@@ -110,7 +120,6 @@ export async function POST(req: Request) {
             phone3: body.phone3 || "",
             email: body.email,
             loginId: body.loginId,
-            passwordPlain: body.passwordPlain,
           },
         },
       });
@@ -122,7 +131,7 @@ export async function POST(req: Request) {
     const newVendor = await createVendorAccount({
       companyName: body.companyName,
       city: body.city,
-      tourismLicense: body.tourismLicense || "DTS-PENDING",
+      tourismLicense: body.tourismLicense || "PENDING",
       phone1: body.phone1 || "03000000000",
       phone2: body.phone2 || "",
       phone3: body.phone3 || "",

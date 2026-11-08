@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { toggleVendorStatus } from "@/services/vendor.service";
 
@@ -9,6 +11,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.role !== "ADMIN") {
+      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    }
+
     const { id } = params;
 
     // 1. Update in Neon PostgreSQL Database permanently

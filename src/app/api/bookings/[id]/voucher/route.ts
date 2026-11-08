@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getBookingById } from "@/services/booking.service";
+import { siteConfig, getVerifiedValue } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +16,52 @@ export async function GET(
       return new NextResponse("Booking Voucher Not Found", { status: 404 });
     }
 
+    const session = await getServerSession(authOptions);
+    const url = new URL(req.url);
+    const guestEmailParam = url.searchParams.get("email")?.toLowerCase().trim();
+
+    const isAdmin = session?.user?.role === "ADMIN";
+    const isOwner =
+      (session?.user?.email &&
+        booking.guestEmail.toLowerCase() === session.user.email.toLowerCase()) ||
+      (guestEmailParam && booking.guestEmail.toLowerCase() === guestEmailParam);
+
+    let isVendorOwner = false;
+    if (session?.user?.role === "VENDOR" && session.user.vendorId) {
+      const { prisma } = await import("@/lib/prisma");
+      const listing = await prisma.listing.findUnique({
+        where: { id: booking.listingId },
+        select: { vendorId: true },
+      });
+      if (listing?.vendorId === session.user.vendorId) {
+        isVendorOwner = true;
+      }
+    }
+
+    const isRecentlyCreated =
+      Date.now() - new Date(booking.createdAt).getTime() < 15 * 60 * 1000;
+
+    if (!isAdmin && !isOwner && !isVendorOwner && !isRecentlyCreated) {
+      return new NextResponse("Forbidden: Access to voucher denied", { status: 403 });
+    }
+
+    const isConfirmed =
+      booking.status === "CONFIRMED" || booking.paymentStatus === "PAID";
+    const voucherTitle = isConfirmed
+      ? `Official Travel Voucher - ${booking.bookingNumber}`
+      : `Booking Request Received - ${booking.bookingNumber}`;
+    const voucherHeaderSubtitle = isConfirmed
+      ? "Official Traveler Check-in Voucher"
+      : "Booking Request Awaiting Payment / Confirmation";
+    const statusBadgeBg = isConfirmed ? "#22c55e" : "#f59e0b";
+    const statusLabel = isConfirmed ? "CONFIRMED" : "PENDING CONFIRMATION";
+
     const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Official Travel Voucher - ${booking.bookingNumber}</title>
+  <title>${voucherTitle}</title>
   <style>
     @page { size: A4 portrait; margin: 15mm; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; background: #fff; }
@@ -27,7 +70,7 @@ export async function GET(
     .header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
     .header .ref { text-align: right; }
     .header .ref-num { font-size: 18px; font-family: monospace; font-weight: 800; color: #fef08a; }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 4px; background: #22c55e; color: #fff; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 4px; background: ${statusBadgeBg}; color: #fff; }
     .body { padding: 32px; }
     .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -55,12 +98,12 @@ export async function GET(
     <div class="header">
       <div>
         <h1>PakistanTravel.agency</h1>
-        <p style="margin: 4px 0 0; font-size: 12px; opacity: 0.9;">Official Government Standard Check-in Voucher</p>
+        <p style="margin: 4px 0 0; font-size: 12px; opacity: 0.9;">${voucherHeaderSubtitle}</p>
       </div>
       <div class="ref">
         <div class="field-label" style="color: #cbd5e1;">Booking Reference</div>
         <div class="ref-num">${booking.bookingNumber}</div>
-        <div class="status-badge">${booking.status}</div>
+        <div class="status-badge">${statusLabel}</div>
       </div>
     </div>
 
@@ -90,6 +133,26 @@ export async function GET(
         <div>
           <div class="field-label">Accommodation Package</div>
           <div class="field-val">${booking.unitTitle}</div>
+        </div>
+      </div>
+
+      <div class="section-title">Your Host for This Trip</div>
+      <div class="grid">
+        <div>
+          <div class="field-label">Host Company</div>
+          <div class="field-val">${booking.vendor?.businessName || "Local Partner Operator"}</div>
+        </div>
+        <div>
+          <div class="field-label">Host Location / Base</div>
+          <div class="field-val">${booking.vendor?.city || booking.destination}</div>
+        </div>
+        <div>
+          <div class="field-label">Host WhatsApp</div>
+          <div class="field-val">${isConfirmed && (booking.vendor?.whatsapp || booking.vendor?.phone) ? `<a href="https://wa.me/${(booking.vendor.whatsapp || booking.vendor.phone || '').replace(/\\D/g, '')}" style="color: #0A5C36; font-weight: 700;">${booking.vendor.whatsapp || booking.vendor.phone}</a>` : '<span style="color: #64748b; font-style: italic;">Released upon payment confirmation</span>'}</div>
+        </div>
+        <div>
+          <div class="field-label">Host Direct Phone</div>
+          <div class="field-val">${isConfirmed && booking.vendor?.phone ? booking.vendor.phone : '<span style="color: #64748b; font-style: italic;">Released upon payment confirmation</span>'}</div>
         </div>
       </div>
 
@@ -133,14 +196,15 @@ export async function GET(
         </div>
       </div>
 
-      <div style="font-size: 11px; color: #64748b; line-height: 1.6;">
-        <strong>Important Check-in Instructions:</strong> Please present this official voucher and original CNIC/Passport at departure terminal. For mountain journeys, warm clothing and valid identity permits are required at Northern security checkpoints.
+      <div style="font-size: 11px; color: #64748b; line-height: 1.6; margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <strong>Standard Cancellation Policy:</strong> ${siteConfig.cancellationPolicy.summary}<br/>
+        <strong style="margin-top: 4px; display: inline-block;">Check-in Notice:</strong> Present this voucher and original CNIC/Passport at departure check-in. Warm alpine clothing required for high-altitude passes.
       </div>
     </div>
 
     <div class="footer">
-      <p style="margin: 0;">PakistanTravel.Agency · Regulated Multi-Vendor Platform · Blue Area, Islamabad, Pakistan</p>
-      <p style="margin: 4px 0 0;">24/7 Traveler Helpline: +92 (51) 111-TRAVEL (872835) · support@pakistantravel.agency</p>
+      <p style="margin: 0;">PakistanTravel.Agency · Multi-Vendor Tourism Marketplace</p>
+      <p style="margin: 4px 0 0;">Customer Support: ${siteConfig.contact.supportEmail} · AI Assistant 24/7</p>
     </div>
   </div>
 </body>

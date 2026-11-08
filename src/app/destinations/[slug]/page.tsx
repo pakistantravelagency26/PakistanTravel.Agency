@@ -34,12 +34,12 @@ interface DestinationPageProps {
 
 export async function generateMetadata({ params }: DestinationPageProps): Promise<Metadata> {
   const dest = destinationsData[params.slug];
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
   if (!dest) {
     return {
       title: "Destination Not Found | Pakistan Travel Agency",
-      description: "Explore verified tour packages, mountain hotels, and 4x4 rentals across northern Pakistan.",
+      description: "Explore tour packages, mountain hotels, and 4x4 rentals across northern Pakistan.",
     };
   }
 
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
       type: "website",
       locale: "en_PK",
       url: canonicalUrl,
-      siteName: "PakistanTravel.Agency",
+      siteName: "PakistanTravel",
       title: dest.seoTitle,
       description: dest.seoDescription,
       images: [
@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
 
 export default async function DestinationDetailPage({ params }: DestinationPageProps) {
   const dest = destinationsData[params.slug];
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistan-travel-agency.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
 
   if (!dest) {
     notFound();
@@ -180,7 +180,8 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           alt={`${dest.name} scenic landscape in ${dest.province}`}
           fill
           priority
-          sizes="100vw"
+          sizes="(max-width: 1600px) 100vw, 1600px"
+          quality={75}
           className="object-cover brightness-[0.75]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
@@ -290,9 +291,12 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 italic border-t border-slate-100 pt-4">
-              * Note: {dest.approximateCosts.notes}
-            </p>
+            <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2.5">
+              <HelpCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                <strong>Pricing Disclaimer:</strong> {dest.approximateCosts.notes} Confirm current rates directly with operators before booking.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -323,7 +327,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
-                Verified Inventory
+                Available Tours &amp; Stays
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                 Tours &amp; Hotels in {dest.name}
@@ -341,7 +345,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           {listings.length === 0 ? (
             <div className="bg-white rounded-3xl p-8 border border-slate-200 text-center space-y-3">
               <p className="text-sm font-bold text-slate-700">
-                New seasonal packages for {dest.name} are currently being onboarded by verified operators.
+                New seasonal packages for {dest.name} are currently being onboarded by local operators.
               </p>
               <Link
                 href="/search"

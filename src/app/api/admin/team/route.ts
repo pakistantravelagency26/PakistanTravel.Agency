@@ -57,12 +57,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const userPerms = (session.user as any)?.permissions || "";
+    const isSuperAdmin =
+      session.user.staffRole === "SUPER_ADMIN" ||
+      userPerms.includes("ALL") ||
+      userPerms.includes("TEAM");
+
+    if (!isSuperAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Forbidden: Only Super Administrators can invite or create staff accounts." },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { name, email, password, phone, permissions, staffRole } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { success: false, error: "Name, email, and password are required." },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return NextResponse.json(
+        { success: false, error: "Password must be at least 8 characters long and contain both letters and numbers." },
         { status: 400 }
       );
     }

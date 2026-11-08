@@ -25,3 +25,6 @@ export const prisma =
 
 // Always preserve client in global across warm serverless lambdas in production
 globalForPrisma.prisma = prisma;
+
+export default prisma;
+

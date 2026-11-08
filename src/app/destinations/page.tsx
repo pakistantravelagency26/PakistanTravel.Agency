@@ -7,15 +7,38 @@ import { getSiteSettings, type PageDestinationsSettings } from "@/services/siteS
 
 export const revalidate = 60;
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Northern Pakistan Destinations | Pakistan Travel Agency",
-  description: "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree. Detailed guides, seasonal tips, and tours.",
+  title: "Top Northern Pakistan Destinations",
+  description:
+    "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree with seasonal travel advice.",
   alternates: {
-    canonical: "/destinations",
+    canonical: `${siteUrl}/destinations`,
   },
   openGraph: {
-    title: "Northern Pakistan Destinations | Pakistan Travel Agency",
-    description: "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree.",
+    type: "website",
+    locale: "en_PK",
+    url: `${siteUrl}/destinations`,
+    siteName: "PakistanTravel",
+    title: "Top Northern Pakistan Destinations",
+    description:
+      "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree with seasonal travel advice.",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200",
+        width: 1200,
+        height: 630,
+        alt: "Explore Northern Pakistan Travel Destinations",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Top Northern Pakistan Destinations",
+    description:
+      "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree with seasonal travel advice.",
+    images: ["https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200"],
   },
 };
 
@@ -23,8 +46,31 @@ export default async function DestinationsIndexPage() {
   const destinations = Object.values(destinationsData);
   const settings: PageDestinationsSettings = await getSiteSettings("PAGE_DESTINATIONS");
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Destinations",
+        item: `${siteUrl}/destinations`,
+      },
+    ],
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="max-w-7xl mx-auto space-y-10">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold">

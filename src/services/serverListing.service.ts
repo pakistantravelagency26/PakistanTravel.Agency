@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { ListingData } from "./listing.service";
+import { sanitizePublicVendor } from "@/lib/antiLeakage";
+import { siteConfig } from "@/config/site";
 
 export function formatDbListing(l: any): ListingData {
   const photos = Array.isArray(l.photos) && l.photos.length > 0 ? l.photos : [
@@ -22,7 +24,7 @@ export function formatDbListing(l: any): ListingData {
       ? "Per Night Stay"
       : undefined;
 
-  const cancellationPolicy = l.cancellationPolicy || `Free cancellation up to ${l.freeCancellationDays || 3} days before start date. 100% refund.`;
+  const cancellationPolicy = l.cancellationPolicy || siteConfig.cancellationPolicy.summary;
 
   return {
     id: l.id,
@@ -44,8 +46,8 @@ export function formatDbListing(l: any): ListingData {
     totalReviews: l.totalReviews || 1,
     isFeatured: l.isFeatured,
     freeCancellation: true,
-    freeCancellationDays: l.freeCancellationDays || 3,
-    badge: l.type === "TOUR" ? "Verified Tour" : "Verified Stay",
+    freeCancellationDays: l.freeCancellationDays || siteConfig.cancellationPolicy.fullRefundDays,
+    badge: l.type === "TOUR" ? "Guided Tour" : "Mountain Stay",
     photos,
     amenities,
     description: l.description,
@@ -62,17 +64,11 @@ export function formatDbListing(l: any): ListingData {
       status: d.status || "AVAILABLE",
     })) : [],
     moderationStatus: l.status === "PUBLISHED" ? "APPROVED" : l.status === "PENDING_APPROVAL" ? "PENDING_APPROVAL" : "REJECTED",
-    vendor: {
-      id: l.vendorId,
-      businessName: l.vendor?.businessName || "Verified Travel Partner",
-      verified: l.vendor?.status === "VERIFIED",
-      joinedYear: 2024,
-      rating: 4.95,
-      licenseNumber: l.vendor?.cnicOrTaxNumber?.startsWith("DTS") 
-        ? l.vendor.cnicOrTaxNumber 
-        : `DTS-PK-${l.vendorId.slice(-4).toUpperCase()}`,
-      registrationNumber: `SECP-TRV-${l.vendorId.slice(0, 6).toUpperCase()}`,
-    },
+    vendor: sanitizePublicVendor({
+      ...l.vendor,
+      vendorId: l.vendorId,
+      city: l.vendor?.city || l.city,
+    }),
     units: Array.isArray(l.units) && l.units.length > 0 ? l.units.map((u: any) => ({
       id: u.id,
       title: u.title,
@@ -98,7 +94,7 @@ export function formatDbListing(l: any): ListingData {
     ],
     reviews: Array.isArray(l.reviews) ? l.reviews.map((r: any) => ({
       id: r.id,
-      userName: r.user?.name || "Verified Traveler",
+      userName: r.user?.name || "Traveler",
       userCity: "Pakistan",
       rating: r.rating || 5,
       date: r.createdAt ? new Date(r.createdAt).toISOString().split("T")[0] : "2026-10-01",
