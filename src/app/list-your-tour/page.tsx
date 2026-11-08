@@ -1,27 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { 
-  Building2, 
   Compass, 
-  CreditCard, 
-  Users, 
-  ArrowRight, 
   CheckCircle2, 
+  DollarSign, 
+  Users, 
   ShieldCheck, 
-  Calendar, 
-  Banknote, 
-  MessageCircle,
-  HelpCircle,
+  Smartphone, 
+  ArrowRight,
+  TrendingUp,
+  Percent,
+  Calendar,
   Lock
 } from "lucide-react";
-import { siteConfig , SITE_URL } from "@/config/site";
+import { siteConfig, SITE_URL } from "@/config/site";
 
 const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
-  title: "List Your Tour or Hotel | Partner Onboarding",
+  title: "List Your Tour Packages | Tour Operator Partner Onboarding",
   description:
-    "Partner with PakistanTravel.Agency to reach domestic and overseas Pakistani travelers. Automated check-in vouchers, JazzCash/card payments, and transparent commission.",
+    "Partner with PakistanTravel.Agency to reach domestic and overseas Pakistani travelers. Automated tour booking vouchers, local payments, and transparent commission.",
   alternates: {
     canonical: `${siteUrl}/list-your-tour`,
   },
@@ -30,9 +29,9 @@ export const metadata: Metadata = {
     locale: "en_PK",
     url: `${siteUrl}/list-your-tour`,
     siteName: siteConfig.name,
-    title: "List Your Tour or Hotel | Partner Onboarding",
+    title: "List Your Tour Packages | Tour Operator Partner Onboarding",
     description:
-      "Partner with PakistanTravel.Agency to reach domestic and overseas Pakistani travelers. Automated check-in vouchers, JazzCash/card payments, and transparent commission.",
+      "Partner with PakistanTravel.Agency to reach domestic and overseas Pakistani travelers. Automated tour booking vouchers, local payments, and transparent commission.",
   },
 };
 
@@ -47,16 +46,16 @@ export default function ListYourTourPage() {
 
         <div className="relative max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-bold tracking-wide uppercase">
-            <Building2 className="w-4 h-4" />
-            <span>For Northern Tour Operators &amp; Hotel Owners</span>
+            <Compass className="w-4 h-4" />
+            <span>For Independent Northern Tour Operators</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight sm:leading-tight">
-            Grow Your Bookings with Domestic &amp; Overseas Pakistani Travelers
+            Grow Your Tour Bookings with Domestic &amp; Overseas Pakistani Travelers
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            List your northern Pakistan tours, family-run hotels, or 4x4 mountain rentals on Pakistan&apos;s dedicated multi-vendor marketplace. Zero monthly software fees—you only pay a simple {commissionRate}% platform commission on completed bookings. Travelers pay zero booking fees.
+            List your northern Pakistan guided tour packages and trekking expeditions on Pakistan&apos;s dedicated tour marketplace. Zero monthly software fees—you only pay a simple {commissionRate}% platform commission on completed bookings. Travelers pay zero booking fees.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
@@ -64,14 +63,14 @@ export default function ListYourTourPage() {
               href="/register?role=VENDOR"
               className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-emerald-700/30 flex items-center justify-center gap-2"
             >
-              <span>Register as a Partner</span>
+              <span>Register as a Tour Operator</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/partner-hub/login"
               className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-sm transition border border-white/20 text-center"
             >
-              Partner Extranet Login
+              Operator Portal Login
             </Link>
           </div>
 
@@ -80,81 +79,102 @@ export default function ListYourTourPage() {
               <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Zero Upfront Fee
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Automated Traveler Vouchers
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Direct Bank Payouts
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Pakistani Commercial Bank Payouts
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Full Price Control
             </span>
           </div>
         </div>
       </section>
 
-      {/* Value Proposition Grid */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-12">
-        <div className="text-center space-y-2">
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Why Partner With Us</span>
+      {/* Benefits Grid */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
+            Operator Advantages
+          </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            Everything You Need to Run Digital Bookings
+            Why List Your Tours on PakistanTravel.Agency?
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-            Focus on delivering memorable mountain journeys while our technology handles guest inquiries, payments, and confirmations.
+          <p className="text-xs sm:text-sm text-slate-500">
+            A technology platform built specifically for local northern Pakistan tour operators.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900">Reach Nationwide Travelers</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Reach Verified Travelers</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Connect directly with families and corporate groups from Karachi, Lahore, and Islamabad, as well as overseas Pakistanis planning summer vacations.
+              Connect directly with families, corporate groups, and overseas Pakistanis looking for authentic northern journeys.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              <CreditCard className="w-5 h-5" />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center">
+              <Smartphone className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900">Pakistani Payment Collection</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Direct WhatsApp Inquiries</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Accept JazzCash, EasyPaisa, Direct Bank Transfer, and Credit/Debit cards with zero merchant account setup needed on your end.
+              Confirmed guests receive your official tour voucher with your direct phone and WhatsApp for seamless itinerary coordination.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-              <Compass className="w-5 h-5" />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+              <DollarSign className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900">Automated PDF Vouchers</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Dependable Bank Payouts</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Guests receive branded check-in vouchers with verified CNIC details immediately upon confirmed payment, eliminating manual paperwork.
+              {siteConfig.marketplace.payoutTiming} disbursements directly into your commercial Pakistani bank account (IBAN) with clear receipts.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+              <Percent className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm">Fair {commissionRate}% Commission</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              No hidden listing fees or subscriptions. We succeed only when your departures fill up.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center">
               <Calendar className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-slate-900">Extranet Rate &amp; Date Control</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Flexible Departure Control</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Manage your departures, seasonal price spikes, twin-sharing supplements, and seat inventories directly from your Partner Extranet.
+              Easily update departure dates, seat counts, pricing, and itinerary inclusions anytime from your mobile or desktop portal.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm">Clear Cancellation Terms</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Standardized refund rules protect your committed transport allocations from last-minute cancellations.
             </p>
           </div>
         </div>
       </section>
 
-      {/* How It Works (4 Steps) */}
-      <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-y border-slate-200">
+      {/* How It Works */}
+      <section className="bg-slate-100/70 py-16 px-4 sm:px-6 lg:px-8 border-y border-slate-200/80">
         <div className="max-w-5xl mx-auto space-y-12">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Simple Process</span>
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
+              Simple 4-Step Process
+            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              How Partner Onboarding Works
+              How Partnering Works
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-              From registration to receiving your first booking in 4 clear steps.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -162,7 +182,7 @@ export default function ListYourTourPage() {
               <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-black text-xs">
                 1
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Create Partner Account</h3>
+              <h3 className="text-sm font-bold text-slate-900">Create Operator Account</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Register your business profile, operating city, contact person, and WhatsApp coordination number.
               </p>
@@ -172,9 +192,9 @@ export default function ListYourTourPage() {
               <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-black text-xs">
                 2
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Publish Your Listings</h3>
+              <h3 className="text-sm font-bold text-slate-900">Publish Your Tour Packages</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Add your tour packages or hotel rooms with high-resolution photos, seasonal dates, and direct operator rates.
+                Add your guided tour packages with high-resolution photos, fixed departure dates, seat counts, and direct operator rates.
               </p>
             </div>
 
@@ -194,7 +214,7 @@ export default function ListYourTourPage() {
               </div>
               <h3 className="text-sm font-bold text-slate-900">Receive Payouts</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Funds are disbursed directly to your Pakistani commercial bank account following departure check-in.
+                Funds are disbursed directly to your Pakistani commercial bank account following tour departure.
               </p>
             </div>
           </div>
@@ -245,7 +265,7 @@ export default function ListYourTourPage() {
                 Quality Standards
               </span>
               <h3 className="text-xl font-extrabold text-slate-900 mt-1">
-                Partner Eligibility Requirements
+                Operator Eligibility Requirements
               </h3>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 To maintain traveler confidence and safety standards across northern Pakistan:
@@ -255,7 +275,7 @@ export default function ListYourTourPage() {
             <ul className="space-y-3 text-xs text-slate-700">
               <li className="flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Must be an actively operating tour company, registered guide, or hotel/resort in Pakistan.</span>
+                <span>Must be an actively operating tour company, expedition organizer, or registered mountain guide in Pakistan.</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -275,70 +295,19 @@ export default function ListYourTourPage() {
               href="/register?role=VENDOR"
               className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition text-center shadow-sm"
             >
-              Start Partner Application
+              Start Operator Application
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Partner FAQs */}
-      <section className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-t border-slate-200">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Frequently Asked</span>
-            <h2 className="text-2xl font-extrabold text-slate-900">Partner Questions &amp; Answers</h2>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
-              <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                When do I receive the traveler&apos;s direct contact details?
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed pl-6">
-                To prevent marketplace bypass and protect both parties, direct phone and WhatsApp numbers are exchanged only once the traveler completes a confirmed reservation and verified payment deposit.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
-              <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                How are partner earnings disbursed?
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed pl-6">
-                Disbursements are processed directly to your registered Pakistani commercial bank account within 48 hours of successful tour departure or guest check-in.
-              </p>
-            </div>
-
-            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
-              <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                What if a tour is delayed due to weather or road closures?
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed pl-6">
-                Northern mountain logistics (Babusar Pass, Karakoram Highway, Skardu road) are subject to weather conditions. Under our Marketplace Terms, force majeure road clearances allow operators to reschedule departures or offer alternative valley itineraries without penalties.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Footer Banner */}
-      <section className="bg-slate-900 text-white py-14 px-4 text-center space-y-4">
-        <h2 className="text-xl sm:text-2xl font-black">
-          Ready to List Your Tour Packages or Mountain Resort?
-        </h2>
-        <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
-          Join independent local hosts across Gilgit-Baltistan and Khyber Pakhtunkhwa.
-        </p>
-        <div className="pt-2">
-          <Link
-            href="/register?role=VENDOR"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition shadow-lg"
-          >
-            <span>Register as a Partner</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+      {/* Trust & Verification Disclaimer Banner */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 text-xs text-slate-500 text-center space-y-2">
+          <p className="font-semibold text-slate-700">Platform Transparency Notice</p>
+          <p className="leading-relaxed">
+            PakistanTravel.Agency is an online technology intermediary and marketplace. All guided tours, transport, and itineraries are executed by independent third-party operators. While we verify operator contact information, the platform does not inspect or certify physical facilities or vehicles.
+          </p>
         </div>
       </section>
     </div>

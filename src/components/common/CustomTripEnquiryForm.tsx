@@ -260,7 +260,7 @@ export function CustomTripEnquiryForm({
           </label>
           <textarea
             rows={2}
-            placeholder="e.g. Need private 4x4 Prado with English-speaking driver, lakefront hotel in Attabad, or honeymoon room decor..."
+            placeholder="e.g. Need private 4x4 Prado with certified mountain guide, Lake Attabad boat excursion, or customized family tour itinerary..."
             value={specialRequests}
             onChange={(e) => setSpecialRequests(e.target.value)}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm text-slate-800 outline-none focus:ring-2 focus:ring-sky-500"

@@ -97,7 +97,7 @@ export default function TermsPage() {
           <div>
             <p className="font-bold">Important Notice Regarding Platform Role:</p>
             <p className="mt-0.5 text-sky-800">
-              {siteConfig.name} is an online booking intermediary technology platform connecting independent travelers with registered local tour operators, transport owners, and hotel providers across Pakistan. Please read these terms carefully before placing a booking.
+              {siteConfig.name} is an online booking intermediary technology platform connecting independent travelers with registered local tour operators, transport owners, and guides across Pakistan. Please read these terms carefully before placing a booking.
             </p>
           </div>
         </div>
@@ -114,10 +114,10 @@ export default function TermsPage() {
                 <strong>Intermediary Platform Only:</strong> {siteConfig.name} operates strictly as an intermediary technology marketplace. We are not a travel agency, tour operator, transport company, mountain guiding outfit, or travel insurance provider.
               </p>
               <p>
-                <strong>Direct Contract:</strong> When you place a booking through the platform, the legal service contract for the tour, hotel room, or transport service is formed directly between you (the Traveler) and the independent service provider (the Vendor / Operator). The Operator is solely responsible for fulfilling the travel service according to the published itinerary.
+                <strong>Direct Contract:</strong> When you place a booking through the platform, the legal service contract for the guided tour package is formed directly between you (the Traveler) and the independent service provider (the Tour Operator). The Operator is solely responsible for fulfilling the travel service according to the published itinerary.
               </p>
               <p>
-                <strong>Voucher Issuance:</strong> A booking request is considered confirmed and an official confirmed voucher with host contact details is issued only upon receipt and verification of advance deposit or full payment.
+                <strong>Voucher Issuance:</strong> A booking request is considered confirmed and an official confirmed voucher with operator contact details is issued only upon receipt and verification of advance deposit or full payment.
               </p>
             </div>
           </section>
@@ -130,7 +130,7 @@ export default function TermsPage() {
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
-                <strong>Independent Businesses:</strong> All vendors (tour companies, mountain guides, hotel owners, and jeep drivers) listing on {siteConfig.name} are independent business contractors. They are neither employees, agents, joint venturers, nor representatives of {siteConfig.name}.
+                <strong>Independent Businesses:</strong> All vendors (tour operators, transport owners and guides) listing on {siteConfig.name} are independent business contractors. They are neither employees, agents, joint venturers, nor representatives of {siteConfig.name}.
               </p>
               <p>
                 <strong>Vendor Compliance &amp; Licenses:</strong> Vendors are solely responsible for obtaining and maintaining their own business registrations, Department of Tourist Services (DTS) or regional tourism department licenses, local permits, vehicle fitness certificates, and tax filings (SECP/FBR). Any license number shown on an operator&apos;s listing or profile is self-reported by the operator.
@@ -197,7 +197,7 @@ export default function TermsPage() {
                 </div>
               </div>
               <p className="text-[11px] text-slate-500 pt-1">
-                Note: Non-refundable policies within 72 hours reflect committed mountain hotel rooms, 4x4 jeep reservations, and permit disbursements made on your behalf.
+                Note: Non-refundable policies within 72 hours reflect committed mountain accommodation, 4x4 transport allocations, and permit disbursements made on your behalf.
               </p>
             </div>
           </section>
@@ -265,7 +265,7 @@ export default function TermsPage() {
             <p><strong>Instant Inquiries:</strong> 24/7 AI Travel Assistant available on every page</p>
             <div className="pt-2 flex items-center gap-4 text-sky-700 font-semibold">
               <Link href="/partner-info" className="hover:underline">Partner Information &rarr;</Link>
-              <Link href="/list-your-tour" className="hover:underline">List Your Tour / Hotel &rarr;</Link>
+              <Link href="/list-your-tour" className="hover:underline">List Your Tour Package &rarr;</Link>
               <Link href="/privacy" className="hover:underline">Privacy Policy &rarr;</Link>
             </div>
           </div>

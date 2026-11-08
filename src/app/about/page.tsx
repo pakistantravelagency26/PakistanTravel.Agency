@@ -133,9 +133,9 @@ export default async function AboutPage() {
             <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h2 className="font-bold text-slate-900 text-base">Independent Hosts</h2>
+            <h2 className="font-bold text-slate-900 text-base">Independent Tour Operators</h2>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Independent tour operators and lodging hosts manage their listings and itineraries directly. Credentials, where provided, are submitted by operators.{" "}
+              Independent local tour operators manage their tour packages and itineraries directly. Credentials, where provided, are submitted by operators.{" "}
               <Link href="/partner-info" className="text-sky-600 underline font-medium">Read partner guidelines</Link>.
             </p>
           </div>
