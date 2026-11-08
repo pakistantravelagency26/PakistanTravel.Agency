@@ -76,7 +76,7 @@ describe("Phase 4: Secure Password Reset Test Suite", () => {
 
   describe("End-to-End Password Reset Flow", () => {
     const testEmail = `reset-user-${Date.now()}@test.pk`;
-    const testIp = "203.0.113.88";
+    const testIp = `203.0.113.${Math.floor(Math.random() * 200 + 10)}`;
     let testUserId = "";
 
     it("creates test user in database", async () => {

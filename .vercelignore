@@ -1,0 +1,9 @@
+Dockerfile
+.dockerignore
+docker-compose.yml
+Caddyfile
+nginx.conf
+scripts/
+docs/
+tests/
+storage/
