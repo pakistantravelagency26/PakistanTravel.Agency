@@ -7,8 +7,13 @@ import { findUserByIdentifier } from "@/services/user.service";
 import { verifyPassword } from "@/lib/password";
 import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit";
 
-if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET) {
-  console.error("FATAL SECURITY WARNING: NEXTAUTH_SECRET environment variable is not defined!");
+const authSecret = process.env.NEXTAUTH_SECRET;
+if (process.env.NODE_ENV === "production") {
+  if (!authSecret || authSecret.length < 32 || authSecret === "pakistantravel-agency-secret-token") {
+    throw new Error(
+      "FATAL SECURITY CONFIGURATION: NEXTAUTH_SECRET must be set to a cryptographically secure string (at least 32 characters) in production."
+    );
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -190,5 +195,5 @@ export const authOptions: NextAuthOptions = {
       },
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || "pakistantravel-agency-secret-token",
+  secret: authSecret || (process.env.NODE_ENV === "development" ? "dev-local-only-secret-do-not-use-in-production-32c" : undefined),
 };

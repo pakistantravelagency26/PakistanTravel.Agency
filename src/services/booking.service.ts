@@ -184,7 +184,7 @@ export async function createBooking(data: {
         guestName: data.guestName,
         guestEmail: data.guestEmail,
         guestPhone: data.guestPhone,
-        specialRequests: data.specialRequests || `CNIC: ${data.cnicOrPassport}`,
+        specialRequests: data.specialRequests || (data.cnicOrPassport ? `ID: ${data.cnicOrPassport.length > 4 ? data.cnicOrPassport.slice(0, 2) + "******" + data.cnicOrPassport.slice(-2) : "Verified"}` : null),
       },
     });
 

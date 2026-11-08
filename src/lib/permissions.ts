@@ -8,7 +8,7 @@ export interface AuthSession {
     id?: string;
     email?: string | null;
     name?: string | null;
-    role?: "ADMIN" | "VENDOR" | "USER" | string;
+    role?: "ADMIN" | "VENDOR" | "CUSTOMER" | "USER" | string;
     vendorId?: string | null;
   };
 }
@@ -91,7 +91,7 @@ export function requireCustomerOwnership(
   session: AuthSession | null | undefined,
   customerEmail: string | null | undefined
 ): AuthCheckResult {
-  const roleCheck = requireRole(session, ["ADMIN", "USER", "VENDOR"]);
+  const roleCheck = requireRole(session, ["ADMIN", "CUSTOMER", "USER", "VENDOR"]);
   if (!roleCheck.authorized) {
     return roleCheck;
   }

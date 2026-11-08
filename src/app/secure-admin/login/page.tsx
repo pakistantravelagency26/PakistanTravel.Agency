@@ -6,13 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
+import { getSafeCallbackUrl } from "@/lib/safeRedirect";
 
 export const dynamic = "force-dynamic";
 
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/secure-admin/dashboard";
+  const safeCallback = getSafeCallbackUrl(searchParams.get("callbackUrl"), "/secure-admin/dashboard");
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -29,14 +30,14 @@ function AdminLoginForm() {
         redirect: false,
         email: identifier.trim(),
         password: password.trim(),
-        callbackUrl,
+        callbackUrl: safeCallback,
       });
 
       if (res?.error) {
         setError(res.error || "Invalid administrative credentials. Access restricted.");
         setLoading(false);
       } else {
-        window.location.href = callbackUrl;
+        window.location.href = safeCallback;
       }
     } catch (err: any) {
       setError("An unexpected error occurred. Please try again.");

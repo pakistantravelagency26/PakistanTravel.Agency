@@ -30,7 +30,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       team: members.map((m) => {
-        const isSuperAdmin = m.email === "emraanirshad88@gmail.com";
+        const isSuperAdmin = m.staffRole === "SUPER_ADMIN" || (m.permissions && m.permissions.includes("ALL"));
         const permissionsStr = isSuperAdmin ? "ALL" : (m.permissions || m.staffRole || "BOOKINGS");
         return {
           id: m.id,

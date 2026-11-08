@@ -12,45 +12,17 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
     }
 
-    const rawUrl = neonConfig.databaseUrl || "NOT_SET";
-    const maskedUrl = rawUrl === "NOT_SET" ? "NOT_SET" : rawUrl.replace(/:[^:@]+@/, ":***@");
     const health = await checkNeonHealth();
     return NextResponse.json({
       success: true,
       timestamp: new Date().toISOString(),
-      databaseUrlMasked: maskedUrl,
-      services: health,
+      services: {
+        postgres: health.postgres,
+      },
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
-    }
-
-    const body = await req.json().catch(() => ({}));
-    const sampleQuery = body.query || "SELECT count(*) FROM \"Listing\" WHERE \"status\" = 'PUBLISHED'";
-    
-    const sealed = await sealRealtimeQuery({
-      query: sampleQuery,
-      params: body.params || [],
-    });
-
-    return NextResponse.json({
-      success: true,
-      sealed,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "Health check error" },
       { status: 500 }
     );
   }

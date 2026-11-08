@@ -5,6 +5,7 @@ import {
   requireVendorOwnership,
   requireCustomerOwnership,
 } from "../src/lib/permissions.ts";
+import { getSafeCallbackUrl } from "../src/lib/safeRedirect.ts";
 
 describe("Phase 2: RBAC & IDOR Access Control Test Suite", () => {
   describe("Central requireRole Helper", () => {
@@ -228,6 +229,106 @@ describe("Phase 2: RBAC & IDOR Access Control Test Suite", () => {
 
     it("does NOT render chatbot on /register", () => {
       assert.equal(shouldRenderChatbot("/register"), false);
+    });
+  });
+
+  describe("Open Redirect Defense (getSafeCallbackUrl)", () => {
+    it("permits standard internal relative paths", () => {
+      assert.equal(getSafeCallbackUrl("/partner-hub/dashboard"), "/partner-hub/dashboard");
+      assert.equal(getSafeCallbackUrl("/checkout/pkt-1234"), "/checkout/pkt-1234");
+      assert.equal(getSafeCallbackUrl("/destinations/hunza?season=autumn"), "/destinations/hunza?season=autumn");
+    });
+
+    it("rejects protocol-relative URLs (//evil.com)", () => {
+      assert.equal(getSafeCallbackUrl("//evil.com", "/"), "/");
+      assert.equal(getSafeCallbackUrl("//evil.com/phishing", "/login"), "/login");
+    });
+
+    it("rejects absolute external URLs (https://attacker.com)", () => {
+      assert.equal(getSafeCallbackUrl("https://attacker.com", "/"), "/");
+      assert.equal(getSafeCallbackUrl("http://evil.com/steal-creds", "/partner-hub/dashboard"), "/partner-hub/dashboard");
+    });
+
+    it("rejects javascript: and data: schemes", () => {
+      assert.equal(getSafeCallbackUrl("javascript:alert(1)", "/"), "/");
+      assert.equal(getSafeCallbackUrl("/javascript:alert(1)", "/"), "/");
+      assert.equal(getSafeCallbackUrl("data:text/html;base64,PHNjcmlwdD4=", "/"), "/");
+    });
+
+    it("rejects backslash directory bypasses (\\evil.com)", () => {
+      assert.equal(getSafeCallbackUrl("/\\evil.com", "/"), "/");
+      assert.equal(getSafeCallbackUrl("\\evil.com", "/"), "/");
+    });
+
+    it("falls back to defaultUrl on empty or non-string input", () => {
+      assert.equal(getSafeCallbackUrl("", "/fallback"), "/fallback");
+      assert.equal(getSafeCallbackUrl(null, "/fallback"), "/fallback");
+      assert.equal(getSafeCallbackUrl(undefined, "/fallback"), "/fallback");
+    });
+  });
+
+  describe("Complete Role-Based Access Matrix (Anonymous, Customer, Vendor A, Vendor B, Admin)", () => {
+    const roles = {
+      ANONYMOUS: null,
+      CUSTOMER: { user: { id: "c1", email: "cust@gmail.com", role: "CUSTOMER" } },
+      VENDOR_A: { user: { id: "va", email: "a@partner.pk", role: "VENDOR", vendorId: "v-hunza" } },
+      VENDOR_B: { user: { id: "vb", email: "b@partner.pk", role: "VENDOR", vendorId: "v-skardu" } },
+      ADMIN: { user: { id: "adm", email: "ops@pakistantravel.agency", role: "ADMIN", staffRole: "SUPER_ADMIN" } },
+    };
+
+    // 1. /api/admin/* endpoints
+    function evaluateAdminEndpointAccess(session) {
+      const check = requireRole(session, ["ADMIN"]);
+      return check.status;
+    }
+
+    it("Matrix: Admin APIs - Anonymous (401), Customer (403), Vendor A (403), Vendor B (403), Admin (200)", () => {
+      assert.equal(evaluateAdminEndpointAccess(roles.ANONYMOUS), 401);
+      assert.equal(evaluateAdminEndpointAccess(roles.CUSTOMER), 403);
+      assert.equal(evaluateAdminEndpointAccess(roles.VENDOR_A), 403);
+      assert.equal(evaluateAdminEndpointAccess(roles.VENDOR_B), 403);
+      assert.equal(evaluateAdminEndpointAccess(roles.ADMIN), 200);
+    });
+
+    // 2. /api/partner/* endpoints
+    function evaluatePartnerEndpointAccess(session) {
+      const check = requireRole(session, ["ADMIN", "VENDOR"]);
+      return check.status;
+    }
+
+    it("Matrix: Partner APIs - Anonymous (401), Customer (403), Vendor A (200), Vendor B (200), Admin (200)", () => {
+      assert.equal(evaluatePartnerEndpointAccess(roles.ANONYMOUS), 401);
+      assert.equal(evaluatePartnerEndpointAccess(roles.CUSTOMER), 403);
+      assert.equal(evaluatePartnerEndpointAccess(roles.VENDOR_A), 200);
+      assert.equal(evaluatePartnerEndpointAccess(roles.VENDOR_B), 200);
+      assert.equal(evaluatePartnerEndpointAccess(roles.ADMIN), 200);
+    });
+
+    // 3. Vendor A editing/deleting Vendor B's listing
+    function evaluateVendorMutationAccess(session, targetListingVendorId) {
+      const check = requireVendorOwnership(session, targetListingVendorId);
+      return check.status;
+    }
+
+    it("Matrix: Mutation on Vendor B listing - Anonymous (401), Customer (403), Vendor A (403), Vendor B (200), Admin (200)", () => {
+      assert.equal(evaluateVendorMutationAccess(roles.ANONYMOUS, "v-skardu"), 401);
+      assert.equal(evaluateVendorMutationAccess(roles.CUSTOMER, "v-skardu"), 403);
+      assert.equal(evaluateVendorMutationAccess(roles.VENDOR_A, "v-skardu"), 403); // IDOR blocked!
+      assert.equal(evaluateVendorMutationAccess(roles.VENDOR_B, "v-skardu"), 200); // Owner permitted
+      assert.equal(evaluateVendorMutationAccess(roles.ADMIN, "v-skardu"), 200);    // Admin permitted
+    });
+
+    // 4. Customer accessing another Customer's booking
+    function evaluateCustomerBookingAccess(session, targetCustomerEmail) {
+      const check = requireCustomerOwnership(session, targetCustomerEmail);
+      return check.status;
+    }
+
+    it("Matrix: Viewing Customer 1 Booking - Anonymous (401), Customer 2 (403), Customer 1 (200), Admin (200)", () => {
+      assert.equal(evaluateCustomerBookingAccess(roles.ANONYMOUS, "cust@gmail.com"), 401);
+      assert.equal(evaluateCustomerBookingAccess(roles.CUSTOMER, "cust2@gmail.com"), 403);
+      assert.equal(evaluateCustomerBookingAccess(roles.CUSTOMER, "cust@gmail.com"), 200);
+      assert.equal(evaluateCustomerBookingAccess(roles.ADMIN, "cust@gmail.com"), 200);
     });
   });
 });

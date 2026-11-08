@@ -189,7 +189,7 @@ export default function AdminVendorsPage() {
   }
 
   function copyCredentials(vendor: VendorData) {
-    const text = `PakistanTravel.Agency - Partner Hub Credentials\n\nPortal: https://www.pakistantravel.agency/partner-hub/login\nLogin ID / Username: ${vendor.loginId}\nEmail: ${vendor.email}\nPassword: ${vendor.passwordPlain}\nCompany: ${vendor.companyName}`;
+    const text = `PakistanTravel.Agency - Partner Hub Account Details\n\nPortal: https://www.pakistantravel.agency/partner-hub/login\nLogin ID / Username: ${vendor.loginId}\nEmail: ${vendor.email}\nCompany: ${vendor.companyName}`;
     navigator.clipboard.writeText(text);
     setCopiedId(vendor.id);
     setTimeout(() => setCopiedId(null), 2500);

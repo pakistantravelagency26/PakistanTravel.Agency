@@ -72,7 +72,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }
 
   const userPerms = (session?.user?.permissions || "").toUpperCase();
-  const isSuperAdmin = session?.user?.email === "emraanirshad88@gmail.com" || userPerms.includes("ALL");
+  const isSuperAdmin = session?.user?.staffRole === "SUPER_ADMIN" || userPerms.includes("ALL");
 
   const allNavItems = [
     { href: "/secure-admin/dashboard", label: "Overview & Analytics", icon: LayoutDashboard, perm: null },

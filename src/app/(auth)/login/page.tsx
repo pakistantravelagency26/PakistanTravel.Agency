@@ -5,13 +5,14 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Compass, Lock, Mail, AlertCircle, ArrowRight, User } from "lucide-react";
+import { getSafeCallbackUrl } from "@/lib/safeRedirect";
 
 export const dynamic = "force-dynamic";
 
 function CustomerLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), "/");
   const errorParam = searchParams.get("error");
 
   let initialError = "";

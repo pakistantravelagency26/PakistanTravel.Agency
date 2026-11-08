@@ -37,7 +37,8 @@ export async function GET() {
     const bookings = await getBookingsByEmail(customerEmail);
     return NextResponse.json({ success: true, bookings });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error("[BookingsAPI] Error:", error);
+    return NextResponse.json({ success: false, error: "Failed to retrieve booking records." }, { status: 500 });
   }
 }
 

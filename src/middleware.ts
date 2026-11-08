@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const AUTH_SECRET = process.env.NEXTAUTH_SECRET || "pakistantravel-agency-secret-token";
+const AUTH_SECRET =
+  process.env.NEXTAUTH_SECRET ||
+  (process.env.NODE_ENV === "development"
+    ? "dev-local-only-secret-do-not-use-in-production-32c"
+    : "");
 
 export async function middleware(req: NextRequest) {
   const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").toLowerCase().trim();

@@ -15,20 +15,8 @@ export interface LocalUser {
   businessName?: string;
 }
 
-// In-memory fallback user repository with bcrypt hashed credentials
-export const USERS_STORE: LocalUser[] = [
-  // SUPER ADMIN default record (used if database connection is offline)
-  {
-    id: "user-admin-emraan",
-    name: "Emraan Irshad",
-    email: "emraanirshad88@gmail.com",
-    username: "emraanirshad88",
-    phone: "03000000001",
-    passwordHash: "$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS",
-    role: "ADMIN",
-    staffRole: "SUPER_ADMIN",
-  },
-];
+// In-memory fallback user repository (empty by default; all users authenticated via PostgreSQL)
+export const USERS_STORE: LocalUser[] = [];
 
 export async function findUserByIdentifier(identifier: string): Promise<LocalUser | null> {
   const query = identifier.toLowerCase().trim();
