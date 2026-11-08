@@ -281,7 +281,7 @@ export async function getBookingById(idOrNumber: string): Promise<BookingRecord 
       id: dbBooking.id,
       bookingNumber: dbBooking.bookingNumber,
       listingId: dbBooking.listingId,
-      listingTitle: dbBooking.listing?.title || "Tour / Hotel Booking",
+      listingTitle: dbBooking.listing?.title || "Tour Package Booking",
       listingPhoto: dbBooking.listing?.photos?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
       unitTitle: dbBooking.unit?.title || "Package Booking",
       destination: `${dbBooking.listing?.city || "Pakistan"}, ${dbBooking.listing?.destination?.province || "Northern Areas"}`,

@@ -27,7 +27,7 @@ export interface PricingCalculationResult {
 }
 
 /**
- * Calculates pricing breakdown according to tour / hotel rules,
+ * Calculates pricing breakdown according to tour package rules,
  * solo traveler single-supplement surcharge, provincial taxes, and deposit splits.
  */
 export function calculateBookingPricing(input: PricingCalculationInput): PricingCalculationResult {
