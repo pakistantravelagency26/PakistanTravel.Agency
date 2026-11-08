@@ -9,6 +9,8 @@
  * - Every page, footer, metadata, voucher, and chatbot prompt must read from this config.
  */
 
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pakistantravel.agency";
+
 export interface SiteConfig {
   name: string;
   legalBrand: string;
@@ -55,8 +57,8 @@ export interface SiteConfig {
 export const siteConfig: SiteConfig = {
   name: "PakistanTravel.Agency",
   legalBrand: "PakistanTravel.Agency",
-  domain: "pakistantravel.agency",
-  url: process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app",
+  domain: "www.pakistantravel.agency",
+  url: SITE_URL,
   tagline: "Northern Pakistan Tours, Hotels & 4x4 Bookings",
 
   contact: {

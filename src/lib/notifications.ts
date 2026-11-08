@@ -1,5 +1,5 @@
 import { BookingRecord } from "@/services/booking.service";
-import { siteConfig } from "@/config/site";
+import { siteConfig, SITE_URL } from "@/config/site";
 
 export interface NotificationPayload {
   toEmail: string;
@@ -77,7 +77,7 @@ export function generateBookingConfirmationHtml(booking: BookingRecord): string 
               Please present this voucher or your CNIC (${booking.cnicOrPassport}) at check-in.
             </p>
             <div style="text-align: center;">
-              <a href="https://pakistantravel.agency/confirmation/${booking.bookingNumber}" class="button">
+              <a href="${SITE_URL}/confirmation/${booking.bookingNumber}" class="button">
                 Download Official Travel Voucher (PDF)
               </a>
             </div>
@@ -104,7 +104,7 @@ ${booking.vendor?.whatsapp || booking.vendor?.phone ? `*Host Contact:* ${booking
 *Total:* PKR ${booking.totalAmount.toLocaleString()} (${booking.paymentStatus})
 
 View & Download your Check-in Voucher:
-https://pakistantravel.agency/confirmation/${booking.bookingNumber}
+${SITE_URL}/confirmation/${booking.bookingNumber}
 
 Customer Support: ${siteConfig.contact.supportEmail}
 Safe travels to the Northern Areas!`;

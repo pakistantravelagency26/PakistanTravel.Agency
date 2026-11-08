@@ -51,6 +51,39 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "pakistantravel.agency",
+          },
+        ],
+        destination: "https://www.pakistantravel.agency/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "pakistantravel-agency.vercel.app",
+          },
+        ],
+        destination: "https://www.pakistantravel.agency/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "pakistan-travel-agency.vercel.app",
+          },
+        ],
+        destination: "https://www.pakistantravel.agency/:path*",
+        permanent: true,
+      },
+      {
         source: "/how-we-verify-partners",
         destination: "/partner-info",
         permanent: true,

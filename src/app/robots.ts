@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
+import { SITE_URL } from "@/config/site";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const baseUrl = SITE_URL;
 
 export default function robots(): MetadataRoute.Robots {
   return {

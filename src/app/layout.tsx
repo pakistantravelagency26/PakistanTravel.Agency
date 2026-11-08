@@ -4,9 +4,9 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import SupportChatWidget from "@/components/chat/SupportChatWidget";
-import { siteConfig } from "@/config/site";
+import { siteConfig, SITE_URL } from "@/config/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const siteUrl = SITE_URL;
 
 export const viewport: Viewport = {
   themeColor: "#059669",

@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Compass, ShieldCheck, Heart, Award, Target, Eye, BookOpen } from "lucide-react";
@@ -5,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 
 export const revalidate = 60;
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: "ہمارے بارے میں اور شمالی سیاحت کا مشن",

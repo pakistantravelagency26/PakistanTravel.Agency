@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { 
@@ -12,7 +13,7 @@ import {
 } from "lucide-react";
 import { CustomTripEnquiryForm } from "@/components/common/CustomTripEnquiryForm";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: "شمالی پاکستان میں ٹورز اور ہوٹلز کی بکنگ",

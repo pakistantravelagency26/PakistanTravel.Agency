@@ -2,11 +2,12 @@ import { MetadataRoute } from "next";
 import { getActiveDbListings } from "@/services/serverListing.service";
 import { destinationsData } from "@/data/destinationData";
 import { blogPosts } from "@/data/blogData";
+import { SITE_URL } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const baseUrl = SITE_URL;
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {

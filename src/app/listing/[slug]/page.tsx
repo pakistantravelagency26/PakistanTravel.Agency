@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,7 +24,7 @@ interface ListingPageProps {
 
 export async function generateMetadata({ params }: ListingPageProps): Promise<Metadata> {
   const listing = await getDbListingBySlugOrId(params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   if (!listing) {
     return {
@@ -95,7 +96,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
 
 export default async function ListingDetailPage({ params }: ListingPageProps) {
   const listing = await getDbListingBySlugOrId(params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   if (!listing) {
     return (

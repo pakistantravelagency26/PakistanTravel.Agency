@@ -11,11 +11,11 @@ import {
   CreditCard,
   HelpCircle 
 } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { siteConfig , SITE_URL } from "@/config/site";
 
 export const revalidate = 60;
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: "شرائط و ضوابط اور منسوخی کی پالیسی",

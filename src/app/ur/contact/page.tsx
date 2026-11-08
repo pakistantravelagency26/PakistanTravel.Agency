@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, ArrowRight, Clock, Bot, HelpCircle } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { siteConfig , SITE_URL } from "@/config/site";
 
 export const revalidate = 60;
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: "رابطہ کریں اور کسٹمر سپورٹ ڈیسک",

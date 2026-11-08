@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,7 +35,7 @@ interface DestinationPageProps {
 
 export async function generateMetadata({ params }: DestinationPageProps): Promise<Metadata> {
   const dest = destinationsData[params.slug];
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   if (!dest) {
     return {
@@ -78,7 +79,7 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
 
 export default async function DestinationDetailPage({ params }: DestinationPageProps) {
   const dest = destinationsData[params.slug];
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   if (!dest) {
     notFound();

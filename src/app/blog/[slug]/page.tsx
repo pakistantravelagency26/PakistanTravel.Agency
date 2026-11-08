@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,7 +20,7 @@ interface BlogPostPageProps {
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const post = blogPosts.find((p) => p.slug === params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   if (!post) {
     return {
@@ -65,7 +66,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const post = blogPosts.find((p) => p.slug === params.slug);
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   if (!post) {
     notFound();

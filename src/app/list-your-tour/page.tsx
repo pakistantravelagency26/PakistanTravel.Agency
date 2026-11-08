@@ -14,9 +14,9 @@ import {
   HelpCircle,
   Lock
 } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { siteConfig , SITE_URL } from "@/config/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${siteConfig.domain}`;
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: "List Your Tour or Hotel | Partner Onboarding",

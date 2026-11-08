@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import { getActiveDbListings } from "@/services/serverListing.service";
 import { SearchClientView } from "@/components/search/SearchClientView";
@@ -9,7 +10,7 @@ interface SearchPageProps {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+  const siteUrl = SITE_URL;
 
   return {
     title: "Search Tours, Hotels & Mountain Expeditions",

@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,7 +8,7 @@ import { getSiteSettings, type PageBlogSettings } from "@/services/siteSettings.
 
 export const revalidate = 60;
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pakistantravel-agency.vercel.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: "Northern Pakistan Travel Blog & Guides",
