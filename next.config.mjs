@@ -45,7 +45,8 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
-  output: "standalone",
+  // Use standalone output only during containerized Docker builds, never on Vercel
+  ...(process.env.DOCKER_BUILD === "standalone" ? { output: "standalone" } : {}),
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },

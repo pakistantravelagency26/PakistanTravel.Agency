@@ -3,11 +3,16 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const uptimeSeconds =
+    typeof process !== "undefined" && typeof process.uptime === "function"
+      ? Math.floor(process.uptime())
+      : 0;
+
   return NextResponse.json(
     {
       status: "healthy",
       timestamp: new Date().toISOString(),
-      uptimeSeconds: Math.floor(process.uptime()),
+      uptimeSeconds,
       environment: process.env.NODE_ENV || "production",
     },
     {
