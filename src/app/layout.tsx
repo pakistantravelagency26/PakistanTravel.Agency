@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PakistanTravel.Agency | Northern Pakistan Tours & Mountain Stays",
+    default: "PakistanTravel.Agency | Northern Pakistan Tour Packages",
     template: "%s | PakistanTravel.Agency",
   },
   authors: [{ name: "PakistanTravel.Agency", url: siteUrl }],

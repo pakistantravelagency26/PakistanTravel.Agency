@@ -575,7 +575,7 @@ export default function AdminWebsiteManagerPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Menu Label (e.g. Murree, Gilgit, Stays)
+                      Menu Label (e.g. Murree, Gilgit, Tours)
                     </label>
                     <input
                       type="text"

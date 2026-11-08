@@ -54,7 +54,7 @@ export default function AdminPayoutsPage() {
                   <td className="py-3.5 px-4 font-extrabold text-brand-amber text-sm">
                     PKR {p.amount.toLocaleString()}
                   </td>
-                  <td className="py-3.5 px-4">{p.bookingsCount} Completed Stays</td>
+                  <td className="py-3.5 px-4">{p.bookingsCount} Completed Tours</td>
                   <td className="py-3.5 px-4">
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${

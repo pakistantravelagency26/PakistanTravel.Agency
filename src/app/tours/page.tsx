@@ -8,20 +8,26 @@ import { MapPin, Calendar, Star, ShieldCheck, ChevronRight, Compass } from "luci
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Northern Pakistan Tours & Guided Treks | PakistanTravel.Agency",
+  title: "Northern Pakistan Tour Packages | PakistanTravel",
   description:
-    "Book verified guided tours, K2 base camp treks, and seasonal holiday packages across Hunza, Skardu, Fairy Meadows, and Swat directly from local operators.",
+    "Compare and book guided tour packages across Hunza, Skardu, Swat, and Kumrat directly from independent local tour operators across Pakistan.",
   alternates: {
     canonical: `${SITE_URL}/tours`,
   },
   openGraph: {
-    title: "Northern Pakistan Tours & Guided Treks | PakistanTravel.Agency",
+    title: "Northern Pakistan Tour Packages | PakistanTravel",
     description:
-      "Curated tour packages and guided mountain expeditions in northern Pakistan with transparent pricing and verified local hosts.",
+      "Compare and book guided tour packages across Hunza, Skardu, Swat, and Kumrat directly from independent local tour operators across Pakistan.",
     url: `${SITE_URL}/tours`,
     siteName: siteConfig.name,
     locale: "en_PK",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Northern Pakistan Tour Packages | PakistanTravel",
+    description:
+      "Compare and book guided tour packages across Hunza, Skardu, Swat, and Kumrat directly from independent local tour operators across Pakistan.",
   },
 };
 

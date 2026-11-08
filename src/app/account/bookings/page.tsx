@@ -66,7 +66,7 @@ export default function MyBookingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">My Bookings & Trips</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Manage your hotel stays, northern tours, and vouchers across Pakistan
+            Manage your northern tour packages and confirmed vouchers across Pakistan
           </p>
         </div>
 

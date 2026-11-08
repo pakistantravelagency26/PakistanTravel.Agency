@@ -84,7 +84,7 @@ export default function VendorDashboardPage() {
               <Calendar className="w-4 h-4" />
             </span>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900">0 Stays</p>
+          <p className="text-2xl font-extrabold text-slate-900">0 Tours</p>
           <p className="text-[11px] text-slate-400">Confirmed customer reservations</p>
         </div>
 

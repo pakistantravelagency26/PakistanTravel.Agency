@@ -284,7 +284,7 @@ export async function POST(req: Request) {
           name: destName,
           province: body.province || "Northern Pakistan",
           image: photosList[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
-          description: `Explore ${destName} with local guided expeditions and scenic mountain stays.`,
+          description: `Explore ${destName} with local guided expeditions and tour packages.`,
           isFeatured: true,
         },
       });

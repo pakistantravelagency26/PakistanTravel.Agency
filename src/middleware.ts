@@ -26,6 +26,18 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(canonicalUrl, 301);
   }
 
+  // 1b. 301 Permanent Redirects for Hotel & Rental URLs -> /tours
+  const typeParam = req.nextUrl.searchParams.get("type")?.toUpperCase();
+  const isHotelOrRentalType = typeParam === "HOTEL" || typeParam === "RENTAL";
+  const isHotelsPath = path === "/hotels" || path.startsWith("/hotels/");
+  const isRentalsPath = path === "/rentals" || path.startsWith("/rentals/");
+  const isSearchWithHotelOrRental = path === "/search" && isHotelOrRentalType;
+
+  if (isHotelsPath || isRentalsPath || isSearchWithHotelOrRental) {
+    const toursUrl = new URL("/tours", req.url);
+    return NextResponse.redirect(toursUrl, 301);
+  }
+
   // Check token across all possible cookie variations and secure flags
   let token = await getToken({
     req,

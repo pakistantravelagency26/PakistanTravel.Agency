@@ -87,7 +87,7 @@ export default function PartnerInfoPage() {
             Partner Information &amp; Marketplace Standards
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mt-2 leading-relaxed">
-            How independent local tour operators and hotels list tours, manage guest itineraries, and handle bookings on PakistanTravel.Agency.
+            How independent local tour operators list packages, manage itineraries, and handle bookings on PakistanTravel.Agency.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export default function PartnerInfoPage() {
             <span>Marketplace Platform Intermediary Notice</span>
           </div>
           <p className="text-xs sm:text-sm text-amber-950/80 leading-relaxed">
-            PakistanTravel.Agency is an online booking intermediary and marketplace. All tours, hotel stays, vehicle rentals, and trekking expeditions listed on this website are owned, organized, and executed by independent third-party operators and property owners. The platform does not certify, inspect, or guarantee operator credentials, vehicles, or physical facilities.
+            PakistanTravel.Agency is an online booking intermediary and marketplace. All guided tour packages and trekking expeditions listed on this website are owned, organized, and executed by independent third-party tour operators. The platform does not certify, inspect, or guarantee operator credentials, vehicles, or physical facilities.
           </p>
         </div>
 
@@ -112,7 +112,7 @@ export default function PartnerInfoPage() {
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Operator Registration</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Tour companies and lodging hosts create a partner account with their business name, contact person, base city, and operational areas across northern Pakistan.
+                Tour operators create a partner account with their business name, contact person, base city, and operational areas across northern Pakistan.
               </p>
             </div>
 
@@ -132,7 +132,7 @@ export default function PartnerInfoPage() {
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Self-Managed Listings &amp; Pricing</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Operators set their own itineraries, seasonal departure dates, vehicle allocations, inclusions, and room rates directly through their partner dashboard.
+                Operators set their own itineraries, seasonal departure dates, vehicle allocations, and inclusions directly through their partner dashboard.
               </p>
             </div>
 
