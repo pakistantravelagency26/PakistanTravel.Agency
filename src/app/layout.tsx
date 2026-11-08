@@ -60,7 +60,7 @@ export default function RootLayout({
         "@id": `${siteUrl}/#website`,
         url: siteUrl,
         name: siteConfig.name,
-        inLanguage: ["en-PK", "ur-PK"],
+        inLanguage: "en-PK",
         potentialAction: {
           "@type": "SearchAction",
           target: `${siteUrl}/search?q={search_term_string}`,

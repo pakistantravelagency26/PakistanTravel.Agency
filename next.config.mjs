@@ -103,6 +103,16 @@ const nextConfig = {
         destination: "/list-your-tour",
         permanent: true,
       },
+      {
+        source: "/ur",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/ur/:path*",
+        destination: "/:path*",
+        permanent: true,
+      },
     ];
   },
   async headers() {

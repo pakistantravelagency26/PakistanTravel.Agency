@@ -74,14 +74,6 @@ export function Navbar() {
             </Link>
             <span className="text-slate-300 hidden md:inline">|</span>
             <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
-            <span className="text-slate-300 hidden sm:inline">|</span>
-            <Link
-              href="/ur"
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] transition border border-emerald-200"
-              title="Urdu Version / اردو ورژن"
-            >
-              <span>اردو</span>
-            </Link>
             <span className="text-slate-300">|</span>
 
             {isCustomerLoggedIn ? (
@@ -185,15 +177,8 @@ export function Navbar() {
             ))}
           </nav>
 
-          {/* Right Action: Explore Catalog button & Urdu Switcher */}
+          {/* Right Action: Explore Catalog button */}
           <div className="hidden sm:flex items-center gap-2.5">
-            <Link
-              href="/ur"
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold transition flex items-center gap-1"
-              title="Urdu Version"
-            >
-              <span className="text-emerald-700 font-extrabold text-xs">اردو</span>
-            </Link>
             <Link
               href="/search"
               className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
@@ -219,15 +204,6 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="lg:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3">
           <div className="space-y-2 text-sm font-semibold">
-            <Link
-              href="/ur"
-              className="py-2.5 px-3 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold flex items-center justify-between"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <span>اردو ورژن (Urdu Version)</span>
-              <span className="text-[11px] bg-emerald-700 text-white px-2 py-0.5 rounded font-extrabold">اردو</span>
-            </Link>
-
             <Link
               href="/search"
               className="block py-2.5 px-3 rounded-xl bg-slate-50 text-slate-800 font-bold hover:text-sky-600 flex items-center justify-between"

@@ -44,7 +44,14 @@ describe("Phase 7: SEO & Canonical Routing Test Suite", () => {
         assert.ok(!url.includes("/login"), "Sitemap must never include /login");
         assert.ok(!url.includes("/register"), "Sitemap must never include /register");
         assert.ok(!url.includes("/search"), "Sitemap must never include /search");
+        assert.ok(!url.includes("/ur"), "Sitemap must never include /ur routes (Phase 3 English-only requirement)");
       }
+    });
+
+    it("ensures sitemap has zero /ur routes remaining", async () => {
+      const entries = await sitemapGenerator();
+      const urRoutes = entries.filter((e) => e.url.includes("/ur"));
+      assert.strictEqual(urRoutes.length, 0, "No Urdu routes may exist in sitemap");
     });
   });
 });

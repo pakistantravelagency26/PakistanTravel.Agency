@@ -27,10 +27,6 @@ export const metadata: Metadata = {
     "Compare and book northern Pakistan tour packages, mountain hotels, and 4x4 rentals across Hunza, Skardu, and Swat from independent local operators.",
   alternates: {
     canonical: siteUrl,
-    languages: {
-      "en-PK": siteUrl,
-      "ur-PK": `${siteUrl}/ur`,
-    },
   },
   openGraph: {
     type: "website",

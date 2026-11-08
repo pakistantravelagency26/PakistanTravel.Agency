@@ -53,10 +53,6 @@ function parseListingToken(text: string): { cleanText: string; listing?: ParsedL
   };
 }
 
-function isUrduText(text: string): boolean {
-  return /[\u0600-\u06FF]/.test(text);
-}
-
 export default function SupportChatWidget() {
   const pathname = usePathname();
 
@@ -469,7 +465,6 @@ export default function SupportChatWidget() {
             {messages.map((m) => {
               const isUser = m.role === "user";
               const parsed = parseListingToken(m.content);
-              const urdu = isUrduText(parsed.cleanText);
 
               return (
                 <div
@@ -477,12 +472,11 @@ export default function SupportChatWidget() {
                   className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
                 >
                   <div
-                    dir={urdu ? "rtl" : "ltr"}
-                    className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 leading-relaxed shadow-sm whitespace-pre-wrap ${
+                    className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 leading-relaxed shadow-sm whitespace-pre-wrap text-[12px] ${
                       isUser
                         ? "bg-emerald-700 text-white rounded-br-none"
                         : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-none"
-                    } ${urdu ? "font-serif text-[13px]" : "text-[12px]"}`}
+                    }`}
                   >
                     {parsed.cleanText}
 

@@ -88,37 +88,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.4,
     },
-    // Urdu routes
-    {
-      url: `${baseUrl}/ur`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/ur/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.65,
-    },
-    {
-      url: `${baseUrl}/ur/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.65,
-    },
-    {
-      url: `${baseUrl}/ur/terms`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/ur/privacy`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
   ];
 
   // Static landing pages for all 6 destinations
