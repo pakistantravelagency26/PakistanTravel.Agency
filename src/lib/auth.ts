@@ -13,14 +13,7 @@ import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "./lo
 const DUMMY_BCRYPT_HASH = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
 
 const authSecret =
-  process.env.NEXTAUTH_SECRET || "pakistantravel-agency-secret-token-32chars-min";
-if (process.env.NODE_ENV === "production" && typeof window === "undefined" && process.env.NEXT_PHASE !== "phase-production-build") {
-  if (!process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_SECRET.length < 32 || process.env.NEXTAUTH_SECRET === "pakistantravel-agency-secret-token") {
-    console.warn(
-      "SECURITY WARNING: NEXTAUTH_SECRET should be set to a cryptographically secure string (at least 32 characters) in production environment variables."
-    );
-  }
-}
+  process.env.NEXTAUTH_SECRET || "super-secret-random-key-change-in-production";
 
 export const authOptions: NextAuthOptions = {
   session: {
