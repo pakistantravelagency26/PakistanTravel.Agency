@@ -1,8 +1,8 @@
-import { MetadataRoute } from "next";
-import { getActiveDbListings } from "@/services/serverListing.service";
-import { destinationsData } from "@/data/destinationData";
-import { blogPosts } from "@/data/blogData";
-import { SITE_URL } from "@/config/site";
+import type { MetadataRoute } from "next";
+import { getActiveDbListings } from "../services/serverListing.service.ts";
+import { destinationsData } from "../data/destinationData.ts";
+import { blogPosts } from "../data/blogData.ts";
+import { SITE_URL } from "../config/site.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/destinations`,
       lastModified: new Date(),
       changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/tours`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/hotels`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/rentals`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
       priority: 0.9,
     },
     {

@@ -1,5 +1,5 @@
-import { MetadataRoute } from "next";
-import { SITE_URL } from "@/config/site";
+import type { MetadataRoute } from "next";
+import { SITE_URL } from "../config/site.ts";
 
 const baseUrl = SITE_URL;
 

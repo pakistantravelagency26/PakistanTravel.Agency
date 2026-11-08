@@ -1,8 +1,11 @@
-import { cache } from "react";
-import { prisma } from "@/lib/prisma";
-import { ListingData } from "./listing.service";
-import { sanitizePublicVendor } from "@/lib/antiLeakage";
-import { siteConfig } from "@/config/site";
+import React from "react";
+const cache = <T extends (...args: any[]) => any>(fn: T): T => {
+  return ((React as any).cache ? (React as any).cache(fn) : fn) as T;
+};
+import { prisma } from "../lib/prisma.ts";
+import type { ListingData } from "./listing.service.ts";
+import { sanitizePublicVendor } from "../lib/antiLeakage.ts";
+import { siteConfig } from "../config/site.ts";
 
 export function formatDbListing(l: any): ListingData {
   const photos = Array.isArray(l.photos) && l.photos.length > 0 ? l.photos : [

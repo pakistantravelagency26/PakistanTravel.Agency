@@ -10,7 +10,7 @@ export const revalidate = 60;
 export async function generateStaticParams() {
   try {
     const listings = await getActiveDbListings();
-    return listings.map((l) => ({ slug: l.slug }));
+    return listings.map((l: any) => ({ slug: l.slug }));
   } catch {
     return [];
   }
