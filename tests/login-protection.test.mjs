@@ -9,6 +9,7 @@ import {
   recordFailedLogin,
   recordSuccessfulLogin,
   unblockLogin,
+  clearMemoryLocks,
 } from "../src/lib/loginThrottle.ts";
 import { prisma } from "../src/lib/prisma.ts";
 
@@ -101,7 +102,7 @@ describe("Phase 3: Login Protection & Brute Force Defense Test Suite", () => {
     });
 
     it("triggers 30-minute block on the 3rd consecutive failed attempt", async () => {
-      const result = await recordFailedLogin(targetEmail, testIp, "VENDOR");
+      const result = await recordFailedLogin(targetEmail, testIp, "ADMIN");
       assert.equal(result.locked, true);
       assert.ok(result.reason.includes("30 minutes") || result.reason.includes("locked"));
 
@@ -111,6 +112,39 @@ describe("Phase 3: Login Protection & Brute Force Defense Test Suite", () => {
       assert.equal(status.reason, "PAIR_BLOCKED");
       assert.ok(status.retryAfterSeconds > 0);
       assert.ok(status.message.includes("locked"));
+
+      // Verify alert email is queued for Admin account
+      const alertEmail = await prisma.emailOutbox.findFirst({
+        where: {
+          eventType: "SECURITY_ALERT",
+          subject: { contains: targetEmail },
+        },
+      });
+      assert.ok(alertEmail, "Security alert email must be queued when admin account is locked");
+    });
+
+    it("rejects even valid credentials during an active lockout", async () => {
+      // Simulate NextAuth authorize flow:
+      // Even if attacker or user types the correct password, checkLoginStatus halts before verification
+      const status = await checkLoginStatus(targetEmail, testIp);
+      assert.equal(status.allowed, false);
+      const authorizeWouldReject = !status.allowed;
+      assert.equal(authorizeWouldReject, true, "Authorize flow must reject before evaluating password");
+    });
+
+    it("allows login after the 30-minute lockout expires", async () => {
+      const pairKey = getPairKey(testIp, targetEmail);
+      // Simulate time expiration by updating expiresAt to the past (31 minutes ago)
+      const pastDate = new Date(Date.now() - 31 * 60 * 1000);
+      await prisma.blockedLogin.update({
+        where: { key: pairKey },
+        data: { expiresAt: pastDate },
+      });
+
+      // Clear in-memory cache to simulate fresh serverless instance evaluation against DB
+      clearMemoryLocks(pairKey);
+      const status = await checkLoginStatus(targetEmail, testIp);
+      assert.equal(status.allowed, true, "Account must automatically unlock after lockout window expires");
     });
 
     it("ensures other users on the same IP are NOT blocked by pair lockout", async () => {

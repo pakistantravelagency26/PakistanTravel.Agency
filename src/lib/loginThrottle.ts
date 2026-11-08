@@ -19,6 +19,14 @@ interface MemLock {
 }
 const memoryLocks = new Map<string, MemLock>();
 
+export function clearMemoryLocks(key?: string): void {
+  if (key) {
+    memoryLocks.delete(key);
+  } else {
+    memoryLocks.clear();
+  }
+}
+
 export interface LoginStatusCheck {
   allowed: boolean;
   reason?: "GLOBAL_IP_BLOCKED" | "PAIR_BLOCKED";
@@ -234,6 +242,27 @@ export async function recordFailedLogin(identifier: string, ip: string, role?: s
         },
       });
 
+      // Security Alert: Email admin when an admin account has 3 failed logins
+      if (role === "ADMIN" || normId.includes("admin")) {
+        for (const adminEmail of ADMIN_NOTIFICATION_EMAILS) {
+          try {
+            await prisma.emailOutbox.create({
+              data: {
+                to: adminEmail,
+                recipientRole: "ADMIN",
+                subject: `[SECURITY ALERT] Admin Account Login Blocked: ${normId}`,
+                textBody: `Security Alert: Admin account "${normId}" has experienced 3 consecutive failed login attempts from IP ${cleanIp}. The account has been locked for 30 minutes.\n\nReview or unblock in Admin Security: https://www.pakistantravel.agency/secure-admin/security`,
+                htmlBody: `<div style="font-family:sans-serif;padding:20px;border:1px solid #ef4444;border-radius:8px;"><h3 style="color:#b91c1c;">Security Alert: Admin Account Locked</h3><p>Admin account <strong>${normId}</strong> has been locked after 3 consecutive failed login attempts.</p><p><strong>Client IP:</strong> ${cleanIp}</p><p><strong>Lock Duration:</strong> 30 minutes</p><p><a href="https://www.pakistantravel.agency/secure-admin/security" style="color:#0284c7;font-weight:bold;">Review Block in Admin Portal</a></p></div>`,
+                eventType: "SECURITY_ALERT",
+                status: "PENDING",
+              },
+            });
+          } catch {
+            // non-fatal email queue error
+          }
+        }
+      }
+
       locked = true;
     }
 
@@ -281,6 +310,34 @@ export async function recordFailedLogin(identifier: string, ip: string, role?: s
           details: `Global IP threshold triggered. ${globalIpFails} failed attempts across accounts.`,
         },
       });
+
+      // Security Alert: Email admin when an IP is blocked more than twice in an hour
+      const recentIpBlocks = await prisma.blockedLogin.count({
+        where: {
+          ip: cleanIp,
+          blockedAt: { gte: oneHourAgo },
+        },
+      });
+
+      if (recentIpBlocks >= 2) {
+        for (const adminEmail of ADMIN_NOTIFICATION_EMAILS) {
+          try {
+            await prisma.emailOutbox.create({
+              data: {
+                to: adminEmail,
+                recipientRole: "ADMIN",
+                subject: `[SECURITY ALERT] IP Address Repeatedly Blocked: ${cleanIp}`,
+                textBody: `Security Alert: IP address ${cleanIp} has triggered lockouts ${recentIpBlocks} times in the last hour due to excessive failed attempts.\n\nManage blocked IPs: https://www.pakistantravel.agency/secure-admin/security`,
+                htmlBody: `<div style="font-family:sans-serif;padding:20px;border:1px solid #ef4444;border-radius:8px;"><h3 style="color:#b91c1c;">Security Alert: Repeated IP Lockout</h3><p>IP address <strong>${cleanIp}</strong> has triggered lockout ${recentIpBlocks} times in the last hour.</p><p><a href="https://www.pakistantravel.agency/secure-admin/security" style="color:#0284c7;font-weight:bold;">Review in Admin Security Portal</a></p></div>`,
+                eventType: "SECURITY_ALERT",
+                status: "PENDING",
+              },
+            });
+          } catch {
+            // non-fatal
+          }
+        }
+      }
 
       locked = true;
       lockReason = ipLockReason;
