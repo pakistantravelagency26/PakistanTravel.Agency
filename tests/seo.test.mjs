@@ -1,5 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import robotsConfig from "../src/app/robots.ts";
 import sitemapGenerator from "../src/app/sitemap.ts";
 import { SITE_URL } from "../src/config/site.ts";
@@ -52,6 +54,62 @@ describe("Phase 7: SEO & Canonical Routing Test Suite", () => {
       const entries = await sitemapGenerator();
       const urRoutes = entries.filter((e) => e.url.includes("/ur"));
       assert.strictEqual(urRoutes.length, 0, "No Urdu routes may exist in sitemap");
+    });
+  });
+
+  describe("Server-Rendered Catalog Pages Structured Data (JSON-LD)", () => {
+    it("verifies /tours has ItemList (TouristTrip), BreadcrumbList, and canonical URL", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/app/tours/page.tsx"), "utf-8");
+      assert.ok(file.includes('canonical: `${SITE_URL}/tours`'), "Tours page must define canonical /tours");
+      assert.ok(file.includes('"@type": "ItemList"'), "Tours page must inject ItemList JSON-LD");
+      assert.ok(file.includes('"@type": "TouristTrip"'), "Tours items must be schema type TouristTrip");
+      assert.ok(file.includes('"@type": "BreadcrumbList"'), "Tours page must inject BreadcrumbList JSON-LD");
+      assert.ok(file.includes("export const revalidate = 60"), "Tours page must use 60s ISR revalidation");
+      assert.ok(file.includes('"PKR"'), "Tours schema must use PKR currency");
+    });
+
+    it("verifies /hotels has ItemList (Hotel), BreadcrumbList, and canonical URL", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/app/hotels/page.tsx"), "utf-8");
+      assert.ok(file.includes('canonical: `${SITE_URL}/hotels`'), "Hotels page must define canonical /hotels");
+      assert.ok(file.includes('"@type": "ItemList"'), "Hotels page must inject ItemList JSON-LD");
+      assert.ok(file.includes('"@type": "Hotel"'), "Hotels items must be schema type Hotel");
+      assert.ok(file.includes('"@type": "BreadcrumbList"'), "Hotels page must inject BreadcrumbList JSON-LD");
+      assert.ok(file.includes("export const revalidate = 60"), "Hotels page must use 60s ISR revalidation");
+    });
+
+    it("verifies /rentals has ItemList (Product), BreadcrumbList, and canonical URL", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/app/rentals/page.tsx"), "utf-8");
+      assert.ok(file.includes('canonical: `${SITE_URL}/rentals`'), "Rentals page must define canonical /rentals");
+      assert.ok(file.includes('"@type": "ItemList"'), "Rentals page must inject ItemList JSON-LD");
+      assert.ok(file.includes('"@type": "Product"'), "Rentals items must be schema type Product");
+      assert.ok(file.includes('"@type": "BreadcrumbList"'), "Rentals page must inject BreadcrumbList JSON-LD");
+      assert.ok(file.includes("export const revalidate = 60"), "Rentals page must use 60s ISR revalidation");
+    });
+
+    it("verifies /listing/[slug] protects against fake aggregate ratings (<10 reviews)", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/app/listing/[slug]/page.tsx"), "utf-8");
+      assert.ok(file.includes("listing.totalReviews >= 10"), "Must guard AggregateRating strictly by >= 10 real reviews");
+      assert.ok(file.includes('"@type": "BreadcrumbList"'), "Listing detail page must inject BreadcrumbList JSON-LD");
+      assert.ok(file.includes('canonical: canonicalUrl'), "Listing detail page must specify canonical URL");
+    });
+  });
+
+  describe("Middleware Canonical Routing & Crawl Exclusion Headers", () => {
+    it("defines canonical 301 redirects for apex and preview domains", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/middleware.ts"), "utf-8");
+      assert.ok(file.includes("isApexDomain"), "Middleware must check for apex domain");
+      assert.ok(file.includes("isProductionVercelHost"), "Middleware must check for vercel default host");
+      assert.ok(file.includes("NextResponse.redirect(canonicalUrl, 301)"), "Middleware must issue 301 permanent redirect");
+    });
+
+    it("sets X-Robots-Tag: noindex, nofollow, noarchive on search, query params, and private portals", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/middleware.ts"), "utf-8");
+      assert.ok(file.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
+      assert.ok(file.includes('path.startsWith("/secure-admin")'));
+      assert.ok(file.includes('path.startsWith("/partner-hub")'));
+      assert.ok(file.includes('path.startsWith("/account")'));
+      assert.ok(file.includes('path === "/search"'));
+      assert.ok(file.includes("hasQueryParams"));
     });
   });
 });
