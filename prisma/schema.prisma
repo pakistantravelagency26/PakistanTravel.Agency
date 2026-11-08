@@ -84,6 +84,7 @@ model User {
   role          Role      @default(CUSTOMER)
   staffRole     String?   @default("SUPER_ADMIN") // SUPER_ADMIN | BOOKINGS_MANAGER | BILLING_FINANCE | LISTING_MODERATOR
   permissions   String?   @default("ALL") // Comma-separated: "BOOKINGS,FINANCE,LISTINGS,VENDORS,DESTINATIONS,COUPONS,TEAM" or "ALL"
+  tokenVersion  Int       @default(1) // Incremented on password reset to invalidate all existing sessions
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -534,6 +535,21 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@index([actorEmail])
+}
+
+model PasswordResetToken {
+  id           String    @id @default(uuid())
+  email        String
+  codeHash     String    // SHA-256 hash of 6-digit code
+  attemptsLeft Int       @default(5)
+  expiresAt    DateTime
+  usedAt       DateTime?
+  invalidated  Boolean   @default(false)
+  ip           String?
+  createdAt    DateTime  @default(now())
+
+  @@index([email, expiresAt])
+  @@index([createdAt])
 }
 
 

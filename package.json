@@ -10,7 +10,7 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "test": "node --experimental-strip-types --test tests/booking-flow.test.mjs tests/chatbot.test.mjs tests/anti-leakage.test.mjs tests/access-control.test.mjs tests/login-protection.test.mjs"
+    "test": "node --experimental-strip-types --test tests/booking-flow.test.mjs tests/chatbot.test.mjs tests/anti-leakage.test.mjs tests/access-control.test.mjs tests/login-protection.test.mjs tests/password-reset.test.mjs"
   },
   "dependencies": {
     "@neon/config": "^1.11.3",

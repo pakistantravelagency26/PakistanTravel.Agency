@@ -120,6 +120,7 @@ export const authOptions: NextAuthOptions = {
           permissions: (user as any).permissions || (user.role === "ADMIN" ? "ALL" : "NONE"),
           vendorId: user.vendorId || null,
           phone: user.phone,
+          tokenVersion: (user as any).tokenVersion || 1,
         };
       },
     }),
@@ -171,6 +172,7 @@ export const authOptions: NextAuthOptions = {
         token.permissions = user.permissions;
         token.vendorId = user.vendorId;
         token.phone = user.phone;
+        token.tokenVersion = (user as any).tokenVersion || 1;
       }
 
       // Auto-load vendorId from Neon DB if not present in existing session token
