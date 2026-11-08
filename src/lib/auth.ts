@@ -46,6 +46,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Login ID / Email / Phone", type: "text" },
         password: { label: "Password", type: "password" },
+        totpCode: { label: "2FA Authenticator Code", type: "text" },
       },
       async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
@@ -98,11 +99,60 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid Login ID or password");
         }
 
-        // 5. Successful login: record success and clear lockouts
+        // 5. Two-Factor Authentication (TOTP / Google Authenticator) Check
+        if (user.twoFactorEnabled && user.twoFactorSecret) {
+          const totpCode = (credentials as any).totpCode?.trim();
+          if (!totpCode) {
+            throw new Error("2FA_REQUIRED");
+          }
+
+          const { verifyTotpCode, verifyRecoveryCode } = await import("./totp.ts");
+          const { decryptTotpSecret } = await import("./totpCrypto.ts");
+
+          let isTotpValid = false;
+          try {
+            const decryptedSecret = decryptTotpSecret(user.twoFactorSecret);
+            isTotpValid = verifyTotpCode(totpCode, decryptedSecret, 1);
+          } catch {
+            isTotpValid = false;
+          }
+
+          if (!isTotpValid && user.twoFactorRecoveryCodes) {
+            try {
+              const hashedCodes: string[] = JSON.parse(user.twoFactorRecoveryCodes);
+              const recovery = verifyRecoveryCode(totpCode, hashedCodes);
+              if (recovery.valid) {
+                isTotpValid = true;
+                // Single-use recovery code: burn it in DB
+                await prisma.user.update({
+                  where: { id: user.id },
+                  data: { twoFactorRecoveryCodes: JSON.stringify(recovery.remainingHashedCodes) },
+                });
+                await prisma.auditLog.create({
+                  data: {
+                    action: "2FA_RECOVERY_CODE_USED",
+                    actorEmail: user.email,
+                    actorId: user.id,
+                    details: `Single-use recovery code consumed. ${recovery.remainingHashedCodes.length} remaining.`,
+                  },
+                });
+              }
+            } catch {
+              // Recovery code check error
+            }
+          }
+
+          if (!isTotpValid) {
+            await recordFailedLogin(identifier, clientIp, user.role);
+            throw new Error("Invalid 2FA Authenticator code or recovery code.");
+          }
+        }
+
+        // 6. Successful login: record success and clear lockouts
         await recordSuccessfulLogin(identifier, clientIp);
         resetRateLimit(`login-auth:${identifier.toLowerCase()}`);
 
-        // 6. Verify that vendor account is not disabled by Super Admin
+        // 7. Verify that vendor account is not disabled by Super Admin
         if (user.role === "VENDOR" && user.vendorId) {
           const { isVendorEnabled } = await import("@/services/vendor.service");
           if (!isVendorEnabled(user.vendorId)) {
@@ -121,6 +171,7 @@ export const authOptions: NextAuthOptions = {
           vendorId: user.vendorId || null,
           phone: user.phone,
           tokenVersion: (user as any).tokenVersion || 1,
+          twoFactorEnabled: Boolean(user.twoFactorEnabled),
         };
       },
     }),
@@ -173,6 +224,7 @@ export const authOptions: NextAuthOptions = {
         token.vendorId = user.vendorId;
         token.phone = user.phone;
         token.tokenVersion = (user as any).tokenVersion || 1;
+        token.twoFactorEnabled = Boolean((user as any).twoFactorEnabled);
       }
 
       // Auto-load vendorId from Neon DB if not present in existing session token
@@ -207,6 +259,7 @@ export const authOptions: NextAuthOptions = {
         session.user.permissions = (token.permissions as string) || (token.role === "ADMIN" ? "ALL" : "NONE");
         session.user.vendorId = token.vendorId as string | null;
         session.user.phone = token.phone as string | null;
+        (session.user as any).twoFactorEnabled = Boolean(token.twoFactorEnabled);
       }
       return session;
     },

@@ -13,6 +13,9 @@ export interface LocalUser {
   staffRole?: string | null;
   vendorId?: string | null;
   businessName?: string;
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string | null;
+  twoFactorRecoveryCodes?: string | null;
 }
 
 // In-memory fallback user repository (empty by default; all users authenticated via PostgreSQL)
@@ -51,6 +54,9 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
         staffRole: (dbUser as any).staffRole || "SUPER_ADMIN",
         vendorId: dbUser.vendorProfile?.id || null,
         businessName: dbUser.vendorProfile?.businessName || undefined,
+        twoFactorEnabled: Boolean((dbUser as any).twoFactorEnabled),
+        twoFactorSecret: (dbUser as any).twoFactorSecret || null,
+        twoFactorRecoveryCodes: (dbUser as any).twoFactorRecoveryCodes || null,
       };
     }
   } catch (err) {

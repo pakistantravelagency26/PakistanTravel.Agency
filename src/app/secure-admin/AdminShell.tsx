@@ -35,7 +35,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }, []);
 
   useEffect(() => {
-    if (pathname !== "/secure-admin/login") {
+    if (pathname !== "/secure-admin/login" && pathname !== "/secure-admin/setup-2fa") {
       if (status === "unauthenticated" || (timedOut && status === "loading")) {
         window.location.href = `/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`;
       } else if (
@@ -43,12 +43,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         session?.user?.role !== "ADMIN"
       ) {
         window.location.href = `/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`;
+      } else if (
+        status === "authenticated" &&
+        session?.user?.role === "ADMIN" &&
+        !(session.user as any).twoFactorEnabled
+      ) {
+        window.location.href = "/secure-admin/setup-2fa";
       }
     }
   }, [status, session, pathname, timedOut]);
 
-  // If on login page, render clean login view without sidebar
-  if (pathname === "/secure-admin/login") {
+  // If on login or 2FA setup page, render clean view without sidebar
+  if (pathname === "/secure-admin/login" || pathname === "/secure-admin/setup-2fa") {
     return <>{children}</>;
   }
 

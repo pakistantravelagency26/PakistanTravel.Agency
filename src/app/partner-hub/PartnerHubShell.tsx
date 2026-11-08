@@ -34,15 +34,21 @@ export default function PartnerHubShell({ children }: { children: React.ReactNod
   }, []);
 
   useEffect(() => {
-    if (pathname !== "/partner-hub/login") {
+    if (pathname !== "/partner-hub/login" && pathname !== "/partner-hub/setup-2fa") {
       if (status === "unauthenticated" || (timedOut && status === "loading")) {
         window.location.href = `/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`;
+      } else if (
+        status === "authenticated" &&
+        session?.user &&
+        !(session.user as any).twoFactorEnabled
+      ) {
+        window.location.href = "/partner-hub/setup-2fa";
       }
     }
-  }, [status, pathname, timedOut]);
+  }, [status, session, pathname, timedOut]);
 
-  // If on login page, render clean login view without sidebar
-  if (pathname === "/partner-hub/login") {
+  // If on login or 2FA setup page, render clean login view without sidebar
+  if (pathname === "/partner-hub/login" || pathname === "/partner-hub/setup-2fa") {
     return <>{children}</>;
   }
 

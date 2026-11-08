@@ -85,6 +85,12 @@ model User {
   staffRole     String?   @default("SUPER_ADMIN") // SUPER_ADMIN | BOOKINGS_MANAGER | BILLING_FINANCE | LISTING_MODERATOR
   permissions   String?   @default("ALL") // Comma-separated: "BOOKINGS,FINANCE,LISTINGS,VENDORS,DESTINATIONS,COUPONS,TEAM" or "ALL"
   tokenVersion  Int       @default(1) // Incremented on password reset to invalidate all existing sessions
+  // Two-Factor Authentication (2FA / TOTP)
+  twoFactorEnabled       Boolean   @default(false)
+  twoFactorSecret        String?   // AES-256-GCM encrypted base32 secret
+  twoFactorRecoveryCodes String?   @db.Text // JSON string array of SHA-256 hashed recovery codes
+  twoFactorPendingSecret String?   // AES-256-GCM encrypted secret pending initial verification
+  twoFactorEnrolledAt    DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -550,6 +556,19 @@ model PasswordResetToken {
 
   @@index([email, expiresAt])
   @@index([createdAt])
+}
+
+model TwoFactorChallenge {
+  id        String    @id @default(uuid())
+  userId    String
+  ticket    String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  ip        String?
+  createdAt DateTime  @default(now())
+
+  @@index([ticket])
+  @@index([userId])
 }
 
 

@@ -150,7 +150,7 @@ export async function requestPasswordReset(email: string, ip: string): Promise<R
   return {
     success: true,
     message: genericSuccess,
-    debugCode: process.env.NODE_ENV !== "production" ? codeStr : undefined,
+    debugCode: process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production" ? undefined : codeStr,
   };
 }
 

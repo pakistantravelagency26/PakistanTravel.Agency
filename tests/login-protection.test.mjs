@@ -147,11 +147,21 @@ describe("Phase 3: Login Protection & Brute Force Defense Test Suite", () => {
     it("locks the entire IP when 30 failures occur across accounts", async () => {
       const attackerIp = `198.51.100.${Math.floor(Math.random() * 200) + 10}`;
 
-      // Simulate 30 failed attempts across different accounts from attackerIp
-      for (let i = 1; i <= 30; i++) {
-        const dummyUser = `bruteforce-${i}-${Date.now()}@attack.com`;
-        await recordFailedLogin(dummyUser, attackerIp, "CUSTOMER");
+      // Insert 29 previous failed attempts in batch to test threshold cleanly
+      const dummyBatch = [];
+      for (let i = 1; i <= 29; i++) {
+        dummyBatch.push({
+          identifier: `bruteforce-${i}-${Date.now()}@attack.com`,
+          ip: attackerIp,
+          pairKey: `pair:${attackerIp}:bruteforce-${i}@attack.com`,
+          success: false,
+          attemptAt: new Date(),
+        });
       }
+      await prisma.loginAttempt.createMany({ data: dummyBatch });
+
+      // 30th failure triggers global IP lockout threshold
+      await recordFailedLogin(`victim-${Date.now()}@attack.com`, attackerIp, "CUSTOMER");
 
       // Any user attempting from attackerIp must now be globally blocked
       const randomUser = `anyone-${Date.now()}@anywhere.pk`;
