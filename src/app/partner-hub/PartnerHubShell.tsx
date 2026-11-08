@@ -16,6 +16,7 @@ import {
   ShieldCheck, 
   ExternalLink,
   Settings,
+  LifeBuoy,
   LogOut
 } from "lucide-react";
 import { COMMISSION_PERCENT } from "@/config/site";
@@ -76,6 +77,7 @@ export default function PartnerHubShell({ children }: { children: React.ReactNod
     { href: "/partner-hub/bookings", label: "Bookings", icon: BookOpenCheck },
     { href: "/partner-hub/earnings", label: "Earnings & Payouts", icon: Wallet },
     { href: "/partner-hub/reviews", label: "Guest Reviews", icon: MessageSquare },
+    { href: "/partner-hub/support", label: "Help & Support Tickets", icon: LifeBuoy },
     { href: "/partner-hub/profile", label: "Profile & Host Contact", icon: Settings },
   ];
 

@@ -11,7 +11,7 @@ export async function GET() {
   return NextResponse.json(
     {
       status: "healthy",
-      version: "2026.11.08-v4",
+      version: "2026.11.08-v5",
       commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "5777a16",
       timestamp: new Date().toISOString(),
       uptimeSeconds,

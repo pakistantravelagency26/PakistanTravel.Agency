@@ -31,7 +31,7 @@ export async function PATCH(
 
     const { id } = params;
     const body = await req.json();
-    const { name, phone, permissions, staffRole, password } = body;
+    const { name, phone, permissions, staffRole, password, action } = body;
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -39,6 +39,81 @@ export async function PATCH(
 
     if (!user) {
       return NextResponse.json({ success: false, error: "Staff member not found." }, { status: 404 });
+    }
+
+    const adminEmail = session.user.email || "admin@pakistantravel.agency";
+
+    // Handle BLOCK / SUSPEND action
+    if (action === "BLOCK" || action === "SUSPEND") {
+      if (user.email === "emraanirshad88@gmail.com") {
+        return NextResponse.json(
+          { success: false, error: "Cannot suspend or block the primary Super Administrator account." },
+          { status: 403 }
+        );
+      }
+      if (session.user.id === user.id) {
+        return NextResponse.json(
+          { success: false, error: "Administrators cannot suspend their own account." },
+          { status: 400 }
+        );
+      }
+
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id },
+          data: {
+            staffRole: "SUSPENDED",
+            sessionVersion: { increment: 1 },
+            tokenVersion: { increment: 1 },
+          },
+        }),
+        prisma.auditLog.create({
+          data: {
+            action: "STAFF_SUSPENDED",
+            actorId: session.user.id,
+            actorEmail: adminEmail,
+            resourceType: "USER",
+            resourceId: id,
+            details: `Super Admin ${adminEmail} suspended staff access for ${user.name} (${user.email}). All active sessions immediately revoked.`,
+          },
+        }),
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        message: `Staff member "${user.name}" (${user.email}) has been blocked and suspended.`,
+      });
+    }
+
+    // Handle UNBLOCK / ACTIVATE action
+    if (action === "UNBLOCK" || action === "ACTIVATE") {
+      const restoredRole = (user.permissions || "").includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF";
+
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id },
+          data: {
+            staffRole: restoredRole,
+            sessionVersion: { increment: 1 },
+            tokenVersion: { increment: 1 },
+          },
+        }),
+        prisma.auditLog.create({
+          data: {
+            action: "STAFF_UNBLOCKED",
+            actorId: session.user.id,
+            actorEmail: adminEmail,
+            resourceType: "USER",
+            resourceId: id,
+            details: `Super Admin ${adminEmail} unblocked staff access for ${user.name} (${user.email}).`,
+          },
+        }),
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        message: `Staff member "${user.name}" (${user.email}) has been unblocked and access restored.`,
+      });
     }
 
     const updateData: any = {};
@@ -52,6 +127,8 @@ export async function PATCH(
         );
       }
       updateData.passwordHash = await bcrypt.hash(password.trim(), 10);
+      updateData.sessionVersion = { increment: 1 };
+      updateData.tokenVersion = { increment: 1 };
     }
 
     // Format permissions
@@ -67,7 +144,9 @@ export async function PATCH(
           formattedPermissions = permissions.trim();
         }
         updateData.permissions = formattedPermissions;
-        updateData.staffRole = staffRole || (formattedPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF");
+        if (user.staffRole !== "SUSPENDED") {
+          updateData.staffRole = staffRole || (formattedPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF");
+        }
       }
     }
 
@@ -133,13 +212,34 @@ export async function DELETE(
       );
     }
 
-    await prisma.user.delete({
-      where: { id },
-    });
+    if (session.user.id === user.id) {
+      return NextResponse.json(
+        { success: false, error: "Administrators cannot delete their own active account." },
+        { status: 400 }
+      );
+    }
+
+    const adminEmail = session.user.email || "admin@pakistantravel.agency";
+
+    await prisma.$transaction([
+      prisma.user.delete({
+        where: { id },
+      }),
+      prisma.auditLog.create({
+        data: {
+          action: "STAFF_DELETED",
+          actorId: session.user.id,
+          actorEmail: adminEmail,
+          resourceType: "USER",
+          resourceId: id,
+          details: `Super Admin ${adminEmail} deleted staff account "${user.name}" (${user.email}).`,
+        },
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,
-      message: `Staff account "${user.name}" (${user.email}) has been removed.`,
+      message: `Staff account "${user.name}" (${user.email}) has been permanently deleted.`,
     });
   } catch (error: any) {
     console.error("Delete staff member error:", error);

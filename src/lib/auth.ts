@@ -146,7 +146,12 @@ export const authOptions: NextAuthOptions = {
         await recordSuccessfulLogin(identifier, clientIp);
         resetRateLimit(`login-auth:${identifier.toLowerCase()}`);
 
-        // 7. Verify that vendor account is not disabled by Super Admin
+        // 7. Verify staff account is not suspended
+        if (user.role === "ADMIN" && user.staffRole === "SUSPENDED") {
+          throw new Error("This staff account has been blocked / suspended by Super Administrator. Access denied.");
+        }
+
+        // 8. Verify that vendor account is not disabled by Super Admin
         if (user.role === "VENDOR" && user.vendorId) {
           const { isVendorEnabled } = await import("@/services/vendor.service");
           if (!isVendorEnabled(user.vendorId)) {
@@ -248,9 +253,9 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          // Session Revocation: If user was deleted or tokenVersion/sessionVersion was incremented
+          // Session Revocation: If user was deleted or tokenVersion/sessionVersion was incremented or staff suspended
           const currentVersion = dbUser?.sessionVersion ?? dbUser?.tokenVersion;
-          if (!dbUser || (token.tokenVersion && currentVersion !== token.tokenVersion)) {
+          if (!dbUser || (token.tokenVersion && currentVersion !== token.tokenVersion) || (dbUser.role === "ADMIN" && dbUser.staffRole === "SUSPENDED")) {
             return null as any; // Invalidates the JWT token immediately
           }
 

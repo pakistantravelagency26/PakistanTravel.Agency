@@ -30,17 +30,22 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       team: members.map((m) => {
-        const isSuperAdmin = m.staffRole === "SUPER_ADMIN" || (m.permissions && m.permissions.includes("ALL"));
-        const permissionsStr = isSuperAdmin ? "ALL" : (m.permissions || m.staffRole || "BOOKINGS");
+        const isPrimary = m.email === "emraanirshad88@gmail.com";
+        const isSuspended = m.staffRole === "SUSPENDED";
+        const isSuperAdmin = isPrimary || (m.staffRole === "SUPER_ADMIN" && !isSuspended);
+        const permissionsStr = isPrimary || (m.permissions && m.permissions.includes("ALL")) 
+          ? "ALL" 
+          : (m.permissions || m.staffRole || "BOOKINGS");
         return {
           id: m.id,
           name: m.name,
           email: m.email,
           phone: m.phone || "N/A",
-          staffRole: isSuperAdmin ? "SUPER_ADMIN" : (m.staffRole || "CUSTOM_STAFF"),
+          staffRole: isSuspended ? "SUSPENDED" : (isSuperAdmin ? "SUPER_ADMIN" : (m.staffRole || "CUSTOM_STAFF")),
           permissions: permissionsStr,
           createdAt: m.createdAt.toISOString(),
-          isProtected: isSuperAdmin,
+          isProtected: isPrimary,
+          isSuspended,
         };
       }),
     });
