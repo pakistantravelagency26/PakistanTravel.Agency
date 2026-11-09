@@ -18,9 +18,9 @@ import { siteConfig, SITE_URL } from "@/config/site";
 const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
-  title: "List Your Tour Packages | Tour Operator Partner Onboarding",
+  title: "List Your Tour Packages",
   description:
-    "Partner with PakistanTravel.Agency to reach domestic and overseas Pakistani travelers. Automated tour booking vouchers, local payments, and transparent commission.",
+    "List your guided tour packages on PakistanTravel to reach travelers across Pakistan. Enjoy digital booking vouchers, local payments, and low commission.",
   alternates: {
     canonical: `${siteUrl}/list-your-tour`,
   },
@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_PK",
     url: `${siteUrl}/list-your-tour`,
-    siteName: siteConfig.name,
-    title: "List Your Tour Packages | Tour Operator Partner Onboarding",
+    siteName: "PakistanTravel",
+    title: "List Your Tour Packages",
     description:
-      "Partner with PakistanTravel.Agency to reach domestic and overseas Pakistani travelers. Automated tour booking vouchers, local payments, and transparent commission.",
+      "List your guided tour packages on PakistanTravel to reach travelers across Pakistan. Enjoy digital booking vouchers, local payments, and low commission.",
   },
 };
 
@@ -107,7 +107,7 @@ export default function ListYourTourPage() {
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">Reach Verified Travelers</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Reach Active Travelers</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               Connect directly with families, corporate groups, and overseas Pakistanis looking for authentic northern journeys.
             </p>

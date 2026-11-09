@@ -11,7 +11,7 @@ const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   title: "Northern Pakistan Travel FAQs & Guide",
   description:
-    "Find expert answers on traveling to Hunza and Skardu, local payment methods, cancellation rules, road seasons, and verified bookings.",
+    "Find clear answers on traveling to Hunza and Skardu, local payment methods, cancellation rules, mountain road seasons, and direct tour package bookings.",
   alternates: {
     canonical: `${siteUrl}/faq`,
   },
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Northern Pakistan Travel FAQs & Guide",
     description:
-      "Find expert answers on traveling to Hunza and Skardu, local payment methods, cancellation rules, road seasons, and verified bookings.",
+      "Find clear answers on traveling to Hunza and Skardu, local payment methods, cancellation rules, mountain road seasons, and direct tour package bookings.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
         alt: "PakistanTravel Frequently Asked Questions & Trip Planning",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Northern Pakistan Travel FAQs & Guide",
     description:
-      "Find expert answers on traveling to Hunza and Skardu, local payment methods, cancellation rules, road seasons, and verified bookings.",
-    images: ["https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200"],
+      "Find clear answers on traveling to Hunza and Skardu, local payment methods, cancellation rules, mountain road seasons, and direct tour package bookings.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

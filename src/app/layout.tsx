@@ -1,11 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import "@/lib/env";
 import "./globals.css";
+import dynamic from "next/dynamic";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import SupportChatWidget from "@/components/chat/SupportChatWidget";
 import { siteConfig, SITE_URL } from "@/config/site";
+
+const SupportChatWidget = dynamic(
+  () => import("@/components/chat/SupportChatWidget"),
+  { ssr: false }
+);
 
 const siteUrl = SITE_URL;
 
@@ -19,16 +24,16 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "PakistanTravel.Agency | Northern Pakistan Tour Packages",
-    template: "%s | PakistanTravel.Agency",
+    default: "Northern Pakistan Tour Packages | PakistanTravel",
+    template: "%s | PakistanTravel",
   },
-  authors: [{ name: "PakistanTravel.Agency", url: siteUrl }],
-  creator: "PakistanTravel.Agency",
-  publisher: "PakistanTravel.Agency",
+  authors: [{ name: "PakistanTravel", url: siteUrl }],
+  creator: "PakistanTravel",
+  publisher: "PakistanTravel",
   openGraph: {
     type: "website",
     locale: "en_PK",
-    siteName: siteConfig.name,
+    siteName: "PakistanTravel",
   },
   robots: {
     index: true,
@@ -67,7 +72,7 @@ export default function RootLayout({
         inLanguage: "en-PK",
         potentialAction: {
           "@type": "SearchAction",
-          target: `${siteUrl}/search?q={search_term_string}`,
+          target: `${siteUrl}/tours?q={search_term_string}`,
           "query-input": "required name=search_term_string",
         },
       },

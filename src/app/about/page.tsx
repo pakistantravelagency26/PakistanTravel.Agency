@@ -10,7 +10,7 @@ export const revalidate = 60;
 const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
-  title: "About Us | PakistanTravel",
+  title: "About Our Tour Marketplace",
   description:
     "Learn about PakistanTravel, our marketplace mission connecting travelers directly with independent local tour operators across northern Pakistan.",
   alternates: {
@@ -21,12 +21,12 @@ export const metadata: Metadata = {
     locale: "en_PK",
     url: `${siteUrl}/about`,
     siteName: "PakistanTravel",
-    title: "About Us | PakistanTravel",
+    title: "About Our Tour Marketplace",
     description:
       "Learn about PakistanTravel, our marketplace mission connecting travelers directly with independent local tour operators across northern Pakistan.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
         alt: "PakistanTravel Marketplace and Mountain Hospitality",
@@ -35,10 +35,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "About Us | PakistanTravel",
+    title: "About Our Tour Marketplace",
     description:
       "Learn about PakistanTravel, our marketplace mission connecting travelers directly with independent local tour operators across northern Pakistan.",
-    images: ["https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200"],
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

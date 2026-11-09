@@ -13,7 +13,7 @@ const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   title: "Northern Pakistan Travel Blog & Guides",
   description:
-    "Explore expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat.",
+    "Explore practical travel guides, seasonal itineraries, route advice, and budgeting tips for exploring Hunza, Skardu, Swat, and Kumrat in Pakistan.",
   alternates: {
     canonical: `${siteUrl}/blog`,
   },
@@ -24,10 +24,10 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Northern Pakistan Travel Blog & Guides",
     description:
-      "Explore expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat.",
+      "Explore practical travel guides, seasonal itineraries, route advice, and budgeting tips for exploring Hunza, Skardu, Swat, and Kumrat in Pakistan.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
         alt: "PakistanTravel Northern Expeditions and Guides",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Northern Pakistan Travel Blog & Guides",
     description:
-      "Explore expert travel guides, seasonal itineraries, budgeting breakdowns, and packing tips for touring Hunza, Skardu, Swat, and Kumrat.",
-    images: ["https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200"],
+      "Explore practical travel guides, seasonal itineraries, route advice, and budgeting tips for exploring Hunza, Skardu, Swat, and Kumrat in Pakistan.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

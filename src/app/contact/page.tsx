@@ -11,7 +11,7 @@ const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   title: "Contact Customer Support Desk",
   description:
-    "Contact PakistanTravel support desk for tour inquiries, booking questions, and general guidance. AI assistant available 24/7.",
+    "Contact PakistanTravel customer support for northern Pakistan tour inquiries, booking questions, and trip assistance. Our team is ready to help.",
   alternates: {
     canonical: `${siteUrl}/contact`,
   },
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Contact Customer Support Desk",
     description:
-      "Contact PakistanTravel support desk for tour inquiries, booking questions, and general guidance. AI assistant available 24/7.",
+      "Contact PakistanTravel customer support for northern Pakistan tour inquiries, booking questions, and trip assistance. Our team is ready to help.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
         alt: "PakistanTravel Customer Support Desk",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Contact Customer Support Desk",
     description:
-      "Contact PakistanTravel support desk for tour inquiries, booking questions, and general guidance. AI assistant available 24/7.",
-    images: ["https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200"],
+      "Contact PakistanTravel customer support for northern Pakistan tour inquiries, booking questions, and trip assistance. Our team is ready to help.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

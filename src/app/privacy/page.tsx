@@ -11,7 +11,7 @@ const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   title: "Privacy Policy & Data Security",
   description:
-    "Read how PakistanTravel collects, encrypts, and protects your personal information, travel identification, and transaction details.",
+    "Learn how PakistanTravel collects, encrypts, and protects personal contact details, booking information, and payment transactions on our marketplace.",
   alternates: {
     canonical: `${siteUrl}/privacy`,
   },
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Privacy Policy & Data Security",
     description:
-      "Read how PakistanTravel collects, encrypts, and protects your personal information, travel identification, and transaction details.",
+      "Learn how PakistanTravel collects, encrypts, and protects personal contact details, booking information, and payment transactions on our marketplace.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
         alt: "PakistanTravel Data Protection and Privacy Policy",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Privacy Policy & Data Security",
     description:
-      "Read how PakistanTravel collects, encrypts, and protects your personal information, travel identification, and transaction details.",
-    images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200"],
+      "Learn how PakistanTravel collects, encrypts, and protects personal contact details, booking information, and payment transactions on our marketplace.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

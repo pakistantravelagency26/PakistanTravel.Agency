@@ -250,7 +250,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
-              href="/search"
+              href="/tours"
               className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition"
             >
               Browse All Tour Packages

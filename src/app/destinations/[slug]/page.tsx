@@ -334,7 +334,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               </h2>
             </div>
             <Link
-              href={`/search?destination=${dest.slug}`}
+              href={`/tours?destination=${dest.slug}`}
               className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1 self-start sm:self-auto"
             >
               <span>View all tour packages</span>
@@ -348,7 +348,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
                 New seasonal tour packages for {dest.name} are currently being onboarded by local operators.
               </p>
               <Link
-                href="/search"
+                href="/tours"
                 className="inline-block px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition"
               >
                 Browse All Northern Tour Packages →

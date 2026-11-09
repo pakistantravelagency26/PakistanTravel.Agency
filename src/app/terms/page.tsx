@@ -17,9 +17,9 @@ export const revalidate = 60;
 const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
-  title: "Terms of Service & Marketplace Policy",
+  title: "Terms of Service & Booking Policy",
   description:
-    "Official marketplace terms of service, booking policies, operator independent contractor status, cancellation policies, and liability limitations on PakistanTravel.Agency.",
+    "Read marketplace terms of service, independent operator obligations, cancellation rules, payment processing terms, and liability limits on PakistanTravel.",
   alternates: {
     canonical: `${siteUrl}/terms`,
   },
@@ -27,25 +27,25 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_PK",
     url: `${siteUrl}/terms`,
-    siteName: siteConfig.name,
-    title: "Terms of Service & Marketplace Policy | PakistanTravel.Agency",
+    siteName: "PakistanTravel",
+    title: "Terms of Service & Booking Policy",
     description:
-      "Marketplace terms of service, independent operator relationships, booking contracts, and liability limitations on PakistanTravel.Agency.",
+      "Read marketplace terms of service, independent operator obligations, cancellation rules, payment processing terms, and liability limits on PakistanTravel.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
-        alt: "PakistanTravel.Agency Terms of Service & Marketplace Policy",
+        alt: "PakistanTravel Terms of Service & Marketplace Policy",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Terms of Service & Marketplace Policy | PakistanTravel.Agency",
+    title: "Terms of Service & Booking Policy",
     description:
-      "Marketplace terms of service, booking contracts, and liability limitations on PakistanTravel.Agency.",
-    images: ["https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200"],
+      "Read marketplace terms of service, independent operator obligations, cancellation rules, payment processing terms, and liability limits on PakistanTravel.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

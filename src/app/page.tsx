@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     absolute: "Northern Pakistan Tour Packages | PakistanTravel",
   },
   description:
-    "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators.",
+    "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators in Pakistan. Plan your trip today.",
   alternates: {
     canonical: siteUrl,
   },
@@ -35,13 +35,13 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Northern Pakistan Tour Packages | PakistanTravel",
     description:
-      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators.",
+      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators in Pakistan. Plan your trip today.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
-        alt: "Hunza Valley Karakoram Mountain Landscape",
+        alt: "Northern Pakistan Karakoram Mountain Landscape and Tour Valley",
       },
     ],
   },
@@ -49,8 +49,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Northern Pakistan Tour Packages | PakistanTravel",
     description:
-      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators.",
-    images: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
+      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators in Pakistan. Plan your trip today.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 
@@ -113,7 +113,7 @@ export default async function HomePage() {
         {/* Clean Floating Search Bar */}
         <div className="max-w-4xl mx-auto mt-10">
           <form
-            action="/search"
+            action="/tours"
             method="GET"
             className="bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/80 grid grid-cols-1 md:grid-cols-12 gap-3"
           >

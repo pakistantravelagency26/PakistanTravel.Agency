@@ -38,11 +38,11 @@ export default function NotFound() {
             <span>Return to Homepage</span>
           </Link>
           <Link
-            href="/search"
+            href="/tours"
             className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 font-bold text-xs flex items-center gap-1.5 shadow-sm transition"
           >
-            <Search className="w-3.5 h-3.5 text-sky-600" />
-            <span>Search All Tours</span>
+            <Compass className="w-3.5 h-3.5 text-sky-600" />
+            <span>Browse All Tours</span>
           </Link>
         </div>
 

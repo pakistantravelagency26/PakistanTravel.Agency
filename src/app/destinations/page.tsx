@@ -82,7 +82,7 @@ export default async function DestinationsIndexPage() {
             {settings.heading || "Top Travel Destinations in Pakistan"}
           </h1>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            {settings.subheading || "Explore comprehensive destination guides, seasonal advice, approximate costs, and verified tours curated by local mountain experts."}
+            {settings.subheading || "Explore comprehensive destination guides, seasonal advice, approximate costs, and guided tours curated by local mountain experts."}
           </p>
         </div>
 

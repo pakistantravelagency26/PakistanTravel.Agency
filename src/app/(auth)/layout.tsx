@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Access | PakistanTravel.Agency",
+  title: "Account Access",
   robots: {
     index: false,
     follow: false,

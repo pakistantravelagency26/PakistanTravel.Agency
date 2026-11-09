@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/permissions";
@@ -88,6 +89,19 @@ export async function PATCH(
           photos: [],
           amenities: [],
         };
+
+    // On-demand ISR revalidation across marketplace catalog
+    try {
+      revalidatePath("/");
+      revalidatePath("/tours");
+      revalidatePath("/destinations");
+      revalidatePath("/sitemap.xml");
+      if (finalListing?.slug) {
+        revalidatePath(`/listing/${finalListing.slug}`);
+      }
+    } catch (e) {
+      console.warn("Revalidation warning:", e);
+    }
 
     return NextResponse.json({
       success: true,

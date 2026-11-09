@@ -17,9 +17,9 @@ export const revalidate = 60;
 const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
-  title: "Partner Information & Operator Guidelines",
+  title: "Tour Operator Partner Guidelines",
   description:
-    "Learn how independent northern Pakistan tour operators publish verified tour packages and manage bookings on PakistanTravel.Agency.",
+    "Learn how independent northern Pakistan tour operators publish guided tour packages, manage bookings, and handle payouts on the PakistanTravel marketplace.",
   alternates: {
     canonical: `${siteUrl}/partner-info`,
   },
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     locale: "en_PK",
     url: `${siteUrl}/partner-info`,
     siteName: "PakistanTravel",
-    title: "Partner Information & Operator Guidelines",
+    title: "Tour Operator Partner Guidelines",
     description:
-      "Learn how independent northern Pakistan tour operators publish verified tour packages and manage bookings on PakistanTravel.Agency.",
+      "Learn how independent northern Pakistan tour operators publish guided tour packages, manage bookings, and handle payouts on the PakistanTravel marketplace.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200",
+        url: `${siteUrl}/images/og/home-og.jpg`,
         width: 1200,
         height: 630,
         alt: "PakistanTravel Partner Information and Guidelines",
@@ -42,10 +42,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Partner Information & Operator Guidelines",
+    title: "Tour Operator Partner Guidelines",
     description:
-      "Learn how independent northern Pakistan tour operators publish verified tour packages and manage bookings on PakistanTravel.Agency.",
-    images: ["https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200"],
+      "Learn how independent northern Pakistan tour operators publish guided tour packages, manage bookings, and handle payouts on the PakistanTravel marketplace.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 
