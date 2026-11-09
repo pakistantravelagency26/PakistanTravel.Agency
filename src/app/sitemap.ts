@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getActiveDbListings } from "../services/serverListing.service.ts";
 import { destinationsData } from "../data/destinationData.ts";
 import { blogPosts } from "../data/blogData.ts";
+import { tourIntentsData } from "../data/tourIntentsData.ts";
 import { SITE_URL } from "../config/site.ts";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/about/editorial-policy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.65,
+    },
+    {
       url: `${baseUrl}/contact`,
       lastModified: new Date(),
       changeFrequency: "monthly",
@@ -78,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Static landing pages for all 6 destinations
+  // Landing pages for all destinations
   const destinationRoutes: MetadataRoute.Sitemap = Object.keys(destinationsData).map((slug) => ({
     url: `${baseUrl}/destinations/${slug}`,
     lastModified: new Date(),
@@ -86,10 +93,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
+  // Tour intent landing pages
+  const intentRoutes: MetadataRoute.Sitemap = Object.keys(tourIntentsData).map((slug) => ({
+    url: `${baseUrl}/tours/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.85,
+  }));
+
   // Blog articles
   const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.isoDate || post.date),
+    lastModified: new Date(post.lastUpdatedIso || post.isoDate || post.date),
     changeFrequency: "monthly",
     priority: 0.8,
   }));
@@ -108,5 +123,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn("Sitemap DB fetch fallback:", err);
   }
 
-  return [...staticRoutes, ...destinationRoutes, ...blogRoutes, ...listingRoutes];
+  return [...staticRoutes, ...destinationRoutes, ...intentRoutes, ...blogRoutes, ...listingRoutes];
 }

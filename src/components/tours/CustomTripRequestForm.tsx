@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { Send, CheckCircle2, AlertCircle, Compass, Users, Calendar, MapPin, Mail, Phone, User } from "lucide-react";
 
-export function CustomTripRequestForm() {
+export function CustomTripRequestForm({ defaultDestination }: { defaultDestination?: string } = {}) {
   const [formData, setFormData] = useState({
-    destination: "Hunza Valley",
+    destination: defaultDestination || "Hunza Valley",
     travelDate: "",
     travelers: 2,
     customerName: "",

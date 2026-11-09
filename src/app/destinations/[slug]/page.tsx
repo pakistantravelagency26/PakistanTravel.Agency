@@ -209,6 +209,28 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
 
       {/* Content Body Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-16">
+        {/* Key Travel Facts Panel */}
+        {dest.keyFacts && (
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Altitude</span>
+              <p className="text-sm font-extrabold text-slate-900">{dest.keyFacts.altitude}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Best Travel Season</span>
+              <p className="text-sm font-extrabold text-slate-900">{dest.keyFacts.bestSeason}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Distance from Islamabad</span>
+              <p className="text-sm font-extrabold text-slate-900">{dest.keyFacts.distanceFromIslamabad}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Road Condition</span>
+              <p className="text-sm font-extrabold text-slate-900">{dest.keyFacts.roadCondition}</p>
+            </div>
+          </div>
+        )}
+
         {/* Section 1: Comprehensive Editorial Overview (500+ Words) */}
         <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-sm space-y-6">
           <div className="flex items-center gap-2">

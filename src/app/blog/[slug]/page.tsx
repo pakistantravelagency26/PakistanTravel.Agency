@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, User, ArrowLeft, ChevronRight, Share2, Compass, HelpCircle } from "lucide-react";
+import { Calendar, Clock, RefreshCw, ArrowLeft, ChevronRight, HelpCircle, Compass, List } from "lucide-react";
 import { blogPosts } from "@/data/blogData";
 
 export const revalidate = 60;
@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       title: post.seoTitle,
       description: post.metaDescription,
       publishedTime: post.isoDate || post.date,
+      modifiedTime: post.lastUpdatedIso || post.isoDate,
       authors: [post.author.name],
       images: [
         {
@@ -64,6 +65,38 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   };
 }
 
+function renderParagraphWithLinks(text: string) {
+  // Simple parser for [link text](/url)
+  const parts = [];
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    const linkText = match[1];
+    const linkUrl = match[2];
+    parts.push(
+      <Link
+        key={match.index}
+        href={linkUrl}
+        className="font-bold text-sky-600 hover:text-sky-700 underline underline-offset-2"
+      >
+        {linkText}
+      </Link>
+    );
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+}
+
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const post = blogPosts.find((p) => p.slug === params.slug);
   const siteUrl = SITE_URL;
@@ -78,12 +111,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     headline: post.title,
     description: post.metaDescription,
     image: [post.coverImage],
-    datePublished: post.date,
-    dateModified: post.date,
+    datePublished: post.isoDate || post.date,
+    dateModified: post.lastUpdatedIso || post.isoDate || post.date,
     author: {
-      "@type": "Person",
+      "@type": "Organization",
       name: post.author.name,
-      jobTitle: post.author.role,
+      url: `${siteUrl}/about/editorial-policy`,
     },
     publisher: {
       "@type": "Organization",
@@ -124,6 +157,23 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
     ],
   };
 
+  const faqJsonLd = post.faqs && post.faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: post.faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.a,
+      },
+    })),
+  } : null;
+
+  const headings = post.content
+    .filter((sec) => sec.heading && sec.id)
+    .map((sec) => ({ id: sec.id!, title: sec.heading! }));
+
   return (
     <article className="bg-slate-50 min-h-screen pb-24 text-slate-800">
       <script
@@ -134,6 +184,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
 
       {/* Hero Header */}
       <div className="bg-white border-b border-slate-200/80 pt-10 pb-12">
@@ -155,24 +211,35 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </h1>
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-2 text-xs text-slate-500 border-t border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
-                {post.author.name.charAt(0)}
+            <Link
+              href="/about/editorial-policy"
+              className="flex items-center gap-3 group hover:opacity-90 transition"
+            >
+              <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs group-hover:bg-emerald-700 transition">
+                P
               </div>
               <div>
-                <span className="font-bold text-slate-900 block">{post.author.name}</span>
-                <span className="text-[11px] text-slate-400">{post.author.role}</span>
+                <span className="font-bold text-slate-900 group-hover:text-emerald-700 transition block">
+                  {post.author.name}
+                </span>
+                <span className="text-[11px] text-slate-400">{post.author.role} • Editorial Policy</span>
               </div>
-            </div>
+            </Link>
 
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex flex-wrap items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
-                {post.date}
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <span>Published: {post.date}</span>
               </span>
+              {post.lastUpdated && (
+                <span className="flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Updated: {post.lastUpdated}</span>
+                </span>
+              )}
               <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
-                {post.readTime}
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <span>{post.readTime}</span>
               </span>
             </div>
           </div>
@@ -195,8 +262,35 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
       {/* Main Content Body */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-12 space-y-10">
+        {/* Table of Contents */}
+        {headings.length > 0 && (
+          <nav aria-label="Table of Contents" className="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm space-y-3">
+            <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
+              <List className="w-4 h-4 text-sky-600" />
+              <span>Table of Contents</span>
+            </div>
+            <ol className="space-y-1.5 text-xs sm:text-sm text-slate-600 pl-4 list-decimal marker:text-sky-600">
+              {headings.map((h) => (
+                <li key={h.id}>
+                  <a href={`#${h.id}`} className="hover:text-sky-600 hover:underline transition">
+                    {h.title}
+                  </a>
+                </li>
+              ))}
+              {post.faqs && post.faqs.length > 0 && (
+                <li>
+                  <a href="#frequently-asked-questions" className="hover:text-sky-600 hover:underline transition">
+                    Frequently Asked Questions
+                  </a>
+                </li>
+              )}
+            </ol>
+          </nav>
+        )}
+
+        {/* Post Sections */}
         {post.content.map((sec, idx) => (
-          <section key={idx} className="space-y-4">
+          <section key={idx} id={sec.id} className="space-y-4 scroll-mt-20">
             {sec.heading && (
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                 {sec.heading}
@@ -211,7 +305,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
             {sec.paragraphs?.map((p, pIdx) => (
               <p key={pIdx} className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                {p}
+                {renderParagraphWithLinks(p)}
               </p>
             ))}
 
@@ -220,7 +314,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                 {sec.list.map((item, lIdx) => (
                   <li key={lIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-600 shrink-0 mt-2"></span>
-                    <span>{item}</span>
+                    <span>{renderParagraphWithLinks(item)}</span>
                   </li>
                 ))}
               </ul>
@@ -236,7 +330,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
         </div>
 
-        {/* Call to action card */}
+        {/* Call to Action Card */}
         <div className="bg-gradient-to-r from-slate-900 to-sky-950 text-white rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300">
             <Compass className="w-4 h-4" />
@@ -246,7 +340,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             Explore Northern Tours with PakistanTravel.Agency
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-            Book guided expeditions in Hunza, Skardu, and Swat with local mountain operators, flexible cancellation, and digital voucher issuance.
+            Book guided tour packages across Hunza, Skardu, and Swat with independent local tour operators, flexible cancellation, and digital vouchers.
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
@@ -264,6 +358,26 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </div>
 
+        {/* Post FAQs Block (with FAQPage Schema) */}
+        {post.faqs && post.faqs.length > 0 && (
+          <section id="frequently-asked-questions" className="space-y-4 pt-6 border-t border-slate-200 scroll-mt-20">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-sky-600" />
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                Frequently Asked Questions
+              </h2>
+            </div>
+            <div className="space-y-3">
+              {post.faqs.map((f, idx) => (
+                <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1.5">
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900">{f.q}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Back to Blog */}
         <div className="pt-8 border-t border-slate-200 flex items-center justify-between">
           <Link
@@ -272,6 +386,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to All Articles</span>
+          </Link>
+          <Link
+            href="/about/editorial-policy"
+            className="text-xs text-slate-400 hover:text-slate-600 transition"
+          >
+            Editorial Policy &amp; Standards →
           </Link>
         </div>
       </div>
