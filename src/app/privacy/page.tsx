@@ -108,6 +108,19 @@ export default async function PrivacyPage() {
             <p>{privacy.contactProtection}</p>
           </div>
 
+          <div className="space-y-2">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>4. Analytics, Cookies &amp; Consent Management</span>
+            </h2>
+            <p>
+              We utilize Google Analytics 4 (GA4) and Google Tag Manager (GTM) to evaluate site performance, search patterns, and user journeys. We operate under Google Consent Mode v2, which defaults advertising storage, personalization, and analytics cookies to denied until explicit user consent is established.
+            </p>
+            <p>
+              Analytics events (such as search queries, tour views, and custom trip requests) do not transmit Personally Identifiable Information (PII) like traveler names, email addresses, phone numbers, or CNIC numbers. We do not run third-party session recording tools (such as Microsoft Clarity) without explicit traveler opt-in.
+            </p>
+          </div>
+
           <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 mt-4 space-y-1.5 text-xs text-slate-700">
             <p><strong>Platform:</strong> {siteConfig.name}</p>
             {supportEmail && <p><strong>Official Contact:</strong> <a href={`mailto:${supportEmail}`} className="text-sky-700 underline">{supportEmail}</a></p>}

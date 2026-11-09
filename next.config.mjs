@@ -123,6 +123,26 @@ const nextConfig = {
         destination: "/:path*",
         permanent: true,
       },
+      {
+        source: "/hotels",
+        destination: "/tours",
+        permanent: true,
+      },
+      {
+        source: "/hotels/:path*",
+        destination: "/tours",
+        permanent: true,
+      },
+      {
+        source: "/rentals",
+        destination: "/tours",
+        permanent: true,
+      },
+      {
+        source: "/rentals/:path*",
+        destination: "/tours",
+        permanent: true,
+      },
     ];
   },
   async headers() {
