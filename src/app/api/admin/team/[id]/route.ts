@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { hashPassword, validatePasswordStrength } from "@/lib/password";
 
 export const dynamic = "force-dynamic";
 
@@ -12,8 +13,9 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
     const userPerms = (session.user as any)?.permissions || "";
@@ -120,13 +122,14 @@ export async function PATCH(
     if (name) updateData.name = name.trim();
     if (phone !== undefined) updateData.phone = phone ? phone.trim() : null;
     if (password && password.trim().length > 0) {
-      if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+      const strength = validatePasswordStrength(password.trim());
+      if (!strength.valid) {
         return NextResponse.json(
-          { success: false, error: "Password must be at least 8 characters long and contain both letters and numbers." },
+          { success: false, error: strength.error || "Password does not meet enterprise security requirements (min 12 chars, upper/lower/numbers/symbols)." },
           { status: 400 }
         );
       }
-      updateData.passwordHash = await bcrypt.hash(password.trim(), 10);
+      updateData.passwordHash = await hashPassword(password.trim());
       updateData.sessionVersion = { increment: 1 };
       updateData.tokenVersion = { increment: 1 };
     }
@@ -178,8 +181,9 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
     const userPerms = (session.user as any)?.permissions || "";

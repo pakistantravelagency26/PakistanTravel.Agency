@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { siteConfig } from "@/config/site";
@@ -10,15 +11,16 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized: Administrator session required." }, { status: 401 });
+  const auth = requireRole(session, ["ADMIN"]);
+  if (!auth.authorized || !session?.user) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: auth.status });
   }
 
   const isSuperAdmin =
-    session.user.staffRole === "SUPER_ADMIN" ||
-    (session.user as any).permissions === "ALL" ||
-    (session.user as any).permissions?.includes("ALL");
+    session!.user?.role === "ADMIN" &&
+    ((session!.user as any).staffRole === "SUPER_ADMIN" ||
+      (session!.user as any).permissions === "ALL" ||
+      (session!.user as any).permissions?.includes("ALL"));
 
   if (!isSuperAdmin) {
     return NextResponse.json(

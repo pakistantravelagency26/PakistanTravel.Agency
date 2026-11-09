@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { generateSignedDocumentUrl } from "@/lib/documentSigner";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +52,16 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized: Please log in to upload files." }, { status: 401 });
+    }
+
+    // Rate limiting: 10 uploads per 10 minutes
+    const clientIp = getTrustedClientIp(req.headers);
+    const rateCheck = await checkServerlessRateLimit(`upload-ip:${clientIp}`, 10, 600);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { error: `Too many upload requests. Please retry in ${rateCheck.retryAfterSeconds} seconds.` },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
+      );
     }
 
     const formData = await req.formData();
@@ -116,8 +129,9 @@ export async function POST(req: Request) {
 
       // If document is private (CNIC, NTN, license), store in private non-public storage
       if (isPrivate) {
-        const privateRef = await saveSecurePrivateFile(buffer, ext);
-        uploadedUrls.push(privateRef);
+        const fileName = await saveSecurePrivateFile(buffer, ext);
+        const signedUrl = generateSignedDocumentUrl(fileName);
+        uploadedUrls.push(signedUrl);
         continue;
       }
 
@@ -183,5 +197,5 @@ async function saveSecurePrivateFile(buffer: Buffer, ext: string): Promise<strin
   const filePath = path.join(privateDir, fileName);
 
   await writeFile(filePath, buffer);
-  return `private://${fileName}`;
+  return fileName;
 }

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "@/lib/env";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
@@ -45,6 +46,9 @@ export const metadata: Metadata = {
     shortcut: "/favicon.png",
     apple: "/icon-192.png",
   },
+  verification: {
+    google: "_dtqzGPHubzFRP1O4KBy3bcZjIlfrRoz-DtaGPx44ww",
+  },
 };
 
 export default function RootLayout({
@@ -85,16 +89,66 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="google-site-verification" content="_dtqzGPHubzFRP1O4KBy3bcZjIlfrRoz-DtaGPx44ww" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredDataGraph) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredDataGraph).replace(/</g, "\\u003c"),
+          }}
+        />
+        {/* Google Tag Manager Official Snippet - Container 1: GTM-PRQQWCK8 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PRQQWCK8');`,
+          }}
+        />
+        {/* Google Tag Manager Official Snippet - Container 2: GTM-TQZH7T4C */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TQZH7T4C');`,
+          }}
+        />
+        {/* Google Tag Manager / gtag base initialization */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());`,
+          }}
         />
       </head>
       <body className="min-h-screen flex flex-col bg-slate-50 antialiased selection:bg-brand-emerald selection:text-white">
+        {/* Google Tag Manager noscript fallbacks */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-PRQQWCK8"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-TQZH7T4C"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>

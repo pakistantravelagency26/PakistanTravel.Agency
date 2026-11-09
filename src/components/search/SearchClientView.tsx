@@ -17,7 +17,7 @@ import {
   Clock,
   RotateCcw
 } from "lucide-react";
-import { ListingData } from "@/services/listing.service";
+import type { ListingData } from "@/services/listing.service";
 import { CustomTripEnquiryForm } from "@/components/common/CustomTripEnquiryForm";
 
 interface SearchClientViewProps {

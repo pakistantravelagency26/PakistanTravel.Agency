@@ -34,9 +34,11 @@ export async function createSupportTicket(input: CreateTicketInput) {
     },
   });
 
-  console.log(
-    `[Support Ticket Created] ${ticket.ticketNumber} from ${ticket.customerName} (${ticket.customerContact}) | Priority: ${ticket.priority} | Notify: ${siteConfig.contact.supportEmail}`
-  );
+  if (process.env.NODE_ENV !== "production") {
+    console.log(
+      `[Support Ticket Created] ${ticket.ticketNumber} | Priority: ${ticket.priority} | Notify: ${siteConfig.contact.supportEmail}`
+    );
+  }
 
   return ticket;
 }

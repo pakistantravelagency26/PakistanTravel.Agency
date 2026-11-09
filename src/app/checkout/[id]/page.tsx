@@ -18,7 +18,7 @@ import {
   ArrowRight,
   Loader2
 } from "lucide-react";
-import { ListingData } from "@/services/listing.service";
+import type { ListingData } from "@/services/listing.service";
 import { calculateBookingPricing } from "@/lib/bookingPricing";
 import { siteConfig } from "@/config/site";
 
@@ -68,6 +68,11 @@ function CheckoutContent() {
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
+
+  // Payment choice & submission state
+  const [paymentChoice, setPaymentChoice] = useState<"DEPOSIT" | "FULL" | "ON_ARRIVAL">("DEPOSIT");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   if (isPageLoading) {
     return (
@@ -136,13 +141,9 @@ function CheckoutContent() {
   const depositAmount = pricing.depositAmount;
   const balanceDue = pricing.balanceDue;
 
-  // Payment choice: DEPOSIT (25% online) | FULL (100% online) | ON_ARRIVAL (reservation request)
-  const [paymentChoice, setPaymentChoice] = useState<"DEPOSIT" | "FULL" | "ON_ARRIVAL">("DEPOSIT");
+  // Payment calculation breakdown
   const amountToPayNow = paymentChoice === "DEPOSIT" ? depositAmount : paymentChoice === "FULL" ? totalAmount : 0;
   const balanceOnArrival = totalAmount - amountToPayNow;
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   function handleApplyPromo() {
     if (promoCode.toUpperCase() === "HUNZA10" || promoCode.toUpperCase() === "WELCOME") {

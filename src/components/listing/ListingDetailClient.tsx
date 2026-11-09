@@ -30,7 +30,7 @@ import {
   MessageCircle,
   Phone
 } from "lucide-react";
-import { ListingData } from "@/services/listing.service";
+import type { ListingData } from "@/services/listing.service";
 import { WriteReviewModal } from "@/components/reviews/WriteReviewModal";
 import { AskOperatorModal } from "./AskOperatorModal";
 

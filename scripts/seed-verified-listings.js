@@ -39,7 +39,7 @@ async function main() {
       name: 'Karakoram Expeditions Partner',
       email: 'karakoram@tours.pk',
       phone: '03001118687',
-      passwordHash: bcrypt.hashSync('karakoram123', 10),
+      passwordHash: bcrypt.hashSync(process.env.SEED_VENDOR_PASSWORD || require("crypto").randomBytes(16).toString("hex"), 12),
       role: 'VENDOR',
     },
   });
@@ -67,7 +67,7 @@ async function main() {
       name: 'Serena Hotels Partner',
       email: 'serena@luxury.pk',
       phone: '03004445566',
-      passwordHash: bcrypt.hashSync('serena123', 10),
+      passwordHash: bcrypt.hashSync(process.env.SEED_VENDOR_PASSWORD || require("crypto").randomBytes(16).toString("hex"), 12),
       role: 'VENDOR',
     },
   });

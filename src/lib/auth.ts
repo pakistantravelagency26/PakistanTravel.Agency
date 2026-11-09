@@ -4,16 +4,20 @@ import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import { prisma } from "./prisma.ts";
 import { findUserByIdentifier } from "../services/user.service.ts";
-import { verifyPassword } from "./password.ts";
+import { verifyPassword, hashPassword, needsRehash } from "./password.ts";
 import { checkRateLimit, resetRateLimit } from "./rate-limit.ts";
+import { checkServerlessRateLimit } from "./serverlessRateLimiter.ts";
 import { getTrustedClientIp } from "./clientIp.ts";
 import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "./loginThrottle.ts";
 
-// Pre-computed valid bcrypt salt/hash for constant-time evaluation to eliminate timing attacks
-const DUMMY_BCRYPT_HASH = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+// Pre-computed valid bcrypt salt/hash (cost 12) for constant-time evaluation to eliminate timing attacks
+const DUMMY_BCRYPT_HASH = "$2a$12$/AOsayhHFTkic9qQNjdMJONH7S7V/rZK5iQK2XuduAumIzsRi0lfu";
 
-const authSecret =
-  process.env.NEXTAUTH_SECRET || "super-secret-random-key-change-in-production";
+const authSecret = process.env.NEXTAUTH_SECRET;
+
+const Google = (GoogleProvider as any)?.default || GoogleProvider;
+const Facebook = (FacebookProvider as any)?.default || FacebookProvider;
+const Credentials = (CredentialsProvider as any)?.default || CredentialsProvider;
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -25,30 +29,44 @@ export const authOptions: NextAuthOptions = {
     error: "/login",
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "dummy-client-id",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy-client-secret",
-      allowDangerousEmailAccountLinking: false,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID || "dummy-fb-id",
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "dummy-fb-secret",
-      allowDangerousEmailAccountLinking: false,
-    }),
-    CredentialsProvider({
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: false,
+          }),
+        ]
+      : []),
+    ...(process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET
+      ? [
+          Facebook({
+            clientId: process.env.FACEBOOK_CLIENT_ID,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+            allowDangerousEmailAccountLinking: false,
+          }),
+        ]
+      : []),
+    Credentials({
       name: "Credentials",
       credentials: {
         email: { label: "Login ID / Email / Phone", type: "text" },
         password: { label: "Password", type: "password" },
         totpCode: { label: "2FA Authenticator Code", type: "text" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials: Record<string, string> | undefined, req: any) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter both Login ID and password");
         }
 
         const identifier = credentials.email.trim();
         const clientIp = getTrustedClientIp(req?.headers);
+
+        // 0. Serverless Rate Limit on IP (max 15 login attempts per 10 minutes)
+        const ipRate = await checkServerlessRateLimit(`login:ip:${clientIp}`, 15, 600);
+        if (!ipRate.success) {
+          throw new Error("Too many login attempts from this network. Please try again in 10 minutes.");
+        }
 
         // 1. Check persistent lockout status (30-min block after 3 wrong passwords or global IP block)
         const status = await checkLoginStatus(identifier, clientIp);
@@ -91,6 +109,20 @@ export const authOptions: NextAuthOptions = {
             );
           }
           throw new Error("Invalid Login ID or password");
+        }
+
+        // 4b. Transparent Migration: Upgrade legacy password hashes (< cost 12) on successful login
+        if (user && user.passwordHash && needsRehash(user.passwordHash)) {
+          try {
+            const upgradedHash = await hashPassword(credentials.password);
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { passwordHash: upgradedHash },
+            });
+            console.log(`[SECURITY AUTH] Upgraded password hash to bcrypt cost 12 for user: ${user.email}`);
+          } catch (err) {
+            console.warn("[SECURITY AUTH] Failed to upgrade legacy password hash:", err);
+          }
         }
 
         // 5. Two-Factor Authentication (TOTP / Google Authenticator) Check
@@ -295,10 +327,48 @@ export const authOptions: NextAuthOptions = {
       (session.user as any).twoFactorEnabled = Boolean(token.twoFactorEnabled);
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // 1. Internal relative URL validation
+      if (url.startsWith("/")) {
+        // Prevent protocol-relative bypasses (//evil.com) and backslash bypasses (/\evil.com)
+        if (url.startsWith("//") || url.startsWith("/\\") || url.includes("://")) {
+          return baseUrl;
+        }
+        return `${baseUrl}${url}`;
+      }
+      // 2. Absolute same-origin URL validation
+      try {
+        const parsed = new URL(url);
+        if (parsed.origin === baseUrl) {
+          return url;
+        }
+      } catch {
+        // Malformed URL
+      }
+      return baseUrl;
+    },
   },
   cookies: {
     sessionToken: {
       name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+    callbackUrl: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+    csrfToken: {
+      name: process.env.NODE_ENV === "production" ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",

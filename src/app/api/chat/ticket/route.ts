@@ -1,27 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupportTicket } from "@/lib/supportTickets";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
+
+const chatTicketSchema = z.object({
+  customerName: z.string().min(2, "Your name is required.").max(100),
+  customerContact: z.string().min(5, "A valid email address or phone number is required.").max(100),
+  category: z.enum(["GENERAL", "COMPLAINT", "REFUND", "PAYMENT"]).default("GENERAL"),
+  message: z.string().min(5, "Please enter your message or complaint details.").max(2000),
+  sessionId: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
+}).strict();
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { customerName, customerContact, category, message, sessionId, metadata } = body;
+    const parsed = chatTicketSchema.safeParse(body);
 
-    if (!customerName || typeof customerName !== "string" || !customerName.trim()) {
-      return NextResponse.json({ error: "Your name is required." }, { status: 400 });
-    }
-
-    if (!customerContact || typeof customerContact !== "string" || !customerContact.trim()) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "A valid email address or phone number is required." },
+        { error: parsed.error.errors[0]?.message || "Invalid ticket data format." },
         { status: 400 }
       );
     }
 
-    if (!message || typeof message !== "string" || !message.trim()) {
-      return NextResponse.json({ error: "Please enter your message or complaint details." }, { status: 400 });
-    }
+    const { customerName, customerContact, category, message, sessionId, metadata } = parsed.data;
 
     const ticket = await createSupportTicket({
       customerName: customerName.trim(),

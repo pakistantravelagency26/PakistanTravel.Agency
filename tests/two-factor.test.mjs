@@ -1,4 +1,4 @@
-import { describe, it } from "node:test";
+import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
 import {
   base32Encode,
@@ -296,5 +296,15 @@ describe("Phase 5: Mandatory 2FA & TOTP Security Test Suite", () => {
       assert.ok(audit);
       assert.equal(audit.actorEmail, "superadmin@pakistantravel.agency");
     });
+  });
+
+  after(async () => {
+    try {
+      await prisma.user.deleteMany({
+        where: { email: { startsWith: "admin-2fa-" } },
+      });
+    } catch {
+      // Ignore if DB connection closed
+    }
   });
 });

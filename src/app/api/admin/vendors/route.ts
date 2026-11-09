@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/password";
+import { hashPassword, validatePasswordStrength } from "@/lib/password";
 import { getAllVendors, createVendorAccount, VENDORS_STORE } from "@/services/vendor.service";
 import { getAllListingsForAdmin } from "@/services/listing.service";
 import { COMMISSION_PERCENT } from "@/config/site";
@@ -12,8 +13,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
     // 1. Try querying Neon PostgreSQL Database first for 100% persistent data
     const dbVendors = await prisma.vendor.findMany({
@@ -70,8 +72,9 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const body = await req.json();
@@ -90,6 +93,14 @@ export async function POST(req: Request) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")}-${Date.now().toString().slice(-4)}`;
+
+    const strength = validatePasswordStrength(body.passwordPlain);
+    if (!strength.valid) {
+      return NextResponse.json(
+        { success: false, error: strength.error || "Password does not meet enterprise security requirements (minimum 12 chars, upper/lower/numbers/symbols)." },
+        { status: 400 }
+      );
+    }
 
     const passwordHash = await hashPassword(body.passwordPlain);
 

@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createBooking, getAllBookings, getBookingsByEmail, getBookingsByVendorId } from "@/services/booking.service";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -67,20 +68,16 @@ const bookingSchema = z.object({
   guestPhone: z.string().min(10),
   cnicOrPassport: z.string().min(5),
   specialRequests: z.string().optional(),
-});
+}).strict();
 
 export async function POST(req: Request) {
   try {
-    const clientIp =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown-ip";
-
-    const rateCheck = checkRateLimit(`booking-ip:${clientIp}`, 10, 10 * 60 * 1000);
+    const clientIp = getTrustedClientIp(req.headers);
+    const rateCheck = await checkServerlessRateLimit(`booking-ip:${clientIp}`, 10, 600);
     if (!rateCheck.success) {
       return NextResponse.json(
         { error: `Too many booking attempts. Please retry after ${rateCheck.retryAfterSeconds} seconds.` },
-        { status: 429 }
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
       );
     }
 

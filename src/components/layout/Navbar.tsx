@@ -15,7 +15,7 @@ import {
   Phone
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { NavLinkItem, DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
+import { NavLinkItem, DEFAULT_SITE_SETTINGS } from "@/config/siteSettings.constants";
 
 export function Navbar() {
   const { data: session } = useSession();

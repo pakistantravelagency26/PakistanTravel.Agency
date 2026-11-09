@@ -173,7 +173,7 @@ export default function TwoFactorEnrollment({ portalName, onSuccessRedirect }: T
                 </div>
               )}
               <div className="space-y-2 text-xs">
-                <p className="font-semibold text-slate-700">Can't scan? Enter manually:</p>
+                <p className="font-semibold text-slate-700">Can&apos;t scan? Enter manually:</p>
                 <div className="flex items-center gap-2 font-mono text-[11px] bg-white px-3 py-2 rounded-xl border border-slate-300">
                   <span className="truncate max-w-[180px]">{secret}</span>
                   <button

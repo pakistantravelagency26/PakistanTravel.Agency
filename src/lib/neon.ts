@@ -3,15 +3,18 @@
  * Wires Lakebase Postgres, Neon Functions, Neon Auth, and Neon Realtime into PakistanTravel.agency
  */
 
-import { prisma, NEON_DATABASE_URL } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export const neonConfig = {
   branch: process.env.NEON_BRANCH || "production",
   databaseUrl:
     process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("db.prisma.io")
       ? process.env.DATABASE_URL
-      : NEON_DATABASE_URL,
-  databaseUrlUnpooled: process.env.DATABASE_URL_UNPOOLED || NEON_DATABASE_URL,
+      : "",
+  databaseUrlUnpooled:
+    process.env.DATABASE_URL_UNPOOLED ||
+    process.env.DATABASE_URL ||
+    "",
   authBaseUrl: process.env.NEON_AUTH_BASE_URL,
   authJwksUrl: process.env.NEON_AUTH_JWKS_URL,
   functionHelloBaseUrl: process.env.NEON_FUNCTION_HELLO_BASE_URL,

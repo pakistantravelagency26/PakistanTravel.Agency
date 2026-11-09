@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const AUTH_SECRET =
-  process.env.NEXTAUTH_SECRET || "super-secret-random-key-change-in-production";
+const AUTH_SECRET = process.env.NEXTAUTH_SECRET;
 
 export async function middleware(req: NextRequest) {
   const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").toLowerCase().trim();
@@ -48,6 +47,83 @@ export async function middleware(req: NextRequest) {
       "https://www.pakistantravel.agency"
     );
     return NextResponse.redirect(englishUrl, 301);
+  }
+
+  // 1d. API Security: CORS & CSRF Protection for /api/*
+  if (path.startsWith("/api/")) {
+    const origin = req.headers.get("origin");
+    const referer = req.headers.get("referer");
+    const secFetchSite = req.headers.get("sec-fetch-site");
+    const isProduction = process.env.NODE_ENV === "production";
+
+    const isAllowedOrigin = (urlStr: string) => {
+      if (!urlStr) return false;
+      const clean = urlStr.trim().toLowerCase();
+      if (clean === "https://www.pakistantravel.agency") return true;
+      if (!isProduction && (clean === "http://localhost:3000" || clean === "http://127.0.0.1:3000")) return true;
+      return false;
+    };
+
+    // Preflight (OPTIONS) Handling
+    if (req.method === "OPTIONS") {
+      if (origin) {
+        if (!isAllowedOrigin(origin)) {
+          return NextResponse.json(
+            { error: "Forbidden: Cross-origin request not allowed." },
+            { status: 403 }
+          );
+        }
+        return new NextResponse(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, x-signature, x-webhook-signature, stripe-signature, x-webhook-timestamp",
+            "Access-Control-Max-Age": "86400",
+            "Vary": "Origin",
+          },
+        });
+      }
+      return new NextResponse(null, { status: 204 });
+    }
+
+    // State-changing CSRF defense (POST, PUT, PATCH, DELETE)
+    const isStateChanging = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method);
+    const isExemptWebhook = path === "/api/payments/webhook" || path.startsWith("/api/cron/");
+
+    if (isStateChanging && !isExemptWebhook) {
+      if (secFetchSite === "cross-site") {
+        return NextResponse.json(
+          { error: "Forbidden: Cross-site request blocked by CSRF policy." },
+          { status: 403 }
+        );
+      }
+
+      if (origin && !isAllowedOrigin(origin)) {
+        return NextResponse.json(
+          { error: "Forbidden: Cross-origin state-changing request blocked." },
+          { status: 403 }
+        );
+      }
+
+      if (!origin && referer) {
+        try {
+          const refOrigin = new URL(referer).origin;
+          if (!isAllowedOrigin(refOrigin)) {
+            return NextResponse.json(
+              { error: "Forbidden: Cross-origin referer blocked by CSRF policy." },
+              { status: 403 }
+            );
+          }
+        } catch {
+          return NextResponse.json(
+            { error: "Forbidden: Malformed referer header." },
+            { status: 403 }
+          );
+        }
+      }
+    }
   }
 
   // Check token across all possible cookie variations and secure flags

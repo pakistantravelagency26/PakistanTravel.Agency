@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { maskContactLeakage } from "@/lib/antiLeakage";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
 
 const enquirySchema = z.object({
   destination: z.string().min(2, "Destination is required").max(100),
@@ -12,10 +14,19 @@ const enquirySchema = z.object({
   customerPhone: z.string().min(8, "Phone number is required").max(30),
   customerEmail: z.string().email("Invalid email").optional().or(z.literal("")),
   specialRequests: z.string().max(1000).optional().nullable(),
-});
+}).strict();
 
 export async function POST(req: Request) {
   try {
+    const clientIp = getTrustedClientIp(req.headers);
+    const rateCheck = await checkServerlessRateLimit(`enquiry-ip:${clientIp}`, 5, 600);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, error: `Too many enquiries sent. Please retry after ${rateCheck.retryAfterSeconds} seconds.` },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const parsed = enquirySchema.safeParse(body);
 

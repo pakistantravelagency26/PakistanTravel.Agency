@@ -25,17 +25,25 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=(self)",
   },
   {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin",
+  },
+  {
+    key: "Cross-Origin-Resource-Policy",
+    value: "same-origin",
+  },
+  {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
       process.env.NODE_ENV === "production"
-        ? "script-src 'self' 'unsafe-inline' https://apis.google.com https://connect.facebook.net https://js.stripe.com"
-        : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://connect.facebook.net https://js.stripe.com",
+        ? "script-src 'self' 'unsafe-inline' https://apis.google.com https://www.googletagmanager.com https://connect.facebook.net https://js.stripe.com"
+        : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com https://connect.facebook.net https://js.stripe.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://*.googleusercontent.com https://*.fbcdn.net",
+      "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://*.googleusercontent.com https://*.fbcdn.net https://www.googletagmanager.com https://*.google-analytics.com",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.neon.tech https://*.cloudinary.com https://api.stripe.com https://accounts.google.com",
-      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://js.stripe.com",
+      "connect-src 'self' https://*.neon.tech https://*.cloudinary.com https://api.stripe.com https://accounts.google.com https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+      "frame-src 'self' https://accounts.google.com https://www.facebook.com https://js.stripe.com https://www.googletagmanager.com",
       "frame-ancestors 'self'",
       "object-src 'none'",
       "base-uri 'self'",
@@ -45,6 +53,8 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   // Use standalone output only during containerized Docker builds, never on Vercel
   ...(process.env.DOCKER_BUILD === "standalone" ? { output: "standalone" } : {}),
   images: {

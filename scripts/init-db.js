@@ -6,9 +6,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('[init-db] Checking Neon PostgreSQL database initialization...');
 
-  // 1. Super Admin: emraanirshad88@gmail.com / Emra@91173259
-  const adminEmail = 'emraanirshad88@gmail.com';
-  const adminHash = '$2a$10$o4qbwcfotztX2tCS5qKhxu2Z1fX0DXgfM.80hqQtaGiRVfUAGKKDS';
+  // 1. Initial Super Admin Account Verification
+  const adminEmail = (process.env.INITIAL_ADMIN_EMAIL || 'emraanirshad88@gmail.com').toLowerCase().trim();
+  const rawAdminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+  const adminHash = rawAdminPassword ? bcrypt.hashSync(rawAdminPassword, 12) : '$/AOsayhHFTkic9qQNjdMJONH7S7V/rZK5iQK2XuduAumIzsRi0lfu';
 
   const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (!existingAdmin) {
@@ -140,8 +141,7 @@ async function main() {
         phone2: '03214445566',
         phone3: '03457778899',
         loginId: 'karakoram_tours',
-        passwordPlain: 'karakoram123',
-        email: 'karakoram@tours.pk',
+                email: 'karakoram@tours.pk',
       },
       tours: [
         {
@@ -189,8 +189,7 @@ async function main() {
         phone2: '03335556677',
         phone3: '',
         loginId: 'hunza_treks',
-        passwordPlain: 'hunza123',
-        email: 'hunza@adventures.pk',
+                email: 'hunza@adventures.pk',
       },
       tours: [
         {
@@ -238,8 +237,7 @@ async function main() {
         phone2: '03129998877',
         phone3: '',
         loginId: 'swat_alpine',
-        passwordPlain: 'swat123',
-        email: 'swat@alpine.pk',
+                email: 'swat@alpine.pk',
       },
       tours: [
         {
@@ -287,8 +285,7 @@ async function main() {
         phone2: '03451112233',
         phone3: '',
         loginId: 'serena_lodges',
-        passwordPlain: 'serena123',
-        email: 'serena@luxury.pk',
+                email: 'serena@luxury.pk',
       },
       tours: [
         {
@@ -333,7 +330,7 @@ async function main() {
         name: v.name,
         email: v.email,
         phone: v.phone,
-        passwordHash: bcrypt.hashSync(v.details.passwordPlain, 10),
+        passwordHash: bcrypt.hashSync(process.env.SEED_VENDOR_PASSWORD || require("crypto").randomBytes(16).toString("hex"), 12),
         role: 'VENDOR',
       },
     });

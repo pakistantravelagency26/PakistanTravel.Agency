@@ -21,11 +21,14 @@ export async function GET(
     const guestToken = url.searchParams.get("token")?.trim();
 
     // Cryptographic HMAC token for guest verification
+    const secret = process.env.NEXTAUTH_SECRET || "";
     const crypto = await import("crypto");
-    const expectedToken = crypto
-      .createHmac("sha256", process.env.NEXTAUTH_SECRET || "voucher-token-fallback")
-      .update(`${booking.id}:${booking.guestEmail.toLowerCase().trim()}`)
-      .digest("hex");
+    const expectedToken = secret
+      ? crypto
+          .createHmac("sha256", secret)
+          .update(`${booking.id}:${booking.guestEmail.toLowerCase().trim()}`)
+          .digest("hex")
+      : "";
 
     const isTokenValid = Boolean(guestToken && guestToken === expectedToken);
 

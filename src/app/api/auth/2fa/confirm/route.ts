@@ -4,11 +4,23 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { verifyTotpCode } from "@/lib/totp";
 import { decryptTotpSecret } from "@/lib/totpCrypto";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Rate limiting: 5 attempts per 5 minutes per user/IP
+  const clientIp = getTrustedClientIp(req.headers);
+  const rateCheck = await checkServerlessRateLimit(`2fa-confirm:${session.user.id}:${clientIp}`, 5, 300);
+  if (!rateCheck.success) {
+    return NextResponse.json(
+      { error: `Too many failed 2FA verification attempts. Please retry in ${rateCheck.retryAfterSeconds} seconds.` },
+      { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
+    );
   }
 
   try {

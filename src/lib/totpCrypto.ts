@@ -13,8 +13,12 @@ const SALT = "pakistantravel-agency-2fa-totp-salt-2026";
 function getMasterKey(): Buffer {
   const secret =
     process.env.TWO_FACTOR_ENCRYPTION_KEY ||
-    process.env.NEXTAUTH_SECRET ||
-    "fallback-pta-super-secure-32-chars-long-key!";
+    process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    throw new Error(
+      "CONFIGURATION ERROR: TWO_FACTOR_ENCRYPTION_KEY or NEXTAUTH_SECRET must be configured for 2FA encryption"
+    );
+  }
   return crypto.scryptSync(secret, SALT, 32);
 }
 

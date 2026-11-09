@@ -144,8 +144,10 @@ export async function requestPasswordReset(email: string, ip: string): Promise<R
     },
   });
 
-  // Log to console for observability / dev
-  console.log(`[AUTH SECURITY] Password reset code for ${normEmail}: ${codeStr} (Expires: ${expiresAt.toISOString()})`);
+  // Log to console only in non-production environments to prevent token leakage in production log aggregators
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[AUTH SECURITY DEV] Password reset code generated (Expires: ${expiresAt.toISOString()})`);
+  }
 
   return {
     success: true,

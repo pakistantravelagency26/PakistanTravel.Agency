@@ -2,23 +2,27 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
 import { maskContactLeakage, containsContactLeakage } from "@/lib/antiLeakage";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
+const reviewSchema = z.object({
+  listingId: z.string().min(1, "Listing ID is required"),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().min(5, "Comment must be at least 5 characters").max(2000, "Comment cannot exceed 2000 characters"),
+}).strict();
+
 export async function POST(req: Request) {
   try {
-    const clientIp =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown-ip";
-
-    const rateCheck = checkRateLimit(`review-ip:${clientIp}`, 5, 10 * 60 * 1000);
+    const clientIp = getTrustedClientIp(req.headers);
+    const rateCheck = await checkServerlessRateLimit(`review-ip:${clientIp}`, 5, 600);
     if (!rateCheck.success) {
       return NextResponse.json(
         { error: `Too many reviews submitted. Please retry after ${rateCheck.retryAfterSeconds} seconds.` },
-        { status: 429 }
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
       );
     }
 
@@ -28,33 +32,25 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { listingId, rating, comment } = body;
-
-    const numericRating = Math.round(Number(rating));
-    if (!listingId || !numericRating || numericRating < 1 || numericRating > 5) {
+    const parsed = reviewSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid review submission: rating must be between 1 and 5 stars" },
+        { error: "Validation failed: " + (parsed.error.errors[0]?.message || "Invalid input") },
         { status: 400 }
       );
     }
 
-    const rawComment = (typeof comment === "string" ? comment : "").trim();
+    const { listingId, rating, comment } = parsed.data;
 
     // Anti-leakage block: phone numbers, emails, WhatsApp links before/after booking
-    if (containsContactLeakage(rawComment)) {
+    if (containsContactLeakage(comment)) {
       return NextResponse.json(
         { error: "Direct contact details (phone numbers, WhatsApp, emails) are not permitted in reviews. Please remove them to submit." },
         { status: 400 }
       );
     }
 
-    const cleanComment = maskContactLeakage(rawComment);
-    if (!cleanComment || cleanComment.length < 5 || cleanComment.length > 2000) {
-      return NextResponse.json(
-        { error: "Review comment must be between 5 and 2000 characters" },
-        { status: 400 }
-      );
-    }
+    const cleanComment = maskContactLeakage(comment.trim());
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getVendorById, deleteVendorAccount } from "@/services/vendor.service";
 import { deleteListingsByVendorId } from "@/services/listing.service";
@@ -13,8 +14,9 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized access" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const { id } = params;

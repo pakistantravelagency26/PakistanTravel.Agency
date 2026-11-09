@@ -10,6 +10,8 @@ export interface AuthSession {
     name?: string | null;
     role?: "ADMIN" | "VENDOR" | "CUSTOMER" | "USER" | string;
     vendorId?: string | null;
+    staffRole?: string | null;
+    permissions?: string | null;
   };
 }
 
@@ -21,10 +23,11 @@ export interface AuthCheckResult {
 
 /**
  * Validates that an active session exists and matches at least one of the specified roles.
+ * Returns 401 for anonymous / unauthenticated requests, and 403 for unauthorized roles.
  */
 export function requireRole(
   session: AuthSession | null | undefined,
-  allowedRoles: Array<"ADMIN" | "VENDOR" | "USER" | string>
+  allowedRoles: Array<"ADMIN" | "VENDOR" | "CUSTOMER" | "USER" | string>
 ): AuthCheckResult {
   if (!session || !session.user) {
     return {
@@ -117,4 +120,64 @@ export function requireCustomerOwnership(
   }
 
   return { authorized: true, status: 200 };
+}
+
+/**
+ * Unified resource ownership check.
+ * Verifies multi-tenant vendor isolation or customer identity.
+ * Administrators bypass ownership constraints.
+ */
+export function requireOwnership(
+  session: AuthSession | null | undefined,
+  resource: { vendorId?: string | null; customerEmail?: string | null; userId?: string | null }
+): AuthCheckResult {
+  if (!session || !session.user) {
+    return {
+      authorized: false,
+      status: 401,
+      error: "Unauthorized: Active session required.",
+    };
+  }
+
+  if (session.user.role === "ADMIN") {
+    return { authorized: true, status: 200 };
+  }
+
+  if (resource.vendorId !== undefined) {
+    if (session.user.role !== "VENDOR") {
+      return {
+        authorized: false,
+        status: 403,
+        error: "Forbidden: Vendor credentials required to access this resource.",
+      };
+    }
+    const currentVendorId = session.user.vendorId;
+    if (!currentVendorId || currentVendorId !== resource.vendorId) {
+      return {
+        authorized: false,
+        status: 403,
+        error: "Forbidden: You do not own this vendor resource.",
+      };
+    }
+    return { authorized: true, status: 200 };
+  }
+
+  if (resource.customerEmail !== undefined || resource.userId !== undefined) {
+    const isEmailMatch =
+      Boolean(resource.customerEmail &&
+      session.user.email &&
+      session.user.email.toLowerCase().trim() === resource.customerEmail.toLowerCase().trim());
+    const isIdMatch = Boolean(resource.userId && session.user.id && session.user.id === resource.userId);
+
+    if (!isEmailMatch && !isIdMatch) {
+      return {
+        authorized: false,
+        status: 403,
+        error: "Forbidden: You cannot access or modify another user's records.",
+      };
+    }
+    return { authorized: true, status: 200 };
+  }
+
+  return { authorized: false, status: 403, error: "Forbidden: Ownership verification failed." };
 }

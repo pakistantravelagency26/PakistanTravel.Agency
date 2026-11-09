@@ -5,11 +5,25 @@ import { prisma } from "@/lib/prisma";
 import QRCode from "qrcode";
 import { generateTotpSecret, getOtpAuthUrl, generateRecoveryCodes } from "@/lib/totp";
 import { encryptTotpSecret } from "@/lib/totpCrypto";
+import { getTrustedClientIp } from "@/lib/clientIp";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const clientIp = getTrustedClientIp(req.headers);
+  const rateResult = await checkServerlessRateLimit(`2fa-setup:ip:${clientIp}`, 5, 300);
+  if (!rateResult.success) {
+    return NextResponse.json(
+      { error: "Too many 2FA setup attempts. Please try again in 5 minutes." },
+      { 
+        status: 429,
+        headers: { "Retry-After": String(rateResult.retryAfterSeconds) }
+      }
+    );
   }
 
   try {

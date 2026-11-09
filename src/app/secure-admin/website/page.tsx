@@ -44,8 +44,8 @@ import type {
   PageBlogSettings,
   NavLinkItem,
   FooterLinkItem
-} from "@/services/siteSettings.service";
-import { DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
+} from "@/config/siteSettings.constants";
+import { DEFAULT_SITE_SETTINGS } from "@/config/siteSettings.constants";
 
 export default function AdminWebsiteManagerPage() {
   const [activeTab, setActiveTab] = useState<

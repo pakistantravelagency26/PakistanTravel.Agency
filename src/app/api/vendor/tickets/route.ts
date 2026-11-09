@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import prisma from "@/lib/prisma";
 import { createSupportTicket } from "@/lib/supportTickets";
 
@@ -9,34 +10,28 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user.role !== "VENDOR" && session.user.role !== "ADMIN")) {
-      return NextResponse.json({ success: false, error: "Unauthorized: Vendor session required" }, { status: 401 });
+    const auth = requireRole(session, ["VENDOR", "ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
-    const email = session.user.email?.toLowerCase().trim();
+    const email = session?.user?.email?.toLowerCase().trim();
     if (!email) {
       return NextResponse.json({ success: false, error: "Missing vendor email" }, { status: 400 });
     }
 
+    // Strict multi-tenant isolation: Vendor only sees tickets where customerContact matches their own email
     const tickets = await prisma.supportTicket.findMany({
-      where: {
-        OR: [
-          { customerContact: email },
-          { source: "VENDOR" },
-        ],
-      },
+      where: session?.user?.role === "ADMIN" 
+        ? {} 
+        : { customerContact: email, source: "VENDOR" },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
 
-    // Filter to only this vendor's tickets if not admin
-    const vendorTickets = session.user.role === "ADMIN" 
-      ? tickets 
-      : tickets.filter((t) => t.customerContact?.toLowerCase() === email);
-
     return NextResponse.json({
       success: true,
-      tickets: vendorTickets,
+      tickets,
     });
   } catch (error: any) {
     console.error("[VendorTicketsAPI] GET Error:", error);
@@ -47,8 +42,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user.role !== "VENDOR" && session.user.role !== "ADMIN")) {
-      return NextResponse.json({ success: false, error: "Unauthorized: Vendor session required" }, { status: 401 });
+    const auth = requireRole(session, ["VENDOR", "ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const body = await req.json();
@@ -58,8 +54,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Please enter your message or question details." }, { status: 400 });
     }
 
-    const vendorName = session.user.name || "Verified Partner";
-    const vendorEmail = session.user.email || "";
+    const vendorName = session?.user?.name || "Verified Partner";
+    const vendorEmail = session?.user?.email || "";
 
     const combinedMessage = subject 
       ? `[Subject: ${subject.trim()}]\n\n${message.trim()}`
@@ -73,8 +69,8 @@ export async function POST(req: NextRequest) {
       source: "CONTACT_FORM",
       metadata: {
         isVendor: true,
-        vendorId: (session.user as any).vendorId || null,
-        vendorRole: session.user.role,
+        vendorId: (session?.user as any)?.vendorId || null,
+        vendorRole: session?.user?.role,
         priority: priority || "MEDIUM",
       },
     });

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
+import { encryptSensitiveField, decryptSensitiveField, maskCnic } from "@/lib/fieldEncryption";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -8,12 +10,13 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["VENDOR", "ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session!.user!.email! },
       include: { vendorProfile: true },
     });
 
@@ -24,6 +27,8 @@ export async function GET() {
       );
     }
 
+    const rawCnic = user.vendorProfile.cnicOrTaxNumber ? decryptSensitiveField(user.vendorProfile.cnicOrTaxNumber) : "";
+
     return NextResponse.json({
       success: true,
       profile: {
@@ -33,7 +38,7 @@ export async function GET() {
         whatsapp: user.vendorProfile.whatsapp || user.vendorProfile.phone,
         city: user.vendorProfile.city,
         address: user.vendorProfile.address || "",
-        cnicOrTaxNumber: user.vendorProfile.cnicOrTaxNumber || "",
+        cnicOrTaxNumber: rawCnic ? maskCnic(rawCnic) : "",
         status: user.vendorProfile.status,
       },
     });
@@ -49,12 +54,13 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["VENDOR", "ADMIN"]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session!.user!.email! },
       include: { vendorProfile: true },
     });
 
@@ -79,6 +85,10 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    const encryptedCnic = cnicOrTaxNumber !== undefined 
+      ? (String(cnicOrTaxNumber).trim() ? encryptSensitiveField(String(cnicOrTaxNumber).trim()) : null)
+      : undefined;
+
     const updated = await prisma.vendor.update({
       where: { id: user.vendorProfile.id },
       data: {
@@ -87,13 +97,24 @@ export async function PATCH(req: NextRequest) {
         ...(whatsapp !== undefined ? { whatsapp: String(whatsapp).trim() } : {}),
         ...(city ? { city: String(city).trim() } : {}),
         ...(address !== undefined ? { address: String(address).trim() } : {}),
-        ...(cnicOrTaxNumber !== undefined ? { cnicOrTaxNumber: String(cnicOrTaxNumber).trim() } : {}),
+        ...(encryptedCnic !== undefined ? { cnicOrTaxNumber: encryptedCnic } : {}),
       },
     });
 
+    const maskedUpdatedCnic = updated.cnicOrTaxNumber ? maskCnic(decryptSensitiveField(updated.cnicOrTaxNumber)) : "";
+
     return NextResponse.json({
       success: true,
-      profile: updated,
+      profile: {
+        id: updated.id,
+        businessName: updated.businessName,
+        phone: updated.phone,
+        whatsapp: updated.whatsapp,
+        city: updated.city,
+        address: updated.address,
+        cnicOrTaxNumber: maskedUpdatedCnic,
+        status: updated.status,
+      },
     });
   } catch (error: unknown) {
     console.error("[PartnerProfileAPI] PATCH Error:", error);

@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { hashPassword, validatePasswordStrength } from "@/lib/password";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
     const members = await prisma.user.findMany({
@@ -58,8 +60,9 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user?.role !== "ADMIN") {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
     const userPerms = (session.user as any)?.permissions || "";
@@ -85,9 +88,10 @@ export async function POST(req: Request) {
       );
     }
 
-    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    const strength = validatePasswordStrength(password.trim());
+    if (!strength.valid) {
       return NextResponse.json(
-        { success: false, error: "Password must be at least 8 characters long and contain both letters and numbers." },
+        { success: false, error: strength.error || "Password does not meet enterprise security requirements (min 12 chars, upper/lower/numbers/symbols)." },
         { status: 400 }
       );
     }
@@ -105,7 +109,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(password.trim(), 10);
+    const passwordHash = await hashPassword(password.trim());
 
     // Format permissions: either array or string
     let formattedPermissions = "BOOKINGS";

@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized: Active session required." }, { status: 401 });
+  const auth = requireRole(session, ["ADMIN"]);
+  if (!auth.authorized || !session?.user) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: auth.status });
   }
 
   // Enforce SUPER_ADMIN authority only
   const isSuperAdmin =
-    session.user.role === "ADMIN" &&
-    ((session.user as any).staffRole === "SUPER_ADMIN" || (session.user as any).permissions === "ALL");
+    session!.user?.role === "ADMIN" &&
+    ((session!.user as any).staffRole === "SUPER_ADMIN" || (session!.user as any).permissions === "ALL");
 
   if (!isSuperAdmin) {
     return NextResponse.json(

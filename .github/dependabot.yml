@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # Maintain npm dependencies for PakistanTravel.Agency
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Karachi"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "pakistantravel-security"
+    labels:
+      - "dependencies"
+      - "security"
+    versioning-strategy: "increase"
+    commit-message:
+      prefix: "security"
+      prefix-development: "chore"
+      include: "scope"
+    ignore:
+      # Keep Next.js on 14.2.x LTS branch until major migration window
+      - dependency-name: "next"
+        versions: [">= 15.0.0"]
+      # Keep React on 18.x until Next.js upgrade to 15+
+      - dependency-name: "react"
+        versions: [">= 19.0.0"]
+      - dependency-name: "react-dom"
+        versions: [">= 19.0.0"]

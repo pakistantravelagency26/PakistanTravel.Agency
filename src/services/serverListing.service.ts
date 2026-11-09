@@ -112,15 +112,30 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
         vendor: { status: "VERIFIED" },
       },
       include: {
-        vendor: true,
+        vendor: {
+          select: {
+            id: true,
+            businessName: true,
+            city: true,
+            status: true,
+          },
+        },
         destination: true,
         units: true,
         departures: {
           orderBy: { startDate: "asc" },
         },
         reviews: {
-          include: {
-            user: true,
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
@@ -142,15 +157,30 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       },
       include: {
-        vendor: true,
+        vendor: {
+          select: {
+            id: true,
+            businessName: true,
+            city: true,
+            status: true,
+          },
+        },
         destination: true,
         units: true,
         departures: {
           orderBy: { startDate: "asc" },
         },
         reviews: {
-          include: {
-            user: true,
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },

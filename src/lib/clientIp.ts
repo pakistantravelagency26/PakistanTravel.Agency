@@ -61,10 +61,14 @@ export function getTrustedClientIp(headers?: HeaderSource | null): string {
     return realIp.trim();
   }
 
-  // 4. Fallback to X-Forwarded-For (take the first IP in the chain)
+  // 4. Fallback to X-Forwarded-For (take the first IP in the chain, stripping optional port)
   const xForwardedFor = getHeaderValue(headers, "x-forwarded-for");
   if (xForwardedFor) {
-    const firstXff = xForwardedFor.split(",")[0]?.trim();
+    let firstXff = xForwardedFor.split(",")[0]?.trim() || "";
+    // If format is IPv4:port (e.g. 192.0.2.1:5432), strip port
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/.test(firstXff)) {
+      firstXff = firstXff.split(":")[0];
+    }
     if (firstXff && isValidIp(firstXff)) {
       return firstXff;
     }

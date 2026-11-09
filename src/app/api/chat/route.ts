@@ -1,38 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/chatRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
 import { sanitizeUserMessage, maskSensitiveData } from "@/lib/chatSanitizer";
 import { getGroundedContext } from "@/services/chatGrounding.service";
 import { streamChatCompletion, type ChatMessageItem } from "@/lib/chatProvider";
 import { siteConfig } from "@/config/site";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
+const chatRequestSchema = z.object({
+  messages: z.array(
+    z.object({
+      role: z.enum(["user", "assistant", "system"]),
+      content: z.string(),
+    }).strict()
+  ).min(1, "Messages array cannot be empty."),
+  sessionId: z.string().optional(),
+}).strict();
+
 export async function POST(req: NextRequest) {
   try {
-    // 1. Identify client for rate limiting
-    const forwardedFor = req.headers.get("x-forwarded-for");
-    const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
-
-    const rateResult = checkRateLimit(ip, 20, 10 * 60 * 1000);
-    if (!rateResult.allowed) {
+    // 1. Identify client with trusted IP proxy check and apply serverless rate limiting
+    const clientIp = getTrustedClientIp(req.headers);
+    const rateResult = await checkServerlessRateLimit(`chat:ip:${clientIp}`, 20, 600);
+    if (!rateResult.success) {
       return NextResponse.json(
         {
           error: "Rate limit exceeded. Please wait a few minutes before sending another message or contact our team via email.",
-          resetMs: rateResult.resetMs,
+          retryAfterSeconds: rateResult.retryAfterSeconds,
         },
-        { status: 429 }
+        { 
+          status: 429,
+          headers: { "Retry-After": String(rateResult.retryAfterSeconds) }
+        }
       );
     }
 
-    // 2. Parse request body
+    // 2. Parse request body with strict Zod validation
     const body = await req.json().catch(() => ({}));
-    const rawMessages = Array.isArray(body?.messages) ? body.messages : [];
-    const sessionId = typeof body?.sessionId === "string" ? body.sessionId : undefined;
-
-    if (rawMessages.length === 0) {
-      return NextResponse.json({ error: "Messages array cannot be empty." }, { status: 400 });
+    const parsed = chatRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.errors[0]?.message || "Invalid chat request format." }, { status: 400 });
     }
+
+    const rawMessages = parsed.data.messages;
+    const sessionId = parsed.data.sessionId;
 
     const lastMessage = rawMessages[rawMessages.length - 1];
     const validation = sanitizeUserMessage(lastMessage?.content);
@@ -83,7 +97,7 @@ export async function POST(req: NextRequest) {
           const session = await prisma.chatSession.upsert({
             where: { id: sessionId },
             update: { updatedAt: new Date() },
-            create: { id: sessionId, ipHash: ip.slice(0, 16) },
+            create: { id: sessionId, ipHash: clientIp.slice(0, 16) },
           });
 
           await prisma.chatMessage.create({

@@ -15,7 +15,7 @@ import {
   Check,
   DollarSign
 } from "lucide-react";
-import { ListingData } from "@/services/listing.service";
+import type { ListingData } from "@/services/listing.service";
 
 export default function VendorListingsPage() {
   const { data: session, status } = useSession();

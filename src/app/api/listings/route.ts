@@ -12,10 +12,63 @@ import {
 import { formatDbListing } from "@/services/serverListing.service";
 import { prisma } from "@/lib/prisma";
 import { COMMISSION_PERCENT } from "@/config/site";
+import { requireRole, requireVendorOwnership } from "@/lib/permissions";
+import { getTrustedClientIp } from "@/lib/clientIp";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
+const listingCreateSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(200),
+  basePrice: z.union([z.number().positive(), z.string().regex(/^\d+(\.\d+)?$/)]),
+  duration: z.string().optional(),
+  durationDays: z.union([z.number(), z.string()]).optional(),
+  durationNights: z.union([z.number(), z.string()]).optional(),
+  destinationSlug: z.string().optional(),
+  destinationName: z.string().optional(),
+  destination: z.string().optional(),
+  province: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+  freeCancellationDays: z.union([z.number(), z.string()]).optional(),
+  photos: z.union([z.array(z.string()), z.string()]).optional(),
+  amenities: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  vendorId: z.string().optional(),
+  unitTitle: z.string().optional(),
+  maxGuests: z.union([z.number(), z.string()]).optional(),
+  inventory: z.union([z.number(), z.string()]).optional(),
+  singleSupplement: z.union([z.number(), z.string()]).optional(),
+  depositPercent: z.union([z.number(), z.string()]).optional(),
+  departures: z.array(z.any()).optional(),
+  type: z.literal("TOUR").optional(),
+}).strict();
+
+const listingUpdateSchema = z.object({
+  id: z.string().min(1, "Listing ID is required"),
+  title: z.string().min(3).max(200).optional(),
+  basePrice: z.union([z.number().positive(), z.string().regex(/^\d+(\.\d+)?$/)]).optional(),
+  duration: z.string().optional(),
+  city: z.string().optional(),
+  description: z.string().optional(),
+  type: z.literal("TOUR").optional(),
+}).strict();
+
 export async function GET(req: Request) {
+  const clientIp = getTrustedClientIp(req.headers);
+  const searchRate = await checkServerlessRateLimit(`search:ip:${clientIp}`, 60, 60);
+  if (!searchRate.success) {
+    return NextResponse.json(
+      { success: false, error: "Too many search requests. Please slow down." },
+      { 
+        status: 429,
+        headers: { "Retry-After": String(searchRate.retryAfterSeconds) }
+      }
+    );
+  }
+
   let includeAll = false;
   try {
     const { searchParams } = new URL(req.url);
@@ -65,15 +118,30 @@ export async function GET(req: Request) {
     const dbListings = await prisma.listing.findMany({
       where: whereCondition,
       include: {
-        vendor: true,
+        vendor: {
+          select: {
+            id: true,
+            businessName: true,
+            city: true,
+            status: true,
+          },
+        },
         destination: true,
         units: true,
         departures: {
           orderBy: { startDate: "asc" },
         },
         reviews: {
-          include: {
-            user: true,
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
@@ -106,28 +174,20 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Vendor or Admin session required to create listings." },
-        { status: 401 }
-      );
+    const auth = requireRole(session, ["ADMIN", "VENDOR"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
-    const body = await req.json();
-
-    if (body.type && body.type !== "TOUR") {
+    const rawBody = await req.json();
+    const parsed = listingCreateSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "PakistanTravel.Agency is a tours-only marketplace. Standalone hotel and rental listings are not supported." },
+        { success: false, error: parsed.error.errors[0]?.message || "Validation failed", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
-
-    if (!body.title || !body.basePrice) {
-      return NextResponse.json(
-        { success: false, error: "Title and base price are required" },
-        { status: 400 }
-      );
-    }
+    const body = parsed.data;
 
     const cleanSlug = body.title
       .toLowerCase()
@@ -433,40 +493,40 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN", "VENDOR"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
-    const body = await req.json();
-    if (!body.id) {
-      return NextResponse.json({ success: false, error: "Listing ID is required" }, { status: 400 });
-    }
-
-    if (body.type && body.type !== "TOUR") {
+    const rawBody = await req.json();
+    const parsed = listingUpdateSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "PakistanTravel.Agency is a tours-only marketplace. Standalone hotel and rental listings are not supported." },
+        { success: false, error: parsed.error.errors[0]?.message || "Validation failed", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     // IDOR Check: If vendor, verify that they own the listing
-    if (session.user.role === "VENDOR") {
+    if (session!.user!.role === "VENDOR") {
       const existing = await prisma.listing.findUnique({
         where: { id: body.id },
         select: { vendorId: true },
       });
-      let currentVendorId = session.user.vendorId;
-      if (!currentVendorId && session.user.id) {
-        const v = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
-        currentVendorId = v?.id || null;
-      }
       if (!existing) {
         return NextResponse.json(
           { success: false, error: "Listing not found" },
           { status: 404 }
         );
       }
-      if (existing.vendorId !== currentVendorId) {
+      let currentVendorId = session!.user!.vendorId;
+      if (!currentVendorId && session!.user!.id) {
+        const v = await prisma.vendor.findFirst({ where: { userId: session!.user!.id } });
+        currentVendorId = v?.id || null;
+      }
+      const ownership = requireVendorOwnership({ user: { ...session!.user, vendorId: currentVendorId } }, existing.vendorId);
+      if (!ownership.authorized) {
         return NextResponse.json(
           { success: false, error: "Forbidden: You cannot modify another vendor's listing." },
           { status: 403 }
@@ -517,8 +577,9 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || (session.user.role !== "ADMIN" && session.user.role !== "VENDOR")) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const auth = requireRole(session, ["ADMIN", "VENDOR"]);
+    if (!auth.authorized || !session?.user) {
+      return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status });
     }
 
     const { searchParams } = new URL(req.url);
@@ -528,23 +589,24 @@ export async function DELETE(req: Request) {
     }
 
     // IDOR Check: If vendor, verify that they own the listing
-    if (session.user.role === "VENDOR") {
+    if (session!.user!.role === "VENDOR") {
       const existing = await prisma.listing.findUnique({
         where: { id },
         select: { vendorId: true },
       });
-      let currentVendorId = session.user.vendorId;
-      if (!currentVendorId && session.user.id) {
-        const v = await prisma.vendor.findFirst({ where: { userId: session.user.id } });
-        currentVendorId = v?.id || null;
-      }
       if (!existing) {
         return NextResponse.json(
           { success: false, error: "Listing not found" },
           { status: 404 }
         );
       }
-      if (existing.vendorId !== currentVendorId) {
+      let currentVendorId = session!.user!.vendorId;
+      if (!currentVendorId && session!.user!.id) {
+        const v = await prisma.vendor.findFirst({ where: { userId: session!.user!.id } });
+        currentVendorId = v?.id || null;
+      }
+      const ownership = requireVendorOwnership({ user: { ...session!.user, vendorId: currentVendorId } }, existing.vendorId);
+      if (!ownership.authorized) {
         return NextResponse.json(
           { success: false, error: "Forbidden: You cannot delete another vendor's listing." },
           { status: 403 }

@@ -24,7 +24,7 @@ import {
   UserCheck,
   Percent
 } from "lucide-react";
-import { ListingData } from "@/services/listing.service";
+import type { ListingData } from "@/services/listing.service";
 import { COMMISSION_PERCENT } from "@/config/site";
 
 export default function AdminListingsPage() {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass, ShieldCheck, CreditCard, Mail, Headphones, MessageSquare } from "lucide-react";
-import { DEFAULT_SITE_SETTINGS } from "@/services/siteSettings.service";
+import { DEFAULT_SITE_SETTINGS } from "@/config/siteSettings.constants";
 import { siteConfig } from "@/config/site";
 
 export function Footer() {

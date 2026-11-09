@@ -1,59 +1,46 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
+import { getTrustedClientIp } from "@/lib/clientIp";
 import { containsContactLeakage, maskContactLeakage } from "@/lib/antiLeakage";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
+const operatorMessageSchema = z.object({
+  listingId: z.string().optional().nullable(),
+  listingTitle: z.string().optional().nullable(),
+  vendorId: z.string().optional().nullable(),
+  senderName: z.string().min(2, "Please provide your full name.").max(100),
+  senderEmail: z.string().email("A valid email is required to receive the operator's response."),
+  message: z.string().min(10, "Please write a message with at least 10 characters.").max(1500, "Message exceeds maximum allowed length of 1500 characters."),
+}).strict();
+
 export async function POST(req: Request) {
   try {
-    const clientIp =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown-ip";
-
-    const rateCheck = checkRateLimit(`operator-msg:${clientIp}`, 5, 10 * 60 * 1000);
+    const clientIp = getTrustedClientIp(req.headers);
+    const rateCheck = await checkServerlessRateLimit(`operator-msg:${clientIp}`, 5, 600);
     if (!rateCheck.success) {
       return NextResponse.json(
         {
           success: false,
           error: `Too many inquiries sent. Please retry after ${rateCheck.retryAfterSeconds} seconds.`,
         },
-        { status: 429 }
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSeconds) } }
       );
     }
 
     const body = await req.json();
-    const { listingId, listingTitle, vendorId, senderName, senderEmail, message } = body;
-
-    if (!senderName || !senderName.trim()) {
+    const parsed = operatorMessageSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Please provide your full name." },
+        { success: false, error: parsed.error.errors[0]?.message || "Validation failed" },
         { status: 400 }
       );
     }
 
-    if (!senderEmail || !senderEmail.includes("@")) {
-      return NextResponse.json(
-        { success: false, error: "A valid email is required to receive the operator's response." },
-        { status: 400 }
-      );
-    }
-
-    const rawMessage = (typeof message === "string" ? message : "").trim();
-    if (!rawMessage || rawMessage.length < 10) {
-      return NextResponse.json(
-        { success: false, error: "Please write a message with at least 10 characters." },
-        { status: 400 }
-      );
-    }
-
-    if (rawMessage.length > 1500) {
-      return NextResponse.json(
-        { success: false, error: "Message exceeds maximum allowed length of 1500 characters." },
-        { status: 400 }
-      );
-    }
+    const { listingId, listingTitle, vendorId, senderName, senderEmail, message } = parsed.data;
+    const rawMessage = message.trim();
 
     // Anti-leakage enforcement: Block phone numbers, emails, WhatsApp links before booking
     if (containsContactLeakage(rawMessage)) {
