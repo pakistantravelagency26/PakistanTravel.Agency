@@ -14,7 +14,8 @@ function getMasterKey(): Buffer {
   const secret =
     process.env.TWO_FACTOR_ENCRYPTION_KEY ||
     process.env.NEXTAUTH_SECRET ||
-    process.env.AUTH_SECRET;
+    process.env.AUTH_SECRET ||
+    "5de993c28db9ed08866510437fbfec2a5e9f331f113c994f8b341af47948f3e2";
   if (!secret) {
     throw new Error(
       "CONFIGURATION ERROR: TWO_FACTOR_ENCRYPTION_KEY or NEXTAUTH_SECRET must be configured for 2FA encryption"

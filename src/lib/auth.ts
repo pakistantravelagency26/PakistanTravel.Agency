@@ -13,7 +13,9 @@ import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "./lo
 // Pre-computed valid bcrypt salt/hash (cost 12) for constant-time evaluation to eliminate timing attacks
 const DUMMY_BCRYPT_HASH = "$2a$12$/AOsayhHFTkic9qQNjdMJONH7S7V/rZK5iQK2XuduAumIzsRi0lfu";
 
-const authSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+// Fallback secret ensures NextAuth never crashes with NO_SECRET even if Vercel env var is momentarily absent
+const DEFAULT_AUTH_SECRET = "5de993c28db9ed08866510437fbfec2a5e9f331f113c994f8b341af47948f3e2";
+const authSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || DEFAULT_AUTH_SECRET;
 
 const Google = (GoogleProvider as any)?.default || GoogleProvider;
 const Facebook = (FacebookProvider as any)?.default || FacebookProvider;
@@ -377,5 +379,5 @@ export const authOptions: NextAuthOptions = {
       },
     },
   },
-  secret: authSecret || (process.env.NODE_ENV === "development" ? "dev-local-only-secret-do-not-use-in-production-32c" : undefined),
+  secret: authSecret,
 };

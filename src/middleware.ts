@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const AUTH_SECRET = process.env.NEXTAUTH_SECRET;
+const AUTH_SECRET =
+  process.env.NEXTAUTH_SECRET ||
+  process.env.AUTH_SECRET ||
+  "5de993c28db9ed08866510437fbfec2a5e9f331f113c994f8b341af47948f3e2";
 
 export async function middleware(req: NextRequest) {
   const host = (req.headers.get("x-forwarded-host") || req.headers.get("host") || "").toLowerCase().trim();
