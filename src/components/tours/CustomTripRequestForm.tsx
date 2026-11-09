@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Send, CheckCircle2, AlertCircle, Compass, Users, Calendar, MapPin, Mail, Phone, User } from "lucide-react";
+import { trackCustomTripSubmitted } from "@/lib/analytics";
 
 export function CustomTripRequestForm({ defaultDestination }: { defaultDestination?: string } = {}) {
   const [formData, setFormData] = useState({
@@ -44,6 +45,11 @@ export function CustomTripRequestForm({ defaultDestination }: { defaultDestinati
       }
 
       setSuccess(true);
+      trackCustomTripSubmitted({
+        destination: formData.destination,
+        travelers: Number(formData.travelers) || 1,
+        travelDate: formData.travelDate,
+      });
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {

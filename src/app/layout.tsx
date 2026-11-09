@@ -53,6 +53,11 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "_dtqzGPHubzFRP1O4KBy3bcZjIlfrRoz-DtaGPx44ww",
+    other: {
+      ...(process.env.NEXT_PUBLIC_BING_VERIFICATION
+        ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION }
+        : {}),
+    },
   },
 };
 
@@ -107,6 +112,21 @@ export default function RootLayout({
             __html: JSON.stringify(structuredDataGraph).replace(/</g, "\\u003c"),
           }}
         />
+        {/* Google Consent Mode v2 Default (EU/UK privacy compliant, defaults to denied) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied',
+  'analytics_storage': 'denied',
+  'wait_for_update': 500
+});
+gtag('js', new Date());`,
+          }}
+        />
         {/* Google Tag Manager Official Snippet - Container 1: GTM-PRQQWCK8 */}
         <script
           dangerouslySetInnerHTML={{
@@ -125,14 +145,6 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-TQZH7T4C');`,
-          }}
-        />
-        {/* Google Tag Manager / gtag base initialization */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());`,
           }}
         />
       </head>
