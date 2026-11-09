@@ -38,6 +38,11 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
             OR: [
               { email: query },
               { phone: query },
+              { phone: query.replace(/^\+92/, "0") },
+              { phone: query.replace(/^92/, "0") },
+              { phone: query.replace(/[\s\-()]/g, "") },
+              { phone: query.replace(/[\s\-()]/g, "").replace(/^\+92/, "0") },
+              { phone: query.replace(/[\s\-()]/g, "").replace(/^92/, "0") },
             ],
           },
           include: { vendorProfile: true },

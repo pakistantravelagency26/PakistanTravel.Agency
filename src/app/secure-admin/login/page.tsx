@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, KeyRound, ArrowLeft } from "lucide-react";
+import { Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, KeyRound, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { getSafeCallbackUrl } from "@/lib/safeRedirect";
 
 export const dynamic = "force-dynamic";
@@ -14,14 +14,23 @@ function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const safeCallback = getSafeCallbackUrl(searchParams.get("callbackUrl"), "/secure-admin/dashboard");
+  const { data: session, status } = useSession();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [totpCode, setTotpCode] = useState("");
   const [twoFactorPrompt, setTwoFactorPrompt] = useState(false);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // If already authenticated as Super Admin, immediately redirect to dashboard
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.role === "ADMIN") {
+      window.location.href = safeCallback;
+    }
+  }, [status, session, safeCallback]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -155,7 +164,7 @@ function AdminLoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Authorized Admin Email
+                Authorized Admin Email or Phone
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
@@ -164,7 +173,7 @@ function AdminLoginForm() {
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="admin@pakistantravel.agency"
+                  placeholder="admin@pakistantravel.agency or 03009117325"
                   className="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 />
               </div>
@@ -185,13 +194,21 @@ function AdminLoginForm() {
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="w-full pl-9 pr-10 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 

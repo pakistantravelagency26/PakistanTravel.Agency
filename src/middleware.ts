@@ -167,6 +167,12 @@ export async function middleware(req: NextRequest) {
     });
   }
 
+  // 1e. Auto-forward authenticated Admin away from login pages straight to dashboard
+  if ((path === "/secure-admin/login" || path === "/login") && token?.role === "ADMIN") {
+    const dashUrl = new URL("/secure-admin/dashboard", req.url);
+    return NextResponse.redirect(dashUrl);
+  }
+
   // 2. Super Admin Portal protection (/secure-admin)
   if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
     if (!token) {

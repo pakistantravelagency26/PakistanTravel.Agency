@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Compass, Lock, Mail, AlertCircle, ArrowRight, User, KeyRound, ArrowLeft } from "lucide-react";
+import { Compass, Lock, Mail, AlertCircle, ArrowRight, User, KeyRound, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { getSafeCallbackUrl } from "@/lib/safeRedirect";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ function CustomerLoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), "/");
   const errorParam = searchParams.get("error");
+  const { data: session, status } = useSession();
 
   let initialError = "";
   if (errorParam === "OAuthSignin" || errorParam === "OAuthCallback" || errorParam === "Configuration") {
@@ -24,12 +25,24 @@ function CustomerLoginForm() {
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [totpCode, setTotpCode] = useState("");
   const [twoFactorPrompt, setTwoFactorPrompt] = useState(false);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
   const [socialNotice, setSocialNotice] = useState<string | null>(null);
+
+  // If already authenticated as ADMIN or VENDOR, redirect appropriately
+  useEffect(() => {
+    if (status === "authenticated") {
+      if (session?.user?.role === "ADMIN") {
+        window.location.href = "/secure-admin/dashboard";
+      } else if (session?.user?.role === "VENDOR") {
+        window.location.href = "/partner-hub/dashboard";
+      }
+    }
+  }, [status, session]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,11 +73,11 @@ function CustomerLoginForm() {
         try {
           const sessionRes = await fetch("/api/auth/session");
           const sessionData = await sessionRes.json();
-          if (callbackUrl === "/" && sessionData?.user?.role === "ADMIN") {
+          if (sessionData?.user?.role === "ADMIN") {
             window.location.href = "/secure-admin/dashboard";
             return;
           }
-          if (callbackUrl === "/" && sessionData?.user?.role === "VENDOR") {
+          if (sessionData?.user?.role === "VENDOR") {
             window.location.href = "/partner-hub/dashboard";
             return;
           }
@@ -259,13 +272,21 @@ function CustomerLoginForm() {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-9 pr-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full pl-9 pr-10 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 

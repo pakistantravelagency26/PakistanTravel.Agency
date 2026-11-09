@@ -25,22 +25,14 @@ export default function PartnerHubShell({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [timedOut, setTimedOut] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimedOut(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (pathname !== "/partner-hub/login" && pathname !== "/partner-hub/setup-2fa") {
-      if (status === "unauthenticated" || (timedOut && status === "loading")) {
+      if (status === "unauthenticated") {
         window.location.href = `/partner-hub/login?callbackUrl=${encodeURIComponent(pathname)}`;
       }
     }
-  }, [status, session, pathname, timedOut]);
+  }, [status, session, pathname]);
 
   // If on login or 2FA setup page, render clean login view without sidebar
   if (pathname === "/partner-hub/login" || pathname === "/partner-hub/setup-2fa") {

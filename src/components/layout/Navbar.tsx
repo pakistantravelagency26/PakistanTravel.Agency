@@ -12,7 +12,8 @@ import {
   Menu, 
   X,
   Heart,
-  Phone
+  Phone,
+  ShieldCheck
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { NavLinkItem, DEFAULT_SITE_SETTINGS } from "@/config/siteSettings.constants";
@@ -49,8 +50,9 @@ export function Navbar() {
     return null;
   }
 
-  // Only customer role is treated as active on public customer navbar
-  const isCustomerLoggedIn = session?.user && session.user.role === "CUSTOMER";
+  // Active session status across all roles (Customer, Vendor, Admin)
+  const isLoggedIn = Boolean(session?.user);
+  const userRole = session?.user?.role;
 
   return (
     <header className="bg-white text-slate-800 sticky top-0 z-50 shadow-sm border-b border-slate-100">
@@ -76,52 +78,100 @@ export function Navbar() {
             <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
             <span className="text-slate-300">|</span>
 
-            {isCustomerLoggedIn ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-sky-600 transition"
-                >
-                  <div className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-[9px] font-bold">
-                    {session.user.name?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                  <span className="max-w-[100px] truncate">{session.user.name}</span>
-                </button>
-
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in text-xs">
-                    <div className="px-3.5 py-2 border-b border-slate-100">
-                      <p className="text-[10px] text-slate-400 font-medium">Signed in as Traveler</p>
-                      <p className="text-xs font-bold text-slate-900 truncate">{session.user.email}</p>
-                    </div>
-
-                    <Link
-                      href="/account/bookings"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
-                    >
-                      <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-                      My Bookings & Vouchers
-                    </Link>
-
-                    <Link
-                      href="/account/wishlist"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
-                    >
-                      <Heart className="w-3.5 h-3.5 text-slate-400" />
-                      Saved Wishlist
-                    </Link>
-
-                    <button
-                      onClick={() => signOut({ callbackUrl: "/" })}
-                      className="w-full flex items-center gap-2 px-3.5 py-2 text-red-600 hover:bg-red-50 text-left border-t border-slate-100 font-semibold"
-                    >
-                      <LogOut className="w-3.5 h-3.5 text-red-500" />
-                      Sign Out
-                    </button>
-                  </div>
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2">
+                {userRole === "ADMIN" && (
+                  <Link
+                    href="/secure-admin/dashboard"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold shadow-sm transition"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Admin Panel
+                  </Link>
                 )}
+                {userRole === "VENDOR" && (
+                  <Link
+                    href="/partner-hub/dashboard"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-700 hover:bg-sky-800 text-white text-[11px] font-bold shadow-sm transition"
+                  >
+                    <Building2 className="w-3.5 h-3.5" />
+                    Partner Hub
+                  </Link>
+                )}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-sky-600 transition"
+                  >
+                    <div className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-[9px] font-bold">
+                      {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <span className="max-w-[100px] truncate">{session?.user?.name}</span>
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in text-xs">
+                      <div className="px-3.5 py-2 border-b border-slate-100">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                          {userRole === "ADMIN"
+                            ? "Super Administrator"
+                            : userRole === "VENDOR"
+                            ? "Partner / Vendor"
+                            : "Signed in as Traveler"}
+                        </p>
+                        <p className="text-xs font-bold text-slate-900 truncate">{session?.user?.email}</p>
+                      </div>
+
+                      {userRole === "ADMIN" && (
+                        <Link
+                          href="/secure-admin/dashboard"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border-b border-emerald-100"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                          Admin Control Center
+                        </Link>
+                      )}
+
+                      {userRole === "VENDOR" && (
+                        <Link
+                          href="/partner-hub/dashboard"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold border-b border-sky-100"
+                        >
+                          <Building2 className="w-4 h-4 text-sky-700 shrink-0" />
+                          Partner Extranet
+                        </Link>
+                      )}
+
+                      <Link
+                        href="/account/bookings"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
+                      >
+                        <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+                        My Bookings & Vouchers
+                      </Link>
+
+                      <Link
+                        href="/account/wishlist"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
+                      >
+                        <Heart className="w-3.5 h-3.5 text-slate-400" />
+                        Saved Wishlist
+                      </Link>
+
+                      <button
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-red-600 hover:bg-red-50 text-left border-t border-slate-100 font-semibold"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-red-500" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2 font-bold text-[11px]">
@@ -239,22 +289,71 @@ export function Navbar() {
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex gap-2">
-            <Link
-              href="/login"
-              className="w-1/2 text-center py-2.5 rounded-xl border border-slate-200 text-slate-800 text-xs font-bold"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="w-1/2 text-center py-2.5 rounded-xl bg-orange-500 text-white text-xs font-bold"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Register
-            </Link>
-          </div>
+          {isLoggedIn ? (
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <div className="px-3 py-1 flex items-center justify-between text-xs text-slate-500">
+                <span className="font-bold text-slate-800 truncate">{session?.user?.name || session?.user?.email}</span>
+                <span className="text-[10px] uppercase font-bold text-emerald-700">
+                  {userRole === "ADMIN" ? "Super Admin" : userRole === "VENDOR" ? "Vendor" : "Traveler"}
+                </span>
+              </div>
+              {userRole === "ADMIN" && (
+                <Link
+                  href="/secure-admin/dashboard"
+                  className="w-full text-center py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Admin Control Center
+                </Link>
+              )}
+              {userRole === "VENDOR" && (
+                <Link
+                  href="/partner-hub/dashboard"
+                  className="w-full text-center py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Building2 className="w-4 h-4" />
+                  Partner Hub Extranet
+                </Link>
+              )}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Link
+                  href="/account/bookings"
+                  className="text-center py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Bookings
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                  className="text-center py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-3 border-t border-slate-100 flex gap-2">
+              <Link
+                href="/login"
+                className="w-1/2 text-center py-2.5 rounded-xl border border-slate-200 text-slate-800 text-xs font-bold"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/register"
+                className="w-1/2 text-center py-2.5 rounded-xl bg-orange-500 text-white text-xs font-bold"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </header>

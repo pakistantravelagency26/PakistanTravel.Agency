@@ -357,9 +357,11 @@ export async function recordSuccessfulLogin(identifier: string, ip: string): Pro
   const normId = normalizeIdentifier(identifier);
   const cleanIp = ip.trim();
   const pairKey = getPairKey(cleanIp, normId);
+  const ipKey = getIpKey(cleanIp);
 
-  // Clear in-memory pair lock
+  // Clear in-memory pair and IP locks
   memoryLocks.delete(pairKey);
+  memoryLocks.delete(ipKey);
 
   try {
     await prisma.loginAttempt.create({
@@ -368,6 +370,22 @@ export async function recordSuccessfulLogin(identifier: string, ip: string): Pro
         ip: cleanIp,
         pairKey,
         success: true,
+      },
+    });
+
+    // Auto-unblock any lingering DB locks on successful authentication
+    await prisma.blockedLogin.updateMany({
+      where: {
+        OR: [
+          { key: pairKey },
+          { target: normId },
+          { ip: cleanIp },
+        ],
+        unblockedAt: null,
+      },
+      data: {
+        unblockedAt: new Date(),
+        unblockedBy: "SYSTEM_AUTH_SUCCESS",
       },
     });
   } catch (err) {

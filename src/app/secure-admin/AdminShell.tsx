@@ -26,18 +26,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [timedOut, setTimedOut] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimedOut(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (pathname !== "/secure-admin/login" && pathname !== "/secure-admin/setup-2fa") {
-      if (status === "unauthenticated" || (timedOut && status === "loading")) {
+      if (status === "unauthenticated") {
         window.location.href = `/secure-admin/login?callbackUrl=${encodeURIComponent(pathname)}`;
       } else if (
         status === "authenticated" &&
@@ -46,7 +38,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         window.location.href = `/secure-admin/login?error=UnauthorizedAdmin&callbackUrl=${encodeURIComponent(pathname)}`;
       }
     }
-  }, [status, session, pathname, timedOut]);
+  }, [status, session, pathname]);
 
   // If on login or 2FA setup page, render clean view without sidebar
   if (pathname === "/secure-admin/login" || pathname === "/secure-admin/setup-2fa") {
