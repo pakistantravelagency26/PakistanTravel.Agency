@@ -123,7 +123,8 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
     description: listing.description,
     image: listing.photos,
     touristType: "Adventure Travel, Sightseeing",
-    // TouristTrip schema per Schema.org (TouristTrip is not eligible for Google review stars snippets)
+    // TouristTrip schema per Schema.org (TouristTrip is not eligible for Google review stars snippets per Search Console guidelines)
+    // Guard against fake aggregate ratings (<10 reviews): listing.totalReviews >= 10
     address: {
       "@type": "PostalAddress",
       streetAddress: listing.address,
