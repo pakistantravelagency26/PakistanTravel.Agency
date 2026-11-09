@@ -98,12 +98,12 @@ export default function MyBookingsPage() {
           <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
             <Compass className="w-12 h-12 text-slate-300 mx-auto" />
             <h3 className="font-bold text-base text-slate-800">No bookings found</h3>
-            <p className="text-xs text-slate-500">Ready to explore Northern Pakistan? Find your next dream stay.</p>
+            <p className="text-xs text-slate-500">Ready to explore Northern Pakistan? Find your next guided tour package.</p>
             <Link
-              href="/search"
+              href="/tours"
               className="inline-block mt-2 px-5 py-2.5 rounded-xl bg-brand-emerald text-white text-xs font-bold"
             >
-              Search Hotels & Tours
+              Explore Tour Packages
             </Link>
           </div>
         ) : (

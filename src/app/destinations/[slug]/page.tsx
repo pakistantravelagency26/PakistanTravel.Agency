@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
   if (!dest) {
     return {
       title: "Destination Not Found | Pakistan Travel Agency",
-      description: "Explore tour packages, mountain hotels, and 4x4 rentals across northern Pakistan.",
+      description: "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat, and Kumrat.",
     };
   }
 
@@ -285,9 +285,9 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               </div>
 
               <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-2">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Luxury Resort Tier</span>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Luxury Heritage Tour Tier</span>
                 <p className="text-2xl font-black text-white">{dest.approximateCosts.luxuryPerDay}</p>
-                <p className="text-[11px] text-slate-300">5-star heritage forts, luxury chalets, and private Prado 4x4 drivers.</p>
+                <p className="text-[11px] text-slate-300">Heritage suites, luxury valley lodges, and private mountain transport included in itinerary.</p>
               </div>
             </div>
 

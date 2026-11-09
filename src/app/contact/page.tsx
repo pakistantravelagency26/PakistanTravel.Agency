@@ -14,10 +14,6 @@ export const metadata: Metadata = {
     "Contact PakistanTravel support desk for tour inquiries, booking questions, and general guidance. AI assistant available 24/7.",
   alternates: {
     canonical: `${siteUrl}/contact`,
-    languages: {
-      "en-PK": `${siteUrl}/contact`,
-      "ur-PK": `${siteUrl}/ur/contact`,
-    },
   },
   openGraph: {
     type: "website",

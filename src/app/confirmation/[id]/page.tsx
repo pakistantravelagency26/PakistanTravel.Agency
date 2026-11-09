@@ -62,10 +62,10 @@ export default function ConfirmationPage() {
           We could not locate any active reservation matching reference &quot;{bookingId}&quot;. Please verify your booking link or contact traveler support.
         </p>
         <Link
-          href="/search"
+          href="/tours"
           className="mt-5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition"
         >
-          Explore Tours &amp; Hotels
+          Explore Tour Packages
         </Link>
       </div>
     );

@@ -19,7 +19,7 @@ const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   title: "Partner Information & Operator Guidelines",
   description:
-    "Learn how independent northern Pakistan tour operators and hotels publish listings and manage bookings on PakistanTravel.Agency.",
+    "Learn how independent northern Pakistan tour operators publish verified tour packages and manage bookings on PakistanTravel.Agency.",
   alternates: {
     canonical: `${siteUrl}/partner-info`,
   },
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Partner Information & Operator Guidelines",
     description:
-      "Learn how independent northern Pakistan tour operators and hotels publish listings and manage bookings on PakistanTravel.Agency.",
+      "Learn how independent northern Pakistan tour operators publish verified tour packages and manage bookings on PakistanTravel.Agency.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Partner Information & Operator Guidelines",
     description:
-      "Learn how independent northern Pakistan tour operators and hotels publish listings and manage bookings on PakistanTravel.Agency.",
+      "Learn how independent northern Pakistan tour operators publish verified tour packages and manage bookings on PakistanTravel.Agency.",
     images: ["https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200"],
   },
 };

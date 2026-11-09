@@ -180,11 +180,11 @@ export function Navbar() {
           {/* Right Action: Explore Catalog button */}
           <div className="hidden sm:flex items-center gap-2.5">
             <Link
-              href="/search"
+              href="/tours"
               className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
             >
               <Compass className="w-4 h-4 text-sky-600" />
-              <span>Explore All</span>
+              <span>Explore Tours</span>
             </Link>
           </div>
 
@@ -205,11 +205,11 @@ export function Navbar() {
         <div className="lg:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3">
           <div className="space-y-2 text-sm font-semibold">
             <Link
-              href="/search"
+              href="/tours"
               className="block py-2.5 px-3 rounded-xl bg-slate-50 text-slate-800 font-bold hover:text-sky-600 flex items-center justify-between"
               onClick={() => setIsMenuOpen(false)}
             >
-              <span>Search Tour Packages</span>
+              <span>Explore Tour Packages</span>
               <Compass className="w-4 h-4 text-orange-500" />
             </Link>
 

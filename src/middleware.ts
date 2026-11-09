@@ -11,14 +11,12 @@ export async function middleware(req: NextRequest) {
   const isSecure = req.url.startsWith("https://") || req.headers.get("x-forwarded-proto") === "https";
 
   // 1. Canonical Domain Enforcement (301 Permanent Redirect)
-  // pakistantravel.agency (apex) & production *.vercel.app hosts -> https://www.pakistantravel.agency
-  const isProductionVercelHost =
-    host === "pakistantravel-agency.vercel.app" ||
-    host === "pakistan-travel-agency.vercel.app";
+  // pakistantravel.agency (apex) & every *.vercel.app host -> https://www.pakistantravel.agency
+  const isVercelHost = host.endsWith(".vercel.app");
   const isApexDomain = host === "pakistantravel.agency";
   const isLocalhost = host.startsWith("localhost") || host.startsWith("127.0.0.1");
 
-  if ((isApexDomain || isProductionVercelHost) && !isLocalhost) {
+  if ((isApexDomain || isVercelHost) && !isLocalhost) {
     const canonicalUrl = new URL(
       `${req.nextUrl.pathname}${req.nextUrl.search}`,
       "https://www.pakistantravel.agency"
@@ -34,8 +32,22 @@ export async function middleware(req: NextRequest) {
   const isSearchWithHotelOrRental = path === "/search" && isHotelOrRentalType;
 
   if (isHotelsPath || isRentalsPath || isSearchWithHotelOrRental) {
-    const toursUrl = new URL("/tours", req.url);
+    const toursUrl = new URL("/tours", "https://www.pakistantravel.agency");
     return NextResponse.redirect(toursUrl, 301);
+  }
+
+  // 1c. 301 Permanent Redirects for legacy Urdu routes -> English equivalent
+  if (path === "/ur" || path === "/ur/") {
+    const englishHome = new URL("/", "https://www.pakistantravel.agency");
+    return NextResponse.redirect(englishHome, 301);
+  }
+  if (path.startsWith("/ur/")) {
+    const cleanPath = path.replace(/^\/ur/, "") || "/";
+    const englishUrl = new URL(
+      `${cleanPath}${req.nextUrl.search}`,
+      "https://www.pakistantravel.agency"
+    );
+    return NextResponse.redirect(englishUrl, 301);
   }
 
   // Check token across all possible cookie variations and secure flags

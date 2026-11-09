@@ -14,10 +14,6 @@ export const metadata: Metadata = {
     "Read how PakistanTravel collects, encrypts, and protects your personal information, travel identification, and transaction details.",
   alternates: {
     canonical: `${siteUrl}/privacy`,
-    languages: {
-      "en-PK": `${siteUrl}/privacy`,
-      "ur-PK": `${siteUrl}/ur/privacy`,
-    },
   },
   openGraph: {
     type: "website",

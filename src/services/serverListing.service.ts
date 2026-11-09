@@ -138,6 +138,7 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
   try {
     const dbListing = await prisma.listing.findFirst({
       where: {
+        status: "PUBLISHED",
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       },
       include: {

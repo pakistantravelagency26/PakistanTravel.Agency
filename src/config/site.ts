@@ -9,7 +9,12 @@
  * - Every page, footer, metadata, voucher, and chatbot prompt must read from this config.
  */
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.pakistantravel.agency";
+export const CANONICAL_SITE_URL = "https://www.pakistantravel.agency";
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL &&
+  !process.env.NEXT_PUBLIC_SITE_URL.includes("vercel.app")
+    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")
+    : CANONICAL_SITE_URL;
 export const COMMISSION_PERCENT = Number(process.env.NEXT_PUBLIC_COMMISSION_PERCENT || 10);
 export const PAYOUT_TIMING = "within 48 hours of tour departure";
 

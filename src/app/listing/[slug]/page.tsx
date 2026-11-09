@@ -30,6 +30,10 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
     return {
       title: "Tour Not Found | Pakistan Travel Agency",
       description: "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat and Kumrat.",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 

@@ -53,7 +53,7 @@ export function ContactForm() {
           id="contact-message"
           rows={4}
           required
-          placeholder="Ask about customized tour packages, road conditions, or private Prado rentals..."
+          placeholder="Ask about customized tour packages, road conditions, or private guided itineraries..."
           className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
       </div>

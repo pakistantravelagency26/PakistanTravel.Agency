@@ -1,4 +1,4 @@
-import { describe, it } from "node:test";
+import { describe, it, after } from "node:test";
 import assert from "node:assert";
 import { prisma } from "../src/lib/prisma.ts";
 import {
@@ -148,9 +148,10 @@ describe("Phase 6: Transactional Booking Emails Test Suite", () => {
     let testVendorProfile;
     let testListing;
     let testBooking;
+    let timestamp;
 
     it("seeds test vendor, listing, and booking record in database", async () => {
-      const timestamp = Date.now();
+      timestamp = Date.now();
       testVendorUser = await prisma.user.create({
         data: {
           name: `Vendor Host ${timestamp}`,
@@ -276,6 +277,24 @@ describe("Phase 6: Transactional Booking Emails Test Suite", () => {
       });
       assert.strictEqual(customerOutbox?.status, "SENT");
       assert.strictEqual(customerOutbox?.eventType, "BOOKING_CANCELLED");
+    });
+
+    after(async () => {
+      // Clean up test booking and listing from isolated test database
+      if (testBooking?.id) {
+        await prisma.emailOutbox.deleteMany({ where: { OR: [{ to: testVendorUser?.email }, { to: `traveler-${timestamp}@gmail.com` }] } });
+        await prisma.booking.deleteMany({ where: { id: testBooking.id } });
+      }
+      if (testListing?.id) {
+        await prisma.listingUnit.deleteMany({ where: { listingId: testListing.id } });
+        await prisma.listing.deleteMany({ where: { id: testListing.id } });
+      }
+      if (testVendorProfile?.id) {
+        await prisma.vendor.deleteMany({ where: { id: testVendorProfile.id } });
+      }
+      if (testVendorUser?.id) {
+        await prisma.user.deleteMany({ where: { id: testVendorUser.id } });
+      }
     });
   });
 

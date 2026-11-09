@@ -22,10 +22,6 @@ export const metadata: Metadata = {
     "Official marketplace terms of service, booking policies, operator independent contractor status, cancellation policies, and liability limitations on PakistanTravel.Agency.",
   alternates: {
     canonical: `${siteUrl}/terms`,
-    languages: {
-      "en-PK": `${siteUrl}/terms`,
-      "ur-PK": `${siteUrl}/ur/terms`,
-    },
   },
   openGraph: {
     type: "website",

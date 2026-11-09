@@ -51,9 +51,9 @@ export function Footer() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">{footer.card1Title || "Independent Local Partners"}</p>
+              <p className="font-bold text-white text-sm">{footer.card1Title || "Independent Local Tour Operators"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                {footer.card1Desc || "Local tour operators and hotels publish and manage their own listings."}{" "}
+                {footer.card1Desc || "Independent local tour operators publish and manage their own guided tour packages."}{" "}
                 <Link href="/partner-info" className="text-sky-400 hover:underline">Learn more</Link>
               </p>
             </div>
@@ -66,7 +66,7 @@ export function Footer() {
             <div>
               <p className="font-bold text-white text-sm">{footer.card2Title || "JazzCash, EasyPaisa & Cards"}</p>
               <p className="text-xs text-slate-400 mt-1">
-                {footer.card2Desc || "Zero hassle local Pakistani payments with confirmed digital check-in vouchers."}
+                {footer.card2Desc || "Zero hassle local Pakistani payments with confirmed digital tour vouchers."}
               </p>
             </div>
           </div>

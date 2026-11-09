@@ -15,10 +15,6 @@ export const metadata: Metadata = {
     "Learn about PakistanTravel, our marketplace mission connecting travelers directly with independent local tour operators across northern Pakistan.",
   alternates: {
     canonical: `${siteUrl}/about`,
-    languages: {
-      "en-PK": `${siteUrl}/about`,
-      "ur-PK": `${siteUrl}/ur/about`,
-    },
   },
   openGraph: {
     type: "website",

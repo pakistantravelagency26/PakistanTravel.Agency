@@ -87,8 +87,15 @@ describe("Phase 7: SEO & Canonical Routing Test Suite", () => {
     it("defines canonical 301 redirects for apex and preview domains", () => {
       const file = fs.readFileSync(path.resolve(process.cwd(), "src/middleware.ts"), "utf-8");
       assert.ok(file.includes("isApexDomain"), "Middleware must check for apex domain");
-      assert.ok(file.includes("isProductionVercelHost"), "Middleware must check for vercel default host");
+      assert.ok(file.includes("isVercelHost"), "Middleware must check for vercel default host");
       assert.ok(file.includes("NextResponse.redirect(canonicalUrl, 301)"), "Middleware must issue 301 permanent redirect");
+    });
+
+    it("verifies 301 permanent redirects for legacy Urdu (/ur) routes in middleware", () => {
+      const file = fs.readFileSync(path.resolve(process.cwd(), "src/middleware.ts"), "utf-8");
+      assert.ok(file.includes('path === "/ur"'), "Middleware must check for /ur");
+      assert.ok(file.includes('path.startsWith("/ur/")'), "Middleware must check for /ur/*");
+      assert.ok(file.includes('NextResponse.redirect(englishHome, 301)'), "Must 301 redirect /ur to English home");
     });
 
     it("sets X-Robots-Tag: noindex, nofollow, noarchive on search, query params, and private portals", () => {

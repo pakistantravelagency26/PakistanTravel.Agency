@@ -99,7 +99,7 @@ export default function SupportChatWidget() {
     const greeting: ChatMessage = {
       id: "greeting",
       role: "assistant",
-      content: `Assalam-o-Alaikum! 🏔️ I am the **${siteConfig.name}** AI assistant.\n\nI can help you explore tours and hotels across Hunza, Skardu, Swat, and northern valleys, explain our cancellation and payment policies, or connect you with support.\n\nHow may I help you today?`,
+      content: `Assalam-o-Alaikum! 🏔️ I am the **${siteConfig.name}** AI assistant.\n\nI can help you explore guided tour packages across Hunza, Skardu, Swat, and northern valleys, explain our cancellation and payment policies, or connect you with support.\n\nHow may I help you today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
     setMessages([greeting]);
@@ -285,10 +285,10 @@ export default function SupportChatWidget() {
   };
 
   const quickPrompts = [
-    { label: "Hunza Valley Tours", query: "What tours or hotels are available in Hunza Valley?" },
+    { label: "Hunza Valley Tours", query: "What tour packages are available in Hunza Valley?" },
     { label: "Cancellation Policy", query: "What is your cancellation and refund policy?" },
     { label: "Payment Methods", query: "What payment methods do you accept for booking?" },
-    { label: "List My Tour / Hotel", query: "How can a local operator or hotel owner list on the platform?" },
+    { label: "List My Tour Package", query: "How can a local tour operator list packages on the platform?" },
   ];
 
   if (isExcluded) {
