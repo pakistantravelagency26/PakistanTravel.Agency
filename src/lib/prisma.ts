@@ -37,7 +37,7 @@ if (isTestEnv) {
 
   activeUrl = testUrl;
 } else {
-  const prodUrl = process.env.DATABASE_URL;
+  const prodUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
   if (!prodUrl || prodUrl.includes("db.prisma.io")) {
     // Safe fallback for Next.js build-time page and route collection when DATABASE_URL is not provided during build
     activeUrl =
