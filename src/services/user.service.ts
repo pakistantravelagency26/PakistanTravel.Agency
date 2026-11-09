@@ -16,6 +16,8 @@ export interface LocalUser {
   twoFactorEnabled?: boolean;
   twoFactorSecret?: string | null;
   twoFactorRecoveryCodes?: string | null;
+  tokenVersion?: number;
+  sessionVersion?: number;
 }
 
 // In-memory fallback user repository (empty by default; all users authenticated via PostgreSQL)
@@ -64,6 +66,8 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
         twoFactorEnabled: Boolean((dbUser as any).twoFactorEnabled),
         twoFactorSecret: (dbUser as any).twoFactorSecret || null,
         twoFactorRecoveryCodes: (dbUser as any).twoFactorRecoveryCodes || null,
+        tokenVersion: (dbUser as any).tokenVersion ?? (dbUser as any).sessionVersion ?? 1,
+        sessionVersion: (dbUser as any).sessionVersion ?? (dbUser as any).tokenVersion ?? 1,
       };
     }
   } catch (err) {

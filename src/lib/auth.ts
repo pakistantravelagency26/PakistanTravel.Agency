@@ -206,7 +206,7 @@ export const authOptions: NextAuthOptions = {
           vendorId: user.vendorId || null,
           phone: user.phone,
           username: (user as any).username || null,
-          tokenVersion: (user as any).tokenVersion || 1,
+          tokenVersion: (user as any).sessionVersion ?? (user as any).tokenVersion ?? 1,
           twoFactorEnabled: Boolean(user.twoFactorEnabled),
         };
       },
@@ -292,10 +292,13 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          // Session Revocation: If user was deleted or tokenVersion/sessionVersion was incremented or staff suspended
+          // Session Revocation: If user was deleted or tokenVersion was incremented or staff suspended
           const currentVersion = dbUser?.sessionVersion ?? dbUser?.tokenVersion;
-          if (!dbUser || (token.tokenVersion && currentVersion !== token.tokenVersion) || (dbUser.role === "ADMIN" && dbUser.staffRole === "SUSPENDED")) {
-            return null as any; // Invalidates the JWT token immediately
+          if (!dbUser || (token.tokenVersion && currentVersion && (token.tokenVersion as number) < currentVersion) || (dbUser.role === "ADMIN" && dbUser.staffRole === "SUSPENDED")) {
+            return {} as any; // Safely clears user session without NextAuth 500 error
+          }
+          if (currentVersion && (!token.tokenVersion || (token.tokenVersion as number) < currentVersion)) {
+            token.tokenVersion = currentVersion;
           }
 
           token.role = dbUser.role;
