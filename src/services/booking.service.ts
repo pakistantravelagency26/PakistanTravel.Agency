@@ -41,6 +41,12 @@ export interface BookingRecord {
     phone?: string;
     whatsapp?: string;
   };
+  emailDeliveryStatus?: {
+    customer: "SENT" | "PENDING" | "FAILED" | "NONE";
+    vendor: "SENT" | "PENDING" | "FAILED" | "NONE";
+    vendorError?: string | null;
+    admin: "SENT" | "PENDING" | "FAILED" | "NONE";
+  };
 }
 
 export function generateBookingNumber(): string {
@@ -324,31 +330,58 @@ export async function getAllBookings(): Promise<BookingRecord[]> {
       orderBy: { createdAt: "desc" },
     });
 
-    return dbBookings.map((b) => ({
-      id: b.id,
-      bookingNumber: b.bookingNumber,
-      listingId: b.listingId,
-      listingTitle: b.listing?.title || "Northern Pakistan Trip",
-      listingPhoto: b.listing?.photos?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
-      unitTitle: b.unit?.title || "Tour Package",
-      destination: `${b.listing?.city || "Pakistan"}`,
-      startDate: b.startDate.toISOString().split("T")[0],
-      endDate: b.endDate.toISOString().split("T")[0],
-      nightsCount: 3,
-      guestsCount: b.guestsCount,
-      unitsCount: b.unitsCount,
-      totalAmount: Number(b.totalAmount),
-      depositAmount: Number(b.depositAmount || 0),
-      balanceDue: Number(b.balanceDue || 0),
-      paymentMethod: (b.payment?.paymentMethod as any) || "CASH_ON_ARRIVAL",
-      paymentStatus: b.payment?.status === "PAID" ? "PAID" : "PENDING",
-      status: b.status === "CONFIRMED" ? "CONFIRMED" : b.status === "COMPLETED" ? "COMPLETED" : "PENDING_PAYMENT",
-      guestName: b.guestName,
-      guestEmail: b.guestEmail,
-      guestPhone: b.guestPhone,
-      cnicOrPassport: "Verified",
-      createdAt: b.createdAt.toISOString(),
-    }));
+    const bookingIds = dbBookings.map((b) => b.id);
+    const outboxRecords = await prisma.emailOutbox.findMany({
+      where: {
+        bookingId: { in: bookingIds },
+        eventType: "BOOKING_CONFIRMED",
+      },
+      select: {
+        bookingId: true,
+        recipientRole: true,
+        status: true,
+        lastError: true,
+      },
+    });
+
+    return dbBookings.map((b) => {
+      const bOutbox = outboxRecords.filter((o) => o.bookingId === b.id);
+      const customerOutbox = bOutbox.find((o) => o.recipientRole === "CUSTOMER");
+      const vendorOutbox = bOutbox.find((o) => o.recipientRole === "VENDOR");
+      const adminOutbox = bOutbox.find((o) => o.recipientRole === "ADMIN");
+
+      return {
+        id: b.id,
+        bookingNumber: b.bookingNumber,
+        listingId: b.listingId,
+        listingTitle: b.listing?.title || "Northern Pakistan Trip",
+        listingPhoto: b.listing?.photos?.[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+        unitTitle: b.unit?.title || "Tour Package",
+        destination: `${b.listing?.city || "Pakistan"}`,
+        startDate: b.startDate.toISOString().split("T")[0],
+        endDate: b.endDate.toISOString().split("T")[0],
+        nightsCount: 3,
+        guestsCount: b.guestsCount,
+        unitsCount: b.unitsCount,
+        totalAmount: Number(b.totalAmount),
+        depositAmount: Number(b.depositAmount || 0),
+        balanceDue: Number(b.balanceDue || 0),
+        paymentMethod: (b.payment?.paymentMethod as any) || "CASH_ON_ARRIVAL",
+        paymentStatus: b.payment?.status === "PAID" ? "PAID" : "PENDING",
+        status: b.status === "CONFIRMED" ? "CONFIRMED" : b.status === "COMPLETED" ? "COMPLETED" : "PENDING_PAYMENT",
+        guestName: b.guestName,
+        guestEmail: b.guestEmail,
+        guestPhone: b.guestPhone,
+        cnicOrPassport: "Verified",
+        createdAt: b.createdAt.toISOString(),
+        emailDeliveryStatus: {
+          customer: (customerOutbox?.status as any) || "NONE",
+          vendor: (vendorOutbox?.status as any) || "NONE",
+          vendorError: vendorOutbox?.lastError || null,
+          admin: (adminOutbox?.status as any) || "NONE",
+        },
+      };
+    });
   } catch (error) {
     console.error("Error fetching all bookings:", error);
     return [];

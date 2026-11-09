@@ -10,7 +10,7 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "test": "node --experimental-strip-types --test tests/booking-flow.test.mjs tests/chatbot.test.mjs tests/anti-leakage.test.mjs tests/access-control.test.mjs tests/login-protection.test.mjs tests/password-reset.test.mjs tests/two-factor.test.mjs tests/booking-emails.test.mjs tests/seo.test.mjs tests/group2-auth.test.mjs tests/group3-authorization.test.mjs tests/group4-input-safety.test.mjs tests/group5-api-security.test.mjs tests/group6-cleanup.test.mjs tests/group7-dependencies.test.mjs tests/group8-database.test.mjs"
+    "test": "node --experimental-strip-types --test tests/booking-flow.test.mjs tests/chatbot.test.mjs tests/anti-leakage.test.mjs tests/access-control.test.mjs tests/login-protection.test.mjs tests/password-reset.test.mjs tests/two-factor.test.mjs tests/booking-emails.test.mjs tests/admin-booking-email-settings.test.mjs tests/seo.test.mjs tests/group2-auth.test.mjs tests/group3-authorization.test.mjs tests/group4-input-safety.test.mjs tests/group5-api-security.test.mjs tests/group6-cleanup.test.mjs tests/group7-dependencies.test.mjs tests/group8-database.test.mjs"
   },
   "dependencies": {
     "@neon/config": "1.11.3",

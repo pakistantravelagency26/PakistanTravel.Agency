@@ -25,6 +25,7 @@ export default function AdminBookingsPage() {
             vendorNet: (b.totalAmount || 0) - Math.round((b.totalAmount || 0) * 0.12),
             paymentMethod: b.paymentMethod || "Direct",
             status: b.status || "CONFIRMED",
+            emailDeliveryStatus: b.emailDeliveryStatus,
           })));
         }
       })
@@ -79,13 +80,14 @@ export default function AdminBookingsPage() {
                 <th className="py-3 px-4">Platform Fee</th>
                 <th className="py-3 px-4">Partner Share</th>
                 <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-center">Email Dispatch</th>
                 <th className="py-3 px-4 text-right">Refund Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/60 text-slate-300 font-medium">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
                     {loading ? "Loading bookings from database..." : "No customer bookings found in the database."}
                   </td>
                 </tr>
@@ -108,6 +110,52 @@ export default function AdminBookingsPage() {
                     >
                       {b.status}
                     </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
+                    <div className="inline-flex items-center gap-1.5" title={`Customer: ${b.emailDeliveryStatus?.customer || "NONE"}, Vendor: ${b.emailDeliveryStatus?.vendor || "NONE"}, Admin: ${b.emailDeliveryStatus?.admin || "NONE"}`}>
+                      <span
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                          b.emailDeliveryStatus?.customer === "SENT"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : b.emailDeliveryStatus?.customer === "PENDING"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : b.emailDeliveryStatus?.customer === "FAILED"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-slate-700 text-slate-400"
+                        }`}
+                        title={`Customer Copy: ${b.emailDeliveryStatus?.customer || "NONE"}`}
+                      >
+                        C: {b.emailDeliveryStatus?.customer === "SENT" ? "✓" : b.emailDeliveryStatus?.customer === "PENDING" ? "⋯" : b.emailDeliveryStatus?.customer === "FAILED" ? "✕" : "–"}
+                      </span>
+                      <span
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                          b.emailDeliveryStatus?.vendor === "SENT"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : b.emailDeliveryStatus?.vendor === "PENDING"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : b.emailDeliveryStatus?.vendor === "FAILED"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-slate-700 text-slate-400"
+                        }`}
+                        title={`Vendor Copy: ${b.emailDeliveryStatus?.vendor || "NONE"}${b.emailDeliveryStatus?.vendorError ? ` (${b.emailDeliveryStatus.vendorError})` : ""}`}
+                      >
+                        V: {b.emailDeliveryStatus?.vendor === "SENT" ? "✓" : b.emailDeliveryStatus?.vendor === "PENDING" ? "⋯" : b.emailDeliveryStatus?.vendor === "FAILED" ? "✕" : "–"}
+                      </span>
+                      <span
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                          b.emailDeliveryStatus?.admin === "SENT"
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : b.emailDeliveryStatus?.admin === "PENDING"
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : b.emailDeliveryStatus?.admin === "FAILED"
+                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            : "bg-slate-700 text-slate-400"
+                        }`}
+                        title={`Admin Copy: ${b.emailDeliveryStatus?.admin || "NONE"}`}
+                      >
+                        A: {b.emailDeliveryStatus?.admin === "SENT" ? "✓" : b.emailDeliveryStatus?.admin === "PENDING" ? "⋯" : b.emailDeliveryStatus?.admin === "FAILED" ? "✕" : "–"}
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3.5 px-4 text-right">
                     {b.status === "CONFIRMED" ? (

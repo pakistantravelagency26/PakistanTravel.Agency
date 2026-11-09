@@ -9,6 +9,7 @@ import {
   buildVendorCancellationEmail,
   buildAdminCancellationEmail,
 } from "./emailTemplates.service.ts";
+import { getBookingEmailSettings, type BookingEmailSettings } from "./emailSettings.service.ts";
 import nodemailer from "nodemailer";
 
 export interface OutboxMessage {
@@ -21,30 +22,51 @@ export interface OutboxMessage {
   eventType: "BOOKING_CONFIRMED" | "BOOKING_CANCELLED" | "PAYMENT_RECEIVED";
 }
 
-let cachedTransporter: nodemailer.Transporter | null = null;
+let cachedTransporter: {
+  transporter: nodemailer.Transporter | null;
+  cacheKey: string;
+} | null = null;
 
-function getMailTransporter(): nodemailer.Transporter | null {
-  if (cachedTransporter) return cachedTransporter;
+export function resetMailTransporter(): void {
+  cachedTransporter = null;
+}
 
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASSWORD || process.env.SMTP_PASS;
+export async function getMailTransporter(): Promise<{
+  transporter: nodemailer.Transporter | null;
+  settings: BookingEmailSettings;
+}> {
+  const settings = await getBookingEmailSettings();
+
+  if (!settings.enabled) {
+    return { transporter: null, settings };
+  }
+
+  const host = settings.smtpHost;
+  const port = Number(settings.smtpPort || 587);
+  const user = settings.smtpUser;
+  const pass = settings.smtpPass;
 
   if (host && user && pass) {
-    cachedTransporter = nodemailer.createTransport({
+    const cacheKey = `${host}:${port}:${user}:${settings.smtpSecure}`;
+    if (cachedTransporter && cachedTransporter.cacheKey === cacheKey) {
+      return { transporter: cachedTransporter.transporter, settings };
+    }
+
+    const transporter = nodemailer.createTransport({
       host,
       port,
-      secure: port === 465,
+      secure: settings.smtpSecure,
       auth: { user, pass },
       tls: {
         rejectUnauthorized: process.env.NODE_ENV === "production",
       },
     });
-    return cachedTransporter;
+
+    cachedTransporter = { transporter, cacheKey };
+    return { transporter, settings };
   }
 
-  return null;
+  return { transporter: null, settings };
 }
 
 /**
@@ -80,17 +102,21 @@ export async function deliverOutboxEmail(outboxId: string): Promise<{ success: b
     return { success: true };
   }
 
-  const fromAddress = process.env.SMTP_FROM || `PakistanTravel.Agency <no-reply@${siteConfig.domain}>`;
-  const transporter = getMailTransporter();
+  const { transporter, settings } = await getMailTransporter();
+  const senderName = settings.senderName || "PakistanTravel.Agency";
+  const senderEmail = settings.senderEmail || settings.smtpUser || `no-reply@${siteConfig.domain}`;
+  const fromAddress = `"${senderName}" <${senderEmail}>`;
+  const replyTo = settings.replyTo || undefined;
 
   try {
-    if (transporter) {
+    if (transporter && settings.enabled) {
       await transporter.sendMail({
         from: fromAddress,
         to: item.to,
         subject: item.subject,
         text: item.textBody,
         html: item.htmlBody,
+        replyTo,
       });
     } else {
       // In staging/development/preview without SMTP credentials:
@@ -135,6 +161,12 @@ export async function sendBookingConfirmationEmails(bookingIdOrNumber: string): 
   vendorOutboxId?: string;
   adminOutboxIds: string[];
 }> {
+  const settings = await getBookingEmailSettings();
+  if (!settings.enabled) {
+    console.log("[EMAIL OUTBOX] Automatic booking emails disabled in Admin Settings.");
+    return { adminOutboxIds: [] };
+  }
+
   const booking = await prisma.booking.findFirst({
     where: {
       OR: [{ id: bookingIdOrNumber }, { bookingNumber: bookingIdOrNumber }],
@@ -151,6 +183,14 @@ export async function sendBookingConfirmationEmails(bookingIdOrNumber: string): 
 
   if (!booking) {
     console.warn(`[EMAIL OUTBOX] Booking ${bookingIdOrNumber} not found for email dispatch`);
+    return { adminOutboxIds: [] };
+  }
+
+  // Trigger emails ONLY when booking status is CONFIRMED
+  if (booking.status !== "CONFIRMED") {
+    console.log(
+      `[EMAIL OUTBOX] Skipping confirmation emails: Booking ${booking.bookingNumber} is '${booking.status}', not 'CONFIRMED'.`
+    );
     return { adminOutboxIds: [] };
   }
 
@@ -179,22 +219,46 @@ export async function sendBookingConfirmationEmails(bookingIdOrNumber: string): 
     commissionRate: booking.listing.commissionRate || undefined,
   };
 
-  // 1. Customer Confirmation Email
-  const customerEmail = buildCustomerBookingConfirmationEmail(emailData);
-  const customerOutboxId = await queueEmail({
-    to: booking.guestEmail,
-    recipientRole: "CUSTOMER",
-    subject: customerEmail.subject,
-    htmlBody: customerEmail.html,
-    textBody: customerEmail.text,
-    bookingId: booking.id,
-    eventType: "BOOKING_CONFIRMED",
-  });
-  await deliverOutboxEmail(customerOutboxId);
+  const bookingId = booking.id;
 
-  // 2. Vendor Alert Email (if vendor email exists)
-  let vendorOutboxId: string | undefined = undefined;
-  if (emailData.vendorEmail) {
+  // Helper for deduplication: check if an email of this role was already queued or delivered
+  async function getExistingOutbox(role: "CUSTOMER" | "VENDOR" | "ADMIN", to?: string): Promise<string | null> {
+    const existing = await prisma.emailOutbox.findFirst({
+      where: {
+        bookingId,
+        recipientRole: role,
+        eventType: "BOOKING_CONFIRMED",
+        ...(to ? { to: to.trim().toLowerCase() } : {}),
+      },
+    });
+    return existing ? existing.id : null;
+  }
+
+  // 1. Customer Confirmation Email
+  let customerOutboxId: string | undefined;
+  const existingCustomer = await getExistingOutbox("CUSTOMER");
+  if (existingCustomer) {
+    customerOutboxId = existingCustomer;
+  } else {
+    const customerEmail = buildCustomerBookingConfirmationEmail(emailData);
+    customerOutboxId = await queueEmail({
+      to: booking.guestEmail,
+      recipientRole: "CUSTOMER",
+      subject: customerEmail.subject,
+      htmlBody: customerEmail.html,
+      textBody: customerEmail.text,
+      bookingId: booking.id,
+      eventType: "BOOKING_CONFIRMED",
+    });
+    await deliverOutboxEmail(customerOutboxId);
+  }
+
+  // 2. Vendor Alert Email
+  let vendorOutboxId: string | undefined;
+  const existingVendor = await getExistingOutbox("VENDOR");
+  if (existingVendor) {
+    vendorOutboxId = existingVendor;
+  } else if (emailData.vendorEmail && emailData.vendorEmail.includes("@")) {
     const vendorEmail = buildVendorBookingAlertEmail(emailData);
     vendorOutboxId = await queueEmail({
       to: emailData.vendorEmail,
@@ -206,24 +270,53 @@ export async function sendBookingConfirmationEmails(bookingIdOrNumber: string): 
       eventType: "BOOKING_CONFIRMED",
     });
     await deliverOutboxEmail(vendorOutboxId);
+  } else {
+    // If vendor email address is not configured, record that in the outbox / Admin panel,
+    // continue delivering the admin and client copies, and do not crash the checkout flow.
+    console.warn(`[EMAIL OUTBOX] Vendor email missing for listing "${booking.listing.title}" on booking ${booking.bookingNumber}`);
+    vendorOutboxId = await queueEmail({
+      to: "vendor-missing@platform.internal",
+      recipientRole: "VENDOR",
+      subject: `[ACTION REQUIRED] Missing Vendor Email: ${booking.bookingNumber} (${booking.listing.title})`,
+      htmlBody: `<p>Warning: No email address configured for tour operator "${booking.listing.vendor?.businessName || "Unknown"}". Fulfilment alert requires manual dispatch.</p>`,
+      textBody: `Warning: No email address configured for tour operator "${booking.listing.vendor?.businessName || "Unknown"}". Fulfilment alert requires manual dispatch.`,
+      bookingId: booking.id,
+      eventType: "BOOKING_CONFIRMED",
+    });
+    await prisma.emailOutbox.update({
+      where: { id: vendorOutboxId },
+      data: {
+        status: "FAILED",
+        attempts: 1,
+        lastError: "Vendor email address not configured. Fulfilment alert requires manual follow-up.",
+      },
+    });
   }
 
-  // 3. Admin Alerts (to all configured ops emails)
+  // 3. Admin Alerts (to configured admin email from settings)
   const adminEmail = buildAdminBookingAlertEmail(emailData);
   const adminOutboxIds: string[] = [];
-  for (const adminTo of ADMIN_NOTIFICATION_EMAILS) {
+  const primaryAdmin = settings.adminEmail || (ADMIN_NOTIFICATION_EMAILS && ADMIN_NOTIFICATION_EMAILS[0]);
+  const adminRecipients = Array.from(new Set([primaryAdmin, ...ADMIN_NOTIFICATION_EMAILS].filter(Boolean)));
+
+  for (const adminTo of adminRecipients) {
     if (adminTo && adminTo.includes("@")) {
-      const adminOutboxId = await queueEmail({
-        to: adminTo,
-        recipientRole: "ADMIN",
-        subject: adminEmail.subject,
-        htmlBody: adminEmail.html,
-        textBody: adminEmail.text,
-        bookingId: booking.id,
-        eventType: "BOOKING_CONFIRMED",
-      });
-      await deliverOutboxEmail(adminOutboxId);
-      adminOutboxIds.push(adminOutboxId);
+      const existingAdmin = await getExistingOutbox("ADMIN", adminTo);
+      if (existingAdmin) {
+        adminOutboxIds.push(existingAdmin);
+      } else {
+        const adminOutboxId = await queueEmail({
+          to: adminTo,
+          recipientRole: "ADMIN",
+          subject: adminEmail.subject,
+          htmlBody: adminEmail.html,
+          textBody: adminEmail.text,
+          bookingId: booking.id,
+          eventType: "BOOKING_CONFIRMED",
+        });
+        await deliverOutboxEmail(adminOutboxId);
+        adminOutboxIds.push(adminOutboxId);
+      }
     }
   }
 
@@ -238,6 +331,11 @@ export async function sendBookingCancellationEmails(bookingIdOrNumber: string): 
   vendorOutboxId?: string;
   adminOutboxIds: string[];
 }> {
+  const settings = await getBookingEmailSettings();
+  if (!settings.enabled) {
+    return { adminOutboxIds: [] };
+  }
+
   const booking = await prisma.booking.findFirst({
     where: {
       OR: [{ id: bookingIdOrNumber }, { bookingNumber: bookingIdOrNumber }],
@@ -306,7 +404,10 @@ export async function sendBookingCancellationEmails(bookingIdOrNumber: string): 
   // 3. Admin Alerts
   const adminEmail = buildAdminCancellationEmail(emailData);
   const adminOutboxIds: string[] = [];
-  for (const adminTo of ADMIN_NOTIFICATION_EMAILS) {
+  const primaryAdmin = settings.adminEmail || (ADMIN_NOTIFICATION_EMAILS && ADMIN_NOTIFICATION_EMAILS[0]);
+  const adminRecipients = Array.from(new Set([primaryAdmin, ...ADMIN_NOTIFICATION_EMAILS].filter(Boolean)));
+
+  for (const adminTo of adminRecipients) {
     if (adminTo && adminTo.includes("@")) {
       const adminOutboxId = await queueEmail({
         to: adminTo,
@@ -365,4 +466,3 @@ export async function processPendingEmailOutbox(batchSize: number = 25, specific
     failed,
   };
 }
-
