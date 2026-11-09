@@ -75,7 +75,12 @@ export function validateEnvironment(): z.infer<typeof envSchema> {
   const isTest =
     process.env.NODE_ENV === "test" ||
     process.argv.some((arg) => arg.includes("test"));
+  const isBuild =
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.npm_lifecycle_event === "build" ||
+    process.argv.some((arg) => arg.includes("build"));
   const isProd = process.env.NODE_ENV === "production";
+  const isProdRuntime = isProd && !isBuild && !isTest;
 
   // 1. Audit all NEXT_PUBLIC_* variables to ensure no secrets are exposed to clients
   for (const [key, val] of Object.entries(process.env)) {
@@ -115,7 +120,7 @@ export function validateEnvironment(): z.infer<typeof envSchema> {
       2
     )}`;
 
-    if (isProd) {
+    if (isProdRuntime) {
       throw new Error(`FATAL: ${errorMsg}`);
     } else if (!isTest) {
       console.warn(`[WARN] ${errorMsg}`);
@@ -123,8 +128,8 @@ export function validateEnvironment(): z.infer<typeof envSchema> {
     return (parsed as any).data || (process.env as any);
   }
 
-  // 3. Strict production assertions
-  if (isProd) {
+  // 3. Strict production assertions at runtime
+  if (isProdRuntime) {
     if (!process.env.DATABASE_URL) {
       throw new Error("FATAL: DATABASE_URL is strictly required in production!");
     }
