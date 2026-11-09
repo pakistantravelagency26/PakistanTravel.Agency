@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { getActiveDbListings } from "@/services/serverListing.service";
 import { SearchClientView } from "@/components/search/SearchClientView";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface SearchPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
@@ -51,7 +52,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SearchPage() {
-  const initialListings = await getActiveDbListings();
+  let initialListings: any[] = [];
+  try {
+    initialListings = await getActiveDbListings();
+  } catch (err) {
+    console.warn("[SearchPage] Active DB listings query fallback:", err);
+  }
 
   return <SearchClientView initialListings={initialListings} />;
 }
