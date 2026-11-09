@@ -28,17 +28,36 @@ export function pushAnalyticsEvent(eventName: string, params: Record<string, any
 
 /**
  * Update consent state (Google Consent Mode v2)
+ * Keeps analytics consent and advertising consent strictly separate.
  */
-export function updateConsentState(granted: boolean) {
-  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+export function updateAnalyticsConsent(granted: boolean) {
+  if (typeof window === "undefined") return;
 
   const state = granted ? "granted" : "denied";
-  window.gtag("consent", "update", {
-    ad_storage: state,
-    ad_user_data: state,
-    ad_personalization: state,
+
+  if (typeof window.gtag === "function") {
+    window.gtag("consent", "update", {
+      analytics_storage: state,
+      // Advertising consent remains strictly denied unless explicitly opted into
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+    });
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: "consent_update",
     analytics_storage: state,
+    timestamp: new Date().toISOString(),
   });
+}
+
+/**
+ * Backward compatibility alias for updateConsentState
+ */
+export function updateConsentState(granted: boolean) {
+  updateAnalyticsConsent(granted);
 }
 
 // ==========================================
