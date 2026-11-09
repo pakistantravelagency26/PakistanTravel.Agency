@@ -33,7 +33,7 @@ export async function PATCH(
 
     const { id } = params;
     const body = await req.json();
-    const { name, phone, permissions, staffRole, password, action } = body;
+    const { name, username, email, phone, permissions, staffRole, password, action } = body;
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -120,7 +120,63 @@ export async function PATCH(
 
     const updateData: any = {};
     if (name) updateData.name = name.trim();
-    if (phone !== undefined) updateData.phone = phone ? phone.trim() : null;
+
+    if (username !== undefined) {
+      if (username && username.trim().length > 0) {
+        const cleanUser = username.trim().toLowerCase();
+        if (!/^[a-z0-9_.-]{3,30}$/.test(cleanUser)) {
+          return NextResponse.json(
+            { success: false, error: "Username must be 3-30 characters long and can contain letters, numbers, underscores, and dots." },
+            { status: 400 }
+          );
+        }
+        const existingUsername = await prisma.user.findFirst({
+          where: { username: cleanUser, NOT: { id } },
+        });
+        if (existingUsername) {
+          return NextResponse.json(
+            { success: false, error: "This username is already taken by another account." },
+            { status: 400 }
+          );
+        }
+        updateData.username = cleanUser;
+      } else {
+        updateData.username = null;
+      }
+    }
+
+    if (email && email.trim().length > 0) {
+      const cleanEmail = email.trim().toLowerCase();
+      const existingEmail = await prisma.user.findFirst({
+        where: { email: cleanEmail, NOT: { id } },
+      });
+      if (existingEmail) {
+        return NextResponse.json(
+          { success: false, error: "This email address is already used by another account." },
+          { status: 400 }
+        );
+      }
+      updateData.email = cleanEmail;
+    }
+
+    if (phone !== undefined) {
+      if (phone && phone.trim().length > 0) {
+        const cleanPhone = phone.trim();
+        const existingPhone = await prisma.user.findFirst({
+          where: { phone: cleanPhone, NOT: { id } },
+        });
+        if (existingPhone) {
+          return NextResponse.json(
+            { success: false, error: "This phone number is already registered to another account." },
+            { status: 400 }
+          );
+        }
+        updateData.phone = cleanPhone;
+      } else {
+        updateData.phone = null;
+      }
+    }
+
     if (password && password.trim().length > 0) {
       const strength = validatePasswordStrength(password.trim());
       if (!strength.valid) {
@@ -163,6 +219,7 @@ export async function PATCH(
       member: {
         id: updated.id,
         name: updated.name,
+        username: updated.username,
         email: updated.email,
         phone: updated.phone,
         staffRole: updated.staffRole,

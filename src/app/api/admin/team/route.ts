@@ -20,6 +20,7 @@ export async function GET() {
       select: {
         id: true,
         name: true,
+        username: true,
         email: true,
         phone: true,
         staffRole: true,
@@ -41,6 +42,7 @@ export async function GET() {
         return {
           id: m.id,
           name: m.name,
+          username: m.username || "",
           email: m.email,
           phone: m.phone || "N/A",
           staffRole: isSuspended ? "SUSPENDED" : (isSuperAdmin ? "SUPER_ADMIN" : (m.staffRole || "CUSTOM_STAFF")),
@@ -79,7 +81,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, email, password, phone, permissions, staffRole } = body;
+    const { name, username, email, password, phone, permissions, staffRole } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -109,6 +111,39 @@ export async function POST(req: Request) {
       );
     }
 
+    let normalizedUsername: string | null = null;
+    if (username && typeof username === "string" && username.trim().length > 0) {
+      normalizedUsername = username.trim().toLowerCase();
+      if (!/^[a-z0-9_.-]{3,30}$/.test(normalizedUsername)) {
+        return NextResponse.json(
+          { success: false, error: "Username must be 3-30 characters long and can contain letters, numbers, underscores, and dots." },
+          { status: 400 }
+        );
+      }
+      const existingUserByUsername = await prisma.user.findUnique({
+        where: { username: normalizedUsername },
+      });
+      if (existingUserByUsername) {
+        return NextResponse.json(
+          { success: false, error: "This username is already taken. Please choose another username." },
+          { status: 400 }
+        );
+      }
+    }
+
+    let cleanPhone = phone ? phone.trim() : null;
+    if (cleanPhone) {
+      const existingPhone = await prisma.user.findFirst({
+        where: { phone: cleanPhone },
+      });
+      if (existingPhone) {
+        return NextResponse.json(
+          { success: false, error: "This phone number is already registered to another account." },
+          { status: 400 }
+        );
+      }
+    }
+
     const passwordHash = await hashPassword(password.trim());
 
     // Format permissions: either array or string
@@ -124,8 +159,9 @@ export async function POST(req: Request) {
     const newStaff = await prisma.user.create({
       data: {
         name: name.trim(),
+        username: normalizedUsername,
         email: normalizedEmail,
-        phone: phone ? phone.trim() : null,
+        phone: cleanPhone,
         passwordHash,
         role: "ADMIN",
         staffRole: assignedStaffRole,
@@ -138,7 +174,9 @@ export async function POST(req: Request) {
       member: {
         id: newStaff.id,
         name: newStaff.name,
+        username: newStaff.username,
         email: newStaff.email,
+        phone: newStaff.phone,
         staffRole: newStaff.staffRole,
         permissions: newStaff.permissions,
         createdAt: newStaff.createdAt.toISOString(),

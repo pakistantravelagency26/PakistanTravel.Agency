@@ -11,19 +11,28 @@ import {
   Mail, 
   Phone, 
   CheckCircle2, 
-  AlertCircle,
-  BookOpenCheck,
-  CreditCard,
-  Building2,
-  MapPin,
-  Tag,
-  Key,
-  Edit,
-  X,
-  Loader2,
-  CheckSquare,
-  Square,
-  Globe
+  AlertCircle, 
+  BookOpenCheck, 
+  CreditCard, 
+  Building2, 
+  MapPin, 
+  Tag, 
+  Key, 
+  Edit, 
+  X, 
+  Loader2, 
+  CheckSquare, 
+  Square, 
+  Globe, 
+  LayoutDashboard, 
+  Headphones, 
+  Percent, 
+  ShieldAlert, 
+  AtSign, 
+  Eye, 
+  EyeOff, 
+  KeyRound, 
+  Save 
 } from "lucide-react";
 
 interface PermissionOption {
@@ -36,6 +45,22 @@ interface PermissionOption {
 }
 
 const PERMISSION_OPTIONS: PermissionOption[] = [
+  {
+    key: "OVERVIEW",
+    label: "Overview & Analytics",
+    department: "Executive Dashboard",
+    description: "View platform real-time overview, daily booking metrics, revenue, and active listings.",
+    badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    icon: LayoutDashboard,
+  },
+  {
+    key: "TICKETS",
+    label: "Support Tickets & AI Logs",
+    department: "Customer Support",
+    description: "Manage traveler inquiries, reply to support tickets, and view AI concierge chat conversations.",
+    badgeColor: "bg-cyan-50 text-cyan-700 border-cyan-200",
+    icon: Headphones,
+  },
   {
     key: "BOOKINGS",
     label: "Bookings & Refunds",
@@ -51,6 +76,14 @@ const PERMISSION_OPTIONS: PermissionOption[] = [
     description: "Audit vendor net commissions, execute Raast/IBFT disbursements, and view financial ledger.",
     badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
     icon: CreditCard,
+  },
+  {
+    key: "COMMISSIONS",
+    label: "Commission Settings",
+    department: "Finance & Rates",
+    description: "Configure global platform take-rate percentages and custom tier commissions.",
+    badgeColor: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    icon: Percent,
   },
   {
     key: "LISTINGS",
@@ -93,10 +126,26 @@ const PERMISSION_OPTIONS: PermissionOption[] = [
     icon: Globe,
   },
   {
+    key: "SETTINGS",
+    label: "Booking Email Settings",
+    department: "System Configuration",
+    description: "Configure transactional booking emails, Gmail App password, and SMTP delivery.",
+    badgeColor: "bg-slate-50 text-slate-700 border-slate-200",
+    icon: Mail,
+  },
+  {
+    key: "SECURITY",
+    label: "Login Security & Lockouts",
+    department: "Cyber Security",
+    description: "View real-time login logs, unblock blocked IP addresses, and manage 2FA overrides.",
+    badgeColor: "bg-orange-50 text-orange-700 border-orange-200",
+    icon: ShieldAlert,
+  },
+  {
     key: "TEAM",
     label: "Team & Staff Access",
     department: "Administration",
-    description: "Create staff sub-accounts and configure granular department permissions.",
+    description: "Create staff sub-accounts and configure granular department tab permissions.",
     badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
     icon: ShieldCheck,
   },
@@ -105,6 +154,7 @@ const PERMISSION_OPTIONS: PermissionOption[] = [
 interface TeamMember {
   id: string;
   name: string;
+  username?: string;
   email: string;
   phone: string;
   staffRole: string;
@@ -123,15 +173,23 @@ export default function AdminTeamPage() {
 
   // New staff form state
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(["BOOKINGS"]);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(["BOOKINGS", "TICKETS"]);
 
-  // Edit staff permissions modal state
+  // Edit staff modal state
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [showEditPassword, setShowEditPassword] = useState(false);
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
-  const [updatingPermissions, setUpdatingPermissions] = useState(false);
+  const [updatingMember, setUpdatingMember] = useState(false);
 
   useEffect(() => {
     fetchTeam();
@@ -157,10 +215,10 @@ export default function AdminTeamPage() {
   function togglePermission(key: string, isEdit = false) {
     if (isEdit) {
       if (key === "ALL") {
-        if (editPermissions.includes("ALL")) {
+        if (editPermissions.includes("ALL") || editPermissions.length === PERMISSION_OPTIONS.length) {
           setEditPermissions(["BOOKINGS"]);
         } else {
-          setEditPermissions(["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)]);
+          setEditPermissions(PERMISSION_OPTIONS.map((p) => p.key));
         }
         return;
       }
@@ -169,17 +227,14 @@ export default function AdminTeamPage() {
         const withoutAll = prev.filter((p) => p !== "ALL");
         const exists = withoutAll.includes(key);
         const updated = exists ? withoutAll.filter((p) => p !== key) : [...withoutAll, key];
-        if (updated.length === PERMISSION_OPTIONS.length) {
-          return ["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)];
-        }
         return updated.length === 0 ? [key] : updated;
       });
     } else {
       if (key === "ALL") {
-        if (selectedPermissions.includes("ALL")) {
+        if (selectedPermissions.includes("ALL") || selectedPermissions.length === PERMISSION_OPTIONS.length) {
           setSelectedPermissions(["BOOKINGS"]);
         } else {
-          setSelectedPermissions(["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)]);
+          setSelectedPermissions(PERMISSION_OPTIONS.map((p) => p.key));
         }
         return;
       }
@@ -188,9 +243,6 @@ export default function AdminTeamPage() {
         const withoutAll = prev.filter((p) => p !== "ALL");
         const exists = withoutAll.includes(key);
         const updated = exists ? withoutAll.filter((p) => p !== key) : [...withoutAll, key];
-        if (updated.length === PERMISSION_OPTIONS.length) {
-          return ["ALL", ...PERMISSION_OPTIONS.map((p) => p.key)];
-        }
         return updated.length === 0 ? [key] : updated;
       });
     }
@@ -201,7 +253,12 @@ export default function AdminTeamPage() {
     setStatusMessage(null);
 
     if (selectedPermissions.length === 0) {
-      setStatusMessage({ type: "error", text: "Please select at least one permission check for this account." });
+      setStatusMessage({ type: "error", text: "Please select at least one tab/permission for this staff account." });
+      return;
+    }
+
+    if (password.length < 8) {
+      setStatusMessage({ type: "error", text: "Password must be at least 8 characters long." });
       return;
     }
 
@@ -212,11 +269,12 @@ export default function AdminTeamPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
+          username: username.trim() || undefined,
           email: email.trim().toLowerCase(),
           password: password.trim(),
           phone: phone.trim() || undefined,
-          permissions: selectedPermissions,
-          staffRole: selectedPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF",
+          permissions: selectedPermissions.length === PERMISSION_OPTIONS.length ? ["ALL"] : selectedPermissions,
+          staffRole: selectedPermissions.length === PERMISSION_OPTIONS.length ? "SUPER_ADMIN" : "CUSTOM_STAFF",
         }),
       });
 
@@ -224,13 +282,14 @@ export default function AdminTeamPage() {
       if (data.success) {
         setStatusMessage({
           type: "success",
-          text: `Staff account "${data.member.name}" successfully created with ${selectedPermissions.length} assigned permissions!`,
+          text: `Staff account "${data.member.name}" successfully created with ${selectedPermissions.length} assigned tabs!`,
         });
         setName("");
+        setUsername("");
         setEmail("");
         setPassword("");
         setPhone("");
-        setSelectedPermissions(["BOOKINGS"]);
+        setSelectedPermissions(["BOOKINGS", "TICKETS"]);
         fetchTeam();
       } else {
         setStatusMessage({ type: "error", text: data.error || "Could not create staff account." });
@@ -242,18 +301,45 @@ export default function AdminTeamPage() {
     }
   }
 
-  async function handleUpdatePermissions(e: React.FormEvent) {
+  function openEditModal(m: TeamMember) {
+    setEditingMember(m);
+    setEditName(m.name || "");
+    setEditUsername(m.username || "");
+    setEditEmail(m.email || "");
+    setEditPhone(m.phone !== "N/A" ? m.phone : "");
+    setEditPassword("");
+    const isSuper = m.isProtected || m.permissions?.includes("ALL");
+    if (isSuper) {
+      setEditPermissions(PERMISSION_OPTIONS.map((p) => p.key));
+    } else {
+      const perms = (m.permissions || "").split(",").map((p) => p.trim()).filter(Boolean);
+      setEditPermissions(perms.length > 0 ? perms : ["BOOKINGS"]);
+    }
+  }
+
+  async function handleUpdateMember(e: React.FormEvent) {
     e.preventDefault();
     if (!editingMember) return;
 
-    setUpdatingPermissions(true);
+    if (editPermissions.length === 0) {
+      alert("Please select at least one tab/permission for this staff member.");
+      return;
+    }
+
+    setUpdatingMember(true);
     try {
+      const isAll = editPermissions.length === PERMISSION_OPTIONS.length;
       const res = await fetch(`/api/admin/team/${editingMember.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          permissions: editPermissions,
-          staffRole: editPermissions.includes("ALL") ? "SUPER_ADMIN" : "CUSTOM_STAFF",
+          name: editName.trim(),
+          username: editUsername.trim() || "",
+          email: editEmail.trim().toLowerCase(),
+          phone: editPhone.trim() || "",
+          password: editPassword.trim() ? editPassword.trim() : undefined,
+          permissions: isAll ? ["ALL"] : editPermissions,
+          staffRole: isAll ? "SUPER_ADMIN" : "CUSTOM_STAFF",
         }),
       });
 
@@ -261,17 +347,17 @@ export default function AdminTeamPage() {
       if (data.success) {
         setStatusMessage({
           type: "success",
-          text: `Permissions updated successfully for ${editingMember.name}!`,
+          text: `Details and tab permissions updated successfully for ${editName}!`,
         });
         setEditingMember(null);
         fetchTeam();
       } else {
-        alert(data.error || "Failed to update permissions.");
+        alert(data.error || "Failed to update staff member.");
       }
     } catch (err: any) {
-      alert("Error updating permissions: " + err.message);
+      alert("Error updating staff member: " + err.message);
     } finally {
-      setUpdatingPermissions(false);
+      setUpdatingMember(false);
     }
   }
 
@@ -324,12 +410,6 @@ export default function AdminTeamPage() {
     }
   }
 
-  function openEditModal(m: TeamMember) {
-    setEditingMember(m);
-    const perms = (m.permissions || "").split(",").map((p) => p.trim()).filter(Boolean);
-    setEditPermissions(perms.length > 0 ? perms : ["BOOKINGS"]);
-  }
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -337,13 +417,13 @@ export default function AdminTeamPage() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold mb-2">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Role & Department Permission Controller</span>
+            <span>Role & Tab Assignment Controller</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Team & Department Staff Access
+            Team & Staff Tab Access
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Assign custom job roles with granular checkboxes. Give one staff member 2 tasks (e.g. Bookings + Billing) and another 3 tasks (e.g. Listings + Destinations + Promos).
+            Create staff sub-accounts with custom Username, Password, Email, and Phone. Check off exactly which dashboard tabs each staff member is allowed to see and manage.
           </p>
         </div>
 
@@ -382,7 +462,7 @@ export default function AdminTeamPage() {
             </div>
             <div>
               <h2 className="text-base font-extrabold text-slate-900">Current Staff Members</h2>
-              <p className="text-xs text-slate-400">Accounts authorized with departmental dashboard access</p>
+              <p className="text-xs text-slate-400">All registered platform operators and their assigned dashboard tabs</p>
             </div>
           </div>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
@@ -413,8 +493,13 @@ export default function AdminTeamPage() {
                   className="p-5 rounded-2xl border border-slate-200 hover:border-slate-300 transition bg-slate-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-5"
                 >
                   <div className="space-y-2 max-w-md">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-extrabold text-slate-900 text-sm">{member.name}</span>
+                      {member.username && (
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-200 text-slate-700">
+                          @{member.username}
+                        </span>
+                      )}
                       {member.isProtected && (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
                           Primary Super Admin
@@ -423,7 +508,7 @@ export default function AdminTeamPage() {
                       {member.isSuspended && (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
                           <Lock className="w-3 h-3 text-rose-600" />
-                          SUSPENDED / BLOCKED
+                          SUSPENDED
                         </span>
                       )}
                     </div>
@@ -445,13 +530,13 @@ export default function AdminTeamPage() {
                   {/* Assigned Granular Permissions Pills */}
                   <div className="flex-1 lg:px-4">
                     <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                      Assigned Permissions ({memberPerms.length} {memberPerms.length === 1 ? "Module" : "Modules"})
+                      Assigned Tabs ({memberPerms.length} of {PERMISSION_OPTIONS.length} Tabs)
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {isSuper ? (
                         <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white shadow-sm flex items-center gap-1.5">
                           <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Full Super Admin Access (All 7 Modules)</span>
+                          <span>Full Super Admin Access (All 13 Tabs Authorized)</span>
                         </span>
                       ) : (
                         memberPerms.map((permKey) => {
@@ -481,7 +566,7 @@ export default function AdminTeamPage() {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold transition shadow-sm"
                         >
                           <Edit className="w-3.5 h-3.5 text-slate-500" />
-                          <span>Edit Tasks</span>
+                          <span>Edit Details & Tabs</span>
                         </button>
                         <button
                           onClick={() => handleToggleSuspend(member.id, member.name, Boolean(member.isSuspended))}
@@ -500,7 +585,7 @@ export default function AdminTeamPage() {
                           ) : (
                             <>
                               <Lock className="w-3.5 h-3.5 text-amber-600" />
-                              <span>Block / Suspend</span>
+                              <span>Block</span>
                             </>
                           )}
                         </button>
@@ -511,7 +596,7 @@ export default function AdminTeamPage() {
                           title="Delete staff account permanently"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-red-600" />
-                          <span>Delete Staff</span>
+                          <span>Delete</span>
                         </button>
                       </>
                     )}
@@ -523,7 +608,7 @@ export default function AdminTeamPage() {
         )}
       </div>
 
-      {/* Create New Staff Member with Granular Checkboxes Form */}
+      {/* Create New Staff Member Form */}
       <div id="create-staff-form" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -532,66 +617,101 @@ export default function AdminTeamPage() {
           <div>
             <h2 className="text-lg font-extrabold text-slate-900">Create New Staff Account</h2>
             <p className="text-xs text-slate-500">
-              Provide credentials and check off the exact tasks this staff member will handle
+              Provide Username, Email, Phone, Password, and check off the exact tabs this staff member will be assigned.
             </p>
           </div>
         </div>
 
         <form onSubmit={handleCreateStaff} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Staff Member Full Name *
+                Staff Full Name *
               </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Tariq Mehmood"
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
+              <div className="relative">
+                <Users className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Tariq Mehmood"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  required
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Staff Email (Login Username) *
+                Username (Login ID)
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. tariq@travel.com"
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
+              <div className="relative">
+                <AtSign className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+                  placeholder="e.g. tariq_operations"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Initial Password *
+                Email Address *
               </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. tariq@travel.com"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Mobile Phone (Login ID)
+              </label>
+              <div className="relative">
+                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="e.g. 03001234567"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Staff Password *
+            </label>
+            <div className="relative max-w-md">
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Secure alphanumeric password"
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Enter password (min 8 characters)"
+                className="w-full pl-9 pr-10 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Direct Contact Phone (Optional)
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0300-1234567"
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -600,41 +720,55 @@ export default function AdminTeamPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="font-extrabold text-slate-900 text-sm">
-                  Department Permissions & Module Access Checkboxes
+                  Dashboard Tabs & Module Access Checkboxes
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Select which dashboard tabs this account can view and manage ({selectedPermissions.length} selected)
+                  Select which dashboard tabs this staff member can view and manage ({selectedPermissions.length} of {PERMISSION_OPTIONS.length} tabs selected)
                 </p>
               </div>
 
               {/* Quick Select Helpers */}
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => setSelectedPermissions(PERMISSION_OPTIONS.map((p) => p.key))}
-                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                  className="px-3 py-1 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold transition"
                 >
-                  Select All
+                  Select All Tabs
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedPermissions(["BOOKINGS"])}
+                  onClick={() => setSelectedPermissions(["BOOKINGS", "TICKETS"])}
                   className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
                 >
-                  Bookings Only
+                  Bookings + Support
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedPermissions(["BOOKINGS", "FINANCE"])}
+                  onClick={() => setSelectedPermissions(["FINANCE", "COMMISSIONS"])}
                   className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
                 >
-                  Bookings + Billing (2 Tasks)
+                  Finance Desk
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPermissions(["LISTINGS", "DESTINATIONS"])}
+                  className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition"
+                >
+                  Catalog & Content
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPermissions([])}
+                  className="px-3 py-1 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold transition"
+                >
+                  Clear All
                 </button>
               </div>
             </div>
 
             {/* Checkboxes Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {PERMISSION_OPTIONS.map((option) => {
                 const isChecked = selectedPermissions.includes(option.key) || selectedPermissions.includes("ALL");
                 const Icon = option.icon;
@@ -645,11 +779,11 @@ export default function AdminTeamPage() {
                     onClick={() => togglePermission(option.key, false)}
                     className={`p-4 rounded-2xl border cursor-pointer transition flex items-start gap-3.5 ${
                       isChecked
-                        ? "bg-emerald-50/60 border-emerald-300 shadow-sm"
+                        ? "bg-emerald-50/70 border-emerald-300 shadow-sm ring-1 ring-emerald-300"
                         : "bg-white border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <div className="mt-0.5 text-emerald-600">
+                    <div className="mt-0.5 text-emerald-600 shrink-0">
                       {isChecked ? (
                         <CheckSquare className="w-5 h-5 fill-emerald-600 text-white" />
                       ) : (
@@ -661,8 +795,10 @@ export default function AdminTeamPage() {
                       <div className="flex items-center gap-2">
                         <Icon className={`w-4 h-4 ${isChecked ? "text-emerald-700" : "text-slate-400"}`} />
                         <span className="font-extrabold text-xs text-slate-900">{option.label}</span>
-                        <span className="text-[10px] font-semibold text-slate-400">({option.department})</span>
                       </div>
+                      <span className="text-[10px] font-semibold text-emerald-700 block">
+                        {option.department}
+                      </span>
                       <p className="text-[11px] text-slate-500 leading-relaxed">
                         {option.description}
                       </p>
@@ -684,16 +820,16 @@ export default function AdminTeamPage() {
               ) : (
                 <UserPlus className="w-4 h-4" />
               )}
-              <span>Create Staff Member ({selectedPermissions.length} Tasks)</span>
+              <span>Create Staff Member ({selectedPermissions.length} Tabs)</span>
             </button>
           </div>
         </form>
       </div>
 
-      {/* Edit Permissions Modal */}
+      {/* Edit Member & Permissions Modal */}
       {editingMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-3xl w-full border border-slate-200 shadow-2xl p-6 sm:p-8 relative max-h-[92vh] overflow-y-auto space-y-6">
             <button
               onClick={() => setEditingMember(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition"
@@ -701,59 +837,159 @@ export default function AdminTeamPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <Edit className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-900 text-base">
-                  Edit Permissions for {editingMember.name}
+                  Edit Staff Details & Tab Access
                 </h3>
-                <p className="text-xs text-slate-500">{editingMember.email}</p>
+                <p className="text-xs text-slate-500">Updating profile and permissions for {editingMember.name}</p>
               </div>
             </div>
 
-            <form onSubmit={handleUpdatePermissions} className="space-y-5">
-              <div className="text-xs text-slate-600">
-                Check or uncheck the departments and tasks this staff member should be assigned:
+            <form onSubmit={handleUpdateMember} className="space-y-6">
+              {/* Profile Details in Modal */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Staff Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+                    placeholder="e.g. username"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Mobile Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="e.g. 03001234567"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2.5">
-                {PERMISSION_OPTIONS.map((option) => {
-                  const isChecked = editPermissions.includes(option.key) || editPermissions.includes("ALL");
-                  const Icon = option.icon;
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Reset Password (Leave blank to keep current password)
+                </label>
+                <div className="relative max-w-sm">
+                  <input
+                    type={showEditPassword ? "text" : "password"}
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    placeholder="Enter new password"
+                    className="w-full px-3.5 pr-10 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                  >
+                    {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
 
-                  return (
-                    <div
-                      key={option.key}
-                      onClick={() => togglePermission(option.key, true)}
-                      className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-start gap-3 ${
-                        isChecked
-                          ? "bg-emerald-50/60 border-emerald-300 shadow-sm"
-                          : "bg-white border-slate-200 hover:border-slate-300"
-                      }`}
+              {/* Checkboxes in Modal */}
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-extrabold text-xs text-slate-900 uppercase tracking-wider">
+                      Assigned Dashboard Tabs ({editPermissions.length} Selected)
+                    </h4>
+                    <p className="text-[11px] text-slate-400">Select which tabs will be visible to this staff member</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditPermissions(PERMISSION_OPTIONS.map((p) => p.key))}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold"
                     >
-                      <div className="mt-0.5 text-emerald-600">
-                        {isChecked ? (
-                          <CheckSquare className="w-5 h-5 fill-emerald-600 text-white" />
-                        ) : (
-                          <Square className="w-5 h-5 text-slate-300" />
-                        )}
-                      </div>
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditPermissions([])}
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] font-bold"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
 
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <Icon className={`w-3.5 h-3.5 ${isChecked ? "text-emerald-700" : "text-slate-400"}`} />
-                          <span className="font-extrabold text-xs text-slate-900">{option.label}</span>
-                          <span className="text-[10px] text-slate-400">({option.department})</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-60 overflow-y-auto p-1">
+                  {PERMISSION_OPTIONS.map((option) => {
+                    const isChecked = editPermissions.includes(option.key) || editPermissions.includes("ALL");
+                    const Icon = option.icon;
+
+                    return (
+                      <div
+                        key={option.key}
+                        onClick={() => togglePermission(option.key, true)}
+                        className={`p-3 rounded-xl border cursor-pointer transition flex items-start gap-2.5 ${
+                          isChecked
+                            ? "bg-emerald-50/70 border-emerald-300 ring-1 ring-emerald-300"
+                            : "bg-white border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="mt-0.5 text-emerald-600 shrink-0">
+                          {isChecked ? (
+                            <CheckSquare className="w-4 h-4 fill-emerald-600 text-white" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-300" />
+                          )}
                         </div>
-                        <p className="text-[11px] text-slate-500">
-                          {option.description}
-                        </p>
+
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <Icon className={`w-3.5 h-3.5 ${isChecked ? "text-emerald-700" : "text-slate-400"}`} />
+                            <span className="font-extrabold text-xs text-slate-900">{option.label}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 leading-tight">
+                            {option.department}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex justify-end gap-2.5">
@@ -766,11 +1002,12 @@ export default function AdminTeamPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={updatingPermissions}
+                  disabled={updatingMember}
                   className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm disabled:opacity-50 flex items-center gap-2"
                 >
-                  {updatingPermissions && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>Save Permissions ({editPermissions.length} Tasks)</span>
+                  {updatingMember && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Staff Details & Tabs ({editPermissions.length} Tabs)</span>
                 </button>
               </div>
             </form>

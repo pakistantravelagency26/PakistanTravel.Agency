@@ -203,6 +203,7 @@ export const authOptions: NextAuthOptions = {
           permissions: (user as any).permissions || (user.role === "ADMIN" ? "ALL" : "NONE"),
           vendorId: user.vendorId || null,
           phone: user.phone,
+          username: (user as any).username || null,
           tokenVersion: (user as any).tokenVersion || 1,
           twoFactorEnabled: Boolean(user.twoFactorEnabled),
         };
@@ -266,6 +267,7 @@ export const authOptions: NextAuthOptions = {
         token.permissions = user.permissions;
         token.vendorId = user.vendorId;
         token.phone = user.phone;
+        token.username = (user as any).username || null;
         token.tokenVersion = (user as any).tokenVersion || (user as any).sessionVersion || 1;
         token.twoFactorEnabled = Boolean((user as any).twoFactorEnabled);
       }
@@ -277,6 +279,7 @@ export const authOptions: NextAuthOptions = {
             where: { id: token.id as string },
             select: {
               id: true,
+              username: true,
               tokenVersion: true,
               sessionVersion: true,
               role: true,
@@ -294,6 +297,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           token.role = dbUser.role;
+          token.username = dbUser.username || null;
           token.staffRole = dbUser.staffRole;
           token.permissions = dbUser.permissions;
           token.twoFactorEnabled = Boolean(dbUser.twoFactorEnabled);
@@ -325,6 +329,7 @@ export const authOptions: NextAuthOptions = {
       session.user.permissions = (token.permissions as string) || (token.role === "ADMIN" ? "ALL" : "NONE");
       session.user.vendorId = token.vendorId as string | null;
       session.user.phone = token.phone as string | null;
+      (session.user as any).username = (token.username as string | null) || null;
       (session.user as any).tokenVersion = token.tokenVersion as number;
       (session.user as any).twoFactorEnabled = Boolean(token.twoFactorEnabled);
       return session;

@@ -37,6 +37,7 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
           where: {
             OR: [
               { email: query },
+              { username: query },
               { phone: query },
               { phone: query.replace(/^\+92/, "0") },
               { phone: query.replace(/^92/, "0") },
@@ -53,6 +54,7 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
         id: dbUser.id,
         name: dbUser.name,
         email: dbUser.email,
+        username: (dbUser as any).username || "",
         phone: dbUser.phone || "",
         passwordHash: dbUser.passwordHash || "",
         role: dbUser.role as any,
