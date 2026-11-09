@@ -10,76 +10,66 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL;
 
+  // Static indexable canonical pages.
+  // Note: Omit lastmod where reliable date is unavailable per Google guidelines.
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${baseUrl}/destinations`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/tours`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.95,
     },
     {
       url: `${baseUrl}/blog`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/about/editorial-policy`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.65,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/faq`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.65,
     },
     {
       url: `${baseUrl}/partner-info`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/list-your-tour`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
       url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
     },
@@ -88,7 +78,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Landing pages for all destinations
   const destinationRoutes: MetadataRoute.Sitemap = Object.keys(destinationsData).map((slug) => ({
     url: `${baseUrl}/destinations/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "weekly",
     priority: 0.9,
   }));
@@ -96,32 +85,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Tour intent landing pages
   const intentRoutes: MetadataRoute.Sitemap = Object.keys(tourIntentsData).map((slug) => ({
     url: `${baseUrl}/tours/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "weekly",
     priority: 0.85,
   }));
 
-  // Blog articles
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.lastUpdatedIso || post.isoDate || post.date),
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
+  // Blog articles with reliable editorial publication/modified dates
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => {
+    const postDate = post.lastUpdatedIso || post.isoDate || post.date;
+    return {
+      url: `${baseUrl}/blog/${post.slug}`,
+      ...(postDate ? { lastModified: new Date(postDate) } : {}),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    };
+  });
 
   // Dynamic active database listings
-  let listingRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const activeListings = await getActiveDbListings();
-    listingRoutes = activeListings.map((listing) => ({
+  // If getActiveDbListings throws DatabaseError, error bubbles up so endpoint returns 500.
+  // This prevents silently serving a partial sitemap with all tours missing.
+  const activeListings = await getActiveDbListings();
+  const listingRoutes: MetadataRoute.Sitemap = activeListings.map((listing) => {
+    const rawDate = listing.updatedAt || listing.createdAt;
+    return {
       url: `${baseUrl}/listing/${listing.slug}`,
-      lastModified: new Date(),
+      ...(rawDate ? { lastModified: new Date(rawDate) } : {}),
       changeFrequency: "daily",
       priority: 0.95,
-    }));
-  } catch (err) {
-    console.warn("Sitemap DB fetch fallback:", err);
-  }
+    };
+  });
 
   return [...staticRoutes, ...destinationRoutes, ...intentRoutes, ...blogRoutes, ...listingRoutes];
 }

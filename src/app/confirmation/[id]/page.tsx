@@ -348,7 +348,7 @@ export default function ConfirmationPage() {
             ← Return to Home
           </Link>
           <Link
-            href="/search"
+            href="/tours"
             className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition flex items-center gap-1.5"
           >
             <span>Explore More Tours</span>

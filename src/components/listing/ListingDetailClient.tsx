@@ -120,9 +120,9 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
         <div className="max-w-7xl mx-auto flex items-center gap-2 text-xs text-slate-500">
           <Link href="/" className="hover:text-brand-emerald">Home</Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <Link href="/search" className="hover:text-brand-emerald">Pakistan</Link>
+          <Link href="/destinations" className="hover:text-brand-emerald">Destinations</Link>
           <ChevronRight className="w-3.5 h-3.5" />
-          <Link href={`/search?destination=${listing.destinationSlug}`} className="hover:text-brand-emerald">
+          <Link href={`/destinations/${listing.destinationSlug || "hunza"}`} className="hover:text-brand-emerald">
             {listing.destinationName}
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -304,7 +304,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-brand-emerald bg-brand-emeraldLight px-3 py-1 rounded-full">
-                  Guaranteed Departures
+                  Scheduled Departures
                 </span>
               </div>
 

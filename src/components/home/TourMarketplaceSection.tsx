@@ -264,7 +264,7 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
       {/* Bottom CTA to browse more */}
       <div className="text-center pt-6">
         <Link
-          href="/search"
+          href="/tours"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-slate-200 text-slate-800 hover:border-slate-300 hover:bg-slate-50 font-bold text-xs shadow-sm transition"
         >
           <span>View All Northern Tour Packages Catalog</span>

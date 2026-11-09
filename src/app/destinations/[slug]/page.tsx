@@ -134,7 +134,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
         "@type": "ListItem",
         position: 2,
         name: "Destinations",
-        item: `${siteUrl}/destinations/${dest.slug}`,
+        item: `${siteUrl}/destinations`,
       },
       {
         "@type": "ListItem",

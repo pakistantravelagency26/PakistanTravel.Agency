@@ -164,7 +164,7 @@ export default async function AboutPage() {
           </p>
           <div className="pt-2">
             <Link
-              href="/search"
+              href="/tours"
               className="px-6 py-3 rounded-2xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-100 transition shadow-lg inline-block"
             >
               {publishedListingCount > 0

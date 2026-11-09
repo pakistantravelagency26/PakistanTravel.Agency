@@ -7,6 +7,16 @@ import type { ListingData } from "./listing.service.ts";
 import { sanitizePublicVendor } from "../lib/antiLeakage.ts";
 import { siteConfig } from "../config/site.ts";
 
+export class DatabaseError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message);
+    this.name = "DatabaseError";
+    if (options?.cause) {
+      this.cause = options.cause;
+    }
+  }
+}
+
 export function formatDbListing(l: any): ListingData {
   const photos = Array.isArray(l.photos) && l.photos.length > 0 ? l.photos : [
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
@@ -33,9 +43,9 @@ export function formatDbListing(l: any): ListingData {
     durationDays,
     durationNights,
     duration,
-    destinationSlug: l.destination?.slug || "pakistan",
+    destinationSlug: l.destination?.slug || "hunza",
     destinationName: l.destination?.name || l.city,
-    province: l.destination?.province || "Pakistan",
+    province: l.destination?.province || "Gilgit-Baltistan",
     address: l.address,
     city: l.city,
     vendorPrice: l.vendorPrice !== undefined && l.vendorPrice !== null ? Number(l.vendorPrice) : Number(l.basePrice),
@@ -91,6 +101,8 @@ export function formatDbListing(l: any): ListingData {
         bedType: "Tour Seat / Per Person",
       }
     ],
+    updatedAt: l.updatedAt instanceof Date ? l.updatedAt.toISOString() : l.updatedAt ? String(l.updatedAt) : undefined,
+    createdAt: l.createdAt instanceof Date ? l.createdAt.toISOString() : l.createdAt ? String(l.createdAt) : undefined,
     reviews: Array.isArray(l.reviews) ? l.reviews.map((r: any) => ({
       id: r.id,
       userName: r.user?.name || "Traveler",
@@ -104,8 +116,9 @@ export function formatDbListing(l: any): ListingData {
 }
 
 export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
+  let dbListings;
   try {
-    const dbListings = await prisma.listing.findMany({
+    dbListings = await prisma.listing.findMany({
       where: {
         status: "PUBLISHED",
         type: "TOUR",
@@ -141,17 +154,18 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
       },
       orderBy: { createdAt: "desc" },
     });
-
-    return dbListings.map(formatDbListing);
   } catch (error) {
-    console.error("Error fetching active DB listings:", error);
-    return [];
+    console.error("[DatabaseError] Error fetching active DB listings:", error);
+    throw new DatabaseError("Database failure while retrieving active tour listings", { cause: error });
   }
+
+  return dbListings.map(formatDbListing);
 });
 
 export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<ListingData | null> => {
+  let dbListing;
   try {
-    const dbListing = await prisma.listing.findFirst({
+    dbListing = await prisma.listing.findFirst({
       where: {
         status: "PUBLISHED",
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
@@ -185,12 +199,12 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
         },
       },
     });
-
-    if (!dbListing || dbListing.type !== "TOUR") return null;
-
-    return formatDbListing(dbListing);
   } catch (error) {
-    console.error("Error fetching DB listing by slug/id:", error);
-    return null;
+    console.error(`[DatabaseError] Error fetching DB listing by slug/id "${idOrSlug}":`, error);
+    throw new DatabaseError(`Database failure while retrieving listing "${idOrSlug}"`, { cause: error });
   }
+
+  if (!dbListing || dbListing.type !== "TOUR") return null;
+
+  return formatDbListing(dbListing);
 });

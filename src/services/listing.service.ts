@@ -67,6 +67,8 @@ export interface ListingData {
   departures?: DepartureData[];
   singleSupplement?: number;
   depositPercent?: number;
+  updatedAt?: string;
+  createdAt?: string;
   reviews: {
     id: string;
     userName: string;

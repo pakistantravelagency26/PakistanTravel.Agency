@@ -23,7 +23,18 @@ interface ListingPageProps {
 }
 
 export async function generateMetadata({ params }: ListingPageProps): Promise<Metadata> {
-  const listing = await getDbListingBySlugOrId(params.slug);
+  let listing;
+  try {
+    listing = await getDbListingBySlugOrId(params.slug);
+  } catch (error) {
+    // Database outage: NEVER return 404 or noindex. Return fallback metadata so crawler retries later without deindexing.
+    console.error(`[ListingMetadataError] DB outage generating metadata for "${params.slug}":`, error);
+    return {
+      title: "Guided Northern Pakistan Tour Package | PakistanTravel",
+      description: "Explore guided tour packages and seasonal departures across Hunza, Skardu, Swat, and Kumrat with local operators.",
+    };
+  }
+
   const siteUrl = SITE_URL;
 
   if (!listing) {
@@ -112,6 +123,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
     description: listing.description,
     image: listing.photos,
     touristType: "Adventure Travel, Sightseeing",
+    // TouristTrip schema per Schema.org (TouristTrip is not eligible for Google review stars snippets)
     address: {
       "@type": "PostalAddress",
       streetAddress: listing.address,
@@ -119,18 +131,6 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
       addressRegion: listing.province,
       addressCountry: "PK",
     },
-    // AggregateRating ONLY when a listing has at least 10 real reviews per Requirement 3
-    ...(listing.totalReviews >= 10
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: listing.avgRating,
-            reviewCount: listing.totalReviews,
-            bestRating: "5",
-            worstRating: "1",
-          },
-        }
-      : {}),
     offers: {
       "@type": "Offer",
       price: listing.basePrice,
@@ -159,8 +159,10 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
       {
         "@type": "ListItem",
         position: 2,
-        name: listing.destinationName,
-        item: `${siteUrl}/destinations/${listing.destinationSlug}`,
+        name: listing.destinationName || "Destinations",
+        item: listing.destinationSlug
+          ? `${siteUrl}/destinations/${listing.destinationSlug}`
+          : `${siteUrl}/destinations`,
       },
       {
         "@type": "ListItem",

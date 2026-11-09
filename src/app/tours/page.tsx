@@ -11,6 +11,7 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   let count = 0;
+  let dbFailed = false;
   try {
     count = await prisma.listing.count({
       where: {
@@ -21,14 +22,17 @@ export async function generateMetadata(): Promise<Metadata> {
     });
   } catch (err) {
     console.warn("Could not query tour count for metadata:", err);
+    dbFailed = true;
   }
 
-  const isIndexable = count > 0;
+  // If DB query succeeded and genuinely 0 published tours exist, set noindex.
+  // If DB query threw an error, do NOT deindex /tours due to a transient database outage!
+  const isIndexable = dbFailed || count > 0;
 
   return {
-    title: "Northern Pakistan Tour Packages",
+    title: "Compare Northern Pakistan Tour Packages",
     description:
-      "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat and Kumrat directly from independent local tour operators today.",
+      "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct verified operator bookings.",
     alternates: {
       canonical: `${SITE_URL}/tours`,
     },
@@ -41,9 +45,9 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: "Northern Pakistan Tour Packages | PakistanTravel",
+      title: "Compare Northern Pakistan Tour Packages | PakistanTravel",
       description:
-        "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat and Kumrat directly from independent local tour operators today.",
+        "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct verified operator bookings.",
       url: `${SITE_URL}/tours`,
       siteName: "PakistanTravel",
       locale: "en_PK",
@@ -51,9 +55,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Northern Pakistan Tour Packages | PakistanTravel",
+      title: "Compare Northern Pakistan Tour Packages | PakistanTravel",
       description:
-        "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat and Kumrat directly from independent local tour operators today.",
+        "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct verified operator bookings.",
     },
   };
 }

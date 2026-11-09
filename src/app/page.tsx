@@ -21,10 +21,10 @@ const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Northern Pakistan Tour Packages | PakistanTravel",
+    absolute: "Northern Pakistan Tour Marketplace | PakistanTravel",
   },
   description:
-    "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators in Pakistan. Plan your trip today.",
+    "Book northern Pakistan tours from independent local operators with departures from Islamabad, Lahore, and Karachi to Hunza, Skardu, and Swat.",
   alternates: {
     canonical: siteUrl,
   },
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
     locale: "en_PK",
     url: siteUrl,
     siteName: "PakistanTravel",
-    title: "Northern Pakistan Tour Packages | PakistanTravel",
+    title: "Northern Pakistan Tour Marketplace | PakistanTravel",
     description:
-      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators in Pakistan. Plan your trip today.",
+      "Book northern Pakistan tours from independent local operators with departures from Islamabad, Lahore, and Karachi to Hunza, Skardu, and Swat.",
     images: [
       {
         url: `${siteUrl}/images/og/home-og.jpg`,
@@ -47,15 +47,20 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Northern Pakistan Tour Packages | PakistanTravel",
+    title: "Northern Pakistan Tour Marketplace | PakistanTravel",
     description:
-      "Compare and book guided tour packages across Hunza, Skardu, Swat and Kumrat from independent local tour operators in Pakistan. Plan your trip today.",
+      "Book northern Pakistan tours from independent local operators with departures from Islamabad, Lahore, and Karachi to Hunza, Skardu, and Swat.",
     images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 
 export default async function HomePage() {
-  const listings = await getActiveDbListings();
+  let listings: any[] = [];
+  try {
+    listings = await getActiveDbListings();
+  } catch (err) {
+    console.error("[HomePage] Active DB listings query error:", err);
+  }
   const settings = await getSiteSettings();
   const hero = settings.HERO;
   const announcement = settings.ANNOUNCEMENT;
