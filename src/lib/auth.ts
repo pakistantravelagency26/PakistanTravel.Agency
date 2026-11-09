@@ -8,7 +8,7 @@ import { verifyPassword, hashPassword, needsRehash } from "./password.ts";
 import { checkRateLimit, resetRateLimit } from "./rate-limit.ts";
 import { checkServerlessRateLimit } from "./serverlessRateLimiter.ts";
 import { getTrustedClientIp } from "./clientIp.ts";
-import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "./loginThrottle.ts";
+import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin, isIpWhitelisted } from "./loginThrottle.ts";
 
 // Pre-computed valid bcrypt salt/hash (cost 12) for constant-time evaluation to eliminate timing attacks
 const DUMMY_BCRYPT_HASH = "$2a$12$/AOsayhHFTkic9qQNjdMJONH7S7V/rZK5iQK2XuduAumIzsRi0lfu";
@@ -64,10 +64,12 @@ export const authOptions: NextAuthOptions = {
         const identifier = credentials.email.trim();
         const clientIp = getTrustedClientIp(req?.headers);
 
-        // 0. Serverless Rate Limit on IP (max 15 login attempts per 10 minutes)
-        const ipRate = await checkServerlessRateLimit(`login:ip:${clientIp}`, 15, 600);
-        if (!ipRate.success) {
-          throw new Error("Too many login attempts from this network. Please try again in 10 minutes.");
+        // 0. Serverless Rate Limit on IP (max 15 login attempts per 10 minutes) - whitelisted IPs bypass
+        if (!isIpWhitelisted(clientIp)) {
+          const ipRate = await checkServerlessRateLimit(`login:ip:${clientIp}`, 15, 600);
+          if (!ipRate.success) {
+            throw new Error("Too many login attempts from this network. Please try again in 10 minutes.");
+          }
         }
 
         // 1. Check persistent lockout status (30-min block after 3 wrong passwords or global IP block)

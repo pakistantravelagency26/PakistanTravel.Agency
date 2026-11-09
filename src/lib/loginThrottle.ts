@@ -19,6 +19,22 @@ interface MemLock {
 }
 const memoryLocks = new Map<string, MemLock>();
 
+// Whitelisted IPs that should never be throttled or locked out (Admin static IP, loopbacks, etc.)
+export const ADMIN_WHITELISTED_IPS = new Set<string>([
+  "37.41.96.252", // Super Admin primary IP
+  "127.0.0.1",
+  "::1",
+  ...(process.env.ADMIN_WHITELISTED_IPS
+    ? process.env.ADMIN_WHITELISTED_IPS.split(",").map((s) => s.trim()).filter(Boolean)
+    : []),
+]);
+
+export function isIpWhitelisted(ip: string | null | undefined): boolean {
+  if (!ip) return false;
+  return ADMIN_WHITELISTED_IPS.has(ip.trim());
+}
+
+
 export function clearMemoryLocks(key?: string): void {
   if (key) {
     memoryLocks.delete(key);
@@ -63,6 +79,15 @@ export function getIpKey(ip: string): string {
 export async function checkLoginStatus(identifier: string, ip: string): Promise<LoginStatusCheck> {
   const normId = normalizeIdentifier(identifier);
   const cleanIp = ip.trim();
+
+  // 0. Whitelist bypass: whitelisted IPs are never locked out or delayed
+  if (isIpWhitelisted(cleanIp)) {
+    return {
+      allowed: true,
+      delayMs: 0,
+      failCount: 0,
+    };
+  }
   const pairKey = getPairKey(cleanIp, normId);
   const ipKey = getIpKey(cleanIp);
   const now = new Date();
@@ -181,6 +206,23 @@ export async function recordFailedLogin(identifier: string, ip: string, role?: s
   const now = new Date();
   const nowMs = now.getTime();
 
+  // Whitelisted IPs are never locked out
+  if (isIpWhitelisted(cleanIp)) {
+    try {
+      await prisma.loginAttempt.create({
+        data: {
+          identifier: normId,
+          ip: cleanIp,
+          pairKey,
+          success: false,
+        },
+      });
+    } catch {
+      // non-fatal
+    }
+    return { locked: false };
+  }
+
   try {
     // 1. Record failure in database
     await prisma.loginAttempt.create({
@@ -192,13 +234,22 @@ export async function recordFailedLogin(identifier: string, ip: string, role?: s
       },
     });
 
-    // 2. Check pair failures in the last 30 minutes
+    // 2. Check consecutive pair failures since last successful login (within last 30 min)
     const thirtyMinAgo = new Date(nowMs - 30 * 60 * 1000);
+    const lastSuccess = await prisma.loginAttempt.findFirst({
+      where: {
+        pairKey,
+        success: true,
+        attemptAt: { gte: thirtyMinAgo },
+      },
+      orderBy: { attemptAt: "desc" },
+    });
+    const sinceDate = lastSuccess ? lastSuccess.attemptAt : thirtyMinAgo;
     const pairFails = await prisma.loginAttempt.count({
       where: {
         pairKey,
         success: false,
-        attemptAt: { gte: thirtyMinAgo },
+        attemptAt: { gt: sinceDate },
       },
     });
 
