@@ -57,6 +57,18 @@ function CustomerLoginForm() {
         setError(res.error || "Invalid Login ID or Password. Please try again.");
         setLoading(false);
       } else {
+        try {
+          const sessionRes = await fetch("/api/auth/session");
+          const sessionData = await sessionRes.json();
+          if (callbackUrl === "/" && sessionData?.user?.role === "ADMIN") {
+            window.location.href = "/secure-admin/dashboard";
+            return;
+          }
+          if (callbackUrl === "/" && sessionData?.user?.role === "VENDOR") {
+            window.location.href = "/partner-hub/dashboard";
+            return;
+          }
+        } catch {}
         router.push(callbackUrl);
         router.refresh();
       }

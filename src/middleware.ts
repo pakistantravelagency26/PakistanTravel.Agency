@@ -49,6 +49,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(englishUrl, 301);
   }
 
+  // 1d. Convenient redirect for /admin -> /secure-admin
+  if (path === "/admin" || path === "/admin/" || path.startsWith("/admin/")) {
+    const targetPath = path.replace(/^\/admin/, "/secure-admin") || "/secure-admin";
+    const targetUrl = new URL(`${targetPath}${req.nextUrl.search}`, req.url);
+    return NextResponse.redirect(targetUrl, 307);
+  }
+
   // 1d. API Security: CORS & CSRF Protection for /api/*
   if (path.startsWith("/api/")) {
     const origin = req.headers.get("origin");
