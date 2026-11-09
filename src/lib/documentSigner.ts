@@ -4,7 +4,7 @@ import crypto from "crypto";
  * Generates an HMAC signed URL for temporary authorized private document access.
  */
 export function generateSignedDocumentUrl(filename: string, expiresInSeconds: number = 3600): string {
-  const secret = process.env.NEXTAUTH_SECRET || "signed-url-secret-minimum-32-chars-long";
+  const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "signed-url-secret-minimum-32-chars-long";
   const expiresAt = Math.floor(Date.now() / 1000) + expiresInSeconds;
   const signature = crypto
     .createHmac("sha256", secret)
@@ -23,7 +23,7 @@ export function verifySignedDocumentToken(filename: string, expStr: string | nul
     return false; // Expired
   }
 
-  const secret = process.env.NEXTAUTH_SECRET || "signed-url-secret-minimum-32-chars-long";
+  const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "signed-url-secret-minimum-32-chars-long";
   const expectedSignature = crypto
     .createHmac("sha256", secret)
     .update(`${filename}:${exp}`)

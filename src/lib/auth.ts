@@ -13,7 +13,7 @@ import { checkLoginStatus, recordFailedLogin, recordSuccessfulLogin } from "./lo
 // Pre-computed valid bcrypt salt/hash (cost 12) for constant-time evaluation to eliminate timing attacks
 const DUMMY_BCRYPT_HASH = "$2a$12$/AOsayhHFTkic9qQNjdMJONH7S7V/rZK5iQK2XuduAumIzsRi0lfu";
 
-const authSecret = process.env.NEXTAUTH_SECRET;
+const authSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
 
 const Google = (GoogleProvider as any)?.default || GoogleProvider;
 const Facebook = (FacebookProvider as any)?.default || FacebookProvider;

@@ -14,7 +14,8 @@ function getMasterKey(): Buffer {
   const secret =
     process.env.FIELD_ENCRYPTION_KEY ||
     process.env.TWO_FACTOR_ENCRYPTION_KEY ||
-    process.env.NEXTAUTH_SECRET;
+    process.env.NEXTAUTH_SECRET ||
+    process.env.AUTH_SECRET;
 
   if (!secret) {
     throw new Error(

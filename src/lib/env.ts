@@ -130,15 +130,21 @@ export function validateEnvironment(): z.infer<typeof envSchema> {
 
   // 3. Strict production assertions at runtime
   if (isProdRuntime) {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("FATAL: DATABASE_URL is strictly required in production!");
+    const effectiveDbUrl =
+      (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("db.prisma.io"))
+        ? (process.env.NEON_DATABASE_URL || process.env.DATABASE_URL)
+        : (process.env.DATABASE_URL || process.env.NEON_DATABASE_URL);
+
+    if (!effectiveDbUrl || effectiveDbUrl.includes("db.prisma.io")) {
+      throw new Error("FATAL: DATABASE_URL or NEON_DATABASE_URL is strictly required in production!");
     }
-    if (!process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_SECRET.length < 32) {
+    const effectiveAuthSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+    if (!effectiveAuthSecret || effectiveAuthSecret.length < 32) {
       throw new Error(
-        "FATAL: NEXTAUTH_SECRET is strictly required and must be at least 32 characters in production!"
+        "FATAL: NEXTAUTH_SECRET (or AUTH_SECRET) is strictly required and must be at least 32 characters in production!"
       );
     }
-    if (WEAK_SECRETS.has(process.env.NEXTAUTH_SECRET.trim())) {
+    if (WEAK_SECRETS.has(effectiveAuthSecret.trim())) {
       throw new Error(
         "FATAL: NEXTAUTH_SECRET is set to an insecure default/placeholder secret in production! Generate a strong random key."
       );
