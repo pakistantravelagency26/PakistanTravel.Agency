@@ -272,7 +272,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               <h2 className="text-lg font-bold text-slate-900">
                 {isTour ? "About this Tour & Itinerary" : "About this Property"}
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
                 {listing.description}
               </p>
 

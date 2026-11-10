@@ -22,6 +22,8 @@ export const dynamic = "force-dynamic";
 const listingCreateSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(200),
   basePrice: z.union([z.number().positive(), z.string().regex(/^\d+(\.\d+)?$/)]),
+  couplePrice: z.union([z.number(), z.string()]).optional(),
+  soloPrice: z.union([z.number(), z.string()]).optional(),
   duration: z.string().optional(),
   durationDays: z.union([z.number(), z.string()]).optional(),
   durationNights: z.union([z.number(), z.string()]).optional(),
@@ -31,6 +33,9 @@ const listingCreateSchema = z.object({
   province: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
+  pickupPoints: z.union([z.array(z.string()), z.string()]).optional(),
+  routeStops: z.union([z.array(z.string()), z.string()]).optional(),
+  groupDiscounts: z.union([z.array(z.any()), z.string()]).optional(),
   isFeatured: z.boolean().optional(),
   freeCancellationDays: z.union([z.number(), z.string()]).optional(),
   photos: z.union([z.array(z.string()), z.string()]).optional(),
@@ -266,6 +271,92 @@ export async function POST(req: Request) {
       ];
     }
 
+    // Handle pickup points (up to 3)
+    let pickupList: string[] = [];
+    if (Array.isArray(body.pickupPoints)) {
+      pickupList = body.pickupPoints.map((p: any) => String(p).trim()).filter(Boolean);
+    } else if (typeof body.pickupPoints === "string" && body.pickupPoints.trim()) {
+      pickupList = body.pickupPoints.split("|").map((p: string) => p.trim()).filter(Boolean);
+    }
+
+    const effectiveAddress = pickupList.length > 0 
+      ? pickupList.join(" | ") 
+      : (body.address || `${body.city || "Karimabad"}, Pakistan`);
+
+    // Handle Route / Sightseeing Stops
+    let routeList: string[] = [];
+    if (Array.isArray(body.routeStops)) {
+      routeList = body.routeStops.map((r: any) => String(r).trim()).filter(Boolean);
+    } else if (typeof body.routeStops === "string" && body.routeStops.trim()) {
+      routeList = body.routeStops.split("➔").map((r: string) => r.trim()).filter(Boolean);
+    }
+
+    // Build Enriched Description
+    let enrichedDescription = body.description || `${body.title} - Curated by ${vendorBusiness}. Experience scenic valleys and authentic hospitality.`;
+    
+    if (routeList.length > 0) {
+      enrichedDescription += `\n\n📍 Tour Journey & Sightseeing Route:\n` + routeList.join(" ➔ ");
+    }
+
+    if (pickupList.length > 0) {
+      enrichedDescription += `\n\n🚐 Departure & Pickup Meeting Points:\n` + pickupList.map((p, idx) => `${idx + 1}. ${p}`).join("\n");
+    }
+
+    if (Array.isArray(body.groupDiscounts) && body.groupDiscounts.length > 0) {
+      const validTiers = body.groupDiscounts.filter((g: any) => g && (g.minPersons || g.persons) && (g.pricePerPerson || g.price));
+      if (validTiers.length > 0) {
+        enrichedDescription += `\n\n👥 Group & Family Discount Tiers:\n` + validTiers
+          .map((g: any) => `• Group of ${g.minPersons || g.persons}+ Persons: PKR ${Number(g.pricePerPerson || g.price).toLocaleString()} / person`)
+          .join("\n");
+      }
+    }
+
+    const packageUnits: any[] = [
+      {
+        id: `${uniqueSlug}-unit-perperson`,
+        title: body.unitTitle || "Per Person Package (Twin / Triple Sharing)",
+        description: "Standard per person tour seat with shared hotel room accommodation and complete transport inclusions.",
+        maxGuests: Number(body.maxGuests || 2),
+        totalQuantity: Number(body.inventory || 10),
+        basePrice: Number(body.basePrice),
+        photos: photosList.slice(0, 2),
+        amenities: Array.isArray(body.amenities) ? body.amenities.slice(0, 4) : [],
+        bedType: "Tour Seat / Per Person",
+      },
+    ];
+
+    if (body.couplePrice && Number(body.couplePrice) > 0) {
+      packageUnits.push({
+        id: `${uniqueSlug}-unit-couple`,
+        title: "Couple Package (Dedicated Private Master Bedroom)",
+        description: "Private room for 2 persons / couple throughout the tour with all package inclusions.",
+        maxGuests: 2,
+        totalQuantity: Math.max(1, Math.floor(Number(body.inventory || 10) / 2)),
+        basePrice: Number(body.couplePrice),
+        photos: photosList.slice(0, 2),
+        amenities: [...(Array.isArray(body.amenities) ? body.amenities.slice(0, 3) : []), "Private Master Bedroom for Couple"],
+        bedType: "Private Double Bed Room",
+      });
+    }
+
+    if (body.soloPrice && Number(body.soloPrice) > 0) {
+      packageUnits.push({
+        id: `${uniqueSlug}-unit-solo`,
+        title: "Solo Traveler / Private Single Room",
+        description: "Single occupancy private room throughout the trip without sharing with other travelers.",
+        maxGuests: 1,
+        totalQuantity: Math.max(1, Math.floor(Number(body.inventory || 10) / 3)),
+        basePrice: Number(body.soloPrice),
+        photos: photosList.slice(0, 2),
+        amenities: [...(Array.isArray(body.amenities) ? body.amenities.slice(0, 3) : []), "Private Single Occupancy Room"],
+        bedType: "Private Single Room",
+      });
+    }
+
+    const singleSupplementCalc = body.soloPrice && Number(body.soloPrice) > Number(body.basePrice)
+      ? Number(body.soloPrice) - Number(body.basePrice)
+      : Number(body.singleSupplement || 0);
+
     const newListing: ListingData = {
       id: uniqueSlug,
       slug: uniqueSlug,
@@ -278,7 +369,7 @@ export async function POST(req: Request) {
       destinationSlug: body.destinationSlug || body.destination || "hunza",
       destinationName: body.destinationName || body.city || "Hunza Valley",
       province: body.province || "Gilgit-Baltistan",
-      address: body.address || `${body.city || "Karimabad"}, Pakistan`,
+      address: effectiveAddress,
       city: body.city || "Karimabad",
       vendorPrice: Number(body.basePrice),
       basePrice: Number(body.basePrice),
@@ -299,8 +390,9 @@ export async function POST(req: Request) {
             "Standard Hotel Accommodations Included",
             "First Aid & Emergency Support",
           ],
-      description: body.description || `${body.title} - Curated by ${vendorBusiness}. Experience scenic valleys and authentic hospitality.`,
+      description: enrichedDescription,
       cancellationPolicy: `Free cancellation until ${body.freeCancellationDays || 3} days before trip start date. 100% refund.`,
+      singleSupplement: singleSupplementCalc,
       vendor: {
         id: vendorId,
         businessName: vendorBusiness,
@@ -308,19 +400,7 @@ export async function POST(req: Request) {
         joinedYear: 2024,
         rating: 4.95,
       },
-      units: [
-        {
-          id: `${uniqueSlug}-unit-1`,
-          title: body.unitTitle || "Standard Tour Seat Package",
-          description: "Full tour package inclusion with guided mountain transport, activities, and standard hotel night stays",
-          maxGuests: Number(body.maxGuests || 2),
-          totalQuantity: Number(body.inventory || 10),
-          basePrice: Number(body.basePrice),
-          photos: photosList.slice(0, 2),
-          amenities: Array.isArray(body.amenities) ? body.amenities.slice(0, 4) : [],
-          bedType: "Tour Seat / Per Person",
-        },
-      ],
+      units: packageUnits,
       reviews: [],
     };
 
@@ -399,7 +479,7 @@ export async function POST(req: Request) {
           amenities: newListing.amenities,
           durationDays: Number(body.durationDays) || 5,
           durationNights: body.durationNights !== undefined ? Number(body.durationNights) : 4,
-          singleSupplement: Number(body.singleSupplement || 0),
+          singleSupplement: newListing.singleSupplement !== undefined ? Number(newListing.singleSupplement) : Number(body.singleSupplement || 0),
           depositPercent: Number(body.depositPercent || 25),
           cancellationPolicy: newListing.cancellationPolicy,
           freeCancellationDays: newListing.freeCancellationDays,
@@ -449,20 +529,22 @@ export async function POST(req: Request) {
           });
         }
 
-      // Also create unit in Neon DB
-      await prisma.listingUnit.create({
-        data: {
-          id: `${newListing.id}-unit-1`,
-          listingId: newListing.id,
-          title: body.unitTitle || "Standard Tour Seat Package",
-          description: "Full tour package inclusion with guided mountain transport, activities, and standard hotel night stays",
-          maxGuests: Number(body.maxGuests || 2),
-          totalQuantity: Number(body.inventory || 10),
-          basePrice: Number(body.basePrice),
-          photos: newListing.photos.slice(0, 2),
-          amenities: newListing.amenities.slice(0, 4),
-        },
-      });
+      // Also create all package units in Neon DB
+      for (const u of packageUnits) {
+        await prisma.listingUnit.create({
+          data: {
+            id: u.id,
+            listingId: newListing.id,
+            title: u.title,
+            description: u.description || "",
+            maxGuests: Number(u.maxGuests || 2),
+            totalQuantity: Number(u.totalQuantity || 10),
+            basePrice: Number(u.basePrice),
+            photos: u.photos || newListing.photos.slice(0, 2),
+            amenities: u.amenities || newListing.amenities.slice(0, 4),
+          },
+        });
+      }
     } catch (dbErr: any) {
       console.error("CRITICAL: Neon DB listing persistence failed:", dbErr);
       return NextResponse.json(
