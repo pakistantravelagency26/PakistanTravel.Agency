@@ -8,6 +8,9 @@ import {
   buildCustomerCancellationEmail,
   buildVendorCancellationEmail,
   buildAdminCancellationEmail,
+  buildAdminPartnerRegistrationAlertEmail,
+  buildPartnerRegistrationConfirmationEmail,
+  type PartnerRegistrationEmailData,
 } from "./emailTemplates.service.ts";
 import { getBookingEmailSettings, type BookingEmailSettings } from "./emailSettings.service.ts";
 import nodemailer from "nodemailer";
@@ -464,5 +467,67 @@ export async function processPendingEmailOutbox(batchSize: number = 25, specific
     processed: pending.length,
     succeeded,
     failed,
+  };
+}
+
+
+/**
+ * Dispatch Partner Registration Emails (both Admin Alert & Partner Confirmation)
+ */
+export async function sendPartnerRegistrationEmails(data: PartnerRegistrationEmailData): Promise<{
+  adminOutboxId?: string;
+  partnerOutboxId?: string;
+  adminDelivered: boolean;
+  partnerDelivered: boolean;
+}> {
+  const settings = await getBookingEmailSettings();
+  const adminEmail = (settings.adminEmail || ADMIN_NOTIFICATION_EMAILS[0] || siteConfig.contact.supportEmail).trim().toLowerCase();
+  const partnerEmail = data.email.trim().toLowerCase();
+
+  const adminTemplate = buildAdminPartnerRegistrationAlertEmail(data);
+  const partnerTemplate = buildPartnerRegistrationConfirmationEmail(data);
+
+  let adminOutboxId: string | undefined;
+  let partnerOutboxId: string | undefined;
+  let adminDelivered = false;
+  let partnerDelivered = false;
+
+  // 1. Enqueue Admin Notification Email
+  try {
+    adminOutboxId = await queueEmail({
+      to: adminEmail,
+      recipientRole: "ADMIN",
+      subject: adminTemplate.subject,
+      htmlBody: adminTemplate.html,
+      textBody: adminTemplate.text,
+      eventType: "PARTNER_REGISTRATION" as any,
+    });
+    const res = await deliverOutboxEmail(adminOutboxId);
+    adminDelivered = res.success;
+  } catch (err) {
+    console.warn("[PARTNER REGISTRATION] Failed to enqueue or deliver Admin alert email:", err);
+  }
+
+  // 2. Enqueue Partner Confirmation Email
+  try {
+    partnerOutboxId = await queueEmail({
+      to: partnerEmail,
+      recipientRole: "VENDOR",
+      subject: partnerTemplate.subject,
+      htmlBody: partnerTemplate.html,
+      textBody: partnerTemplate.text,
+      eventType: "PARTNER_REGISTRATION" as any,
+    });
+    const res = await deliverOutboxEmail(partnerOutboxId);
+    partnerDelivered = res.success;
+  } catch (err) {
+    console.warn("[PARTNER REGISTRATION] Failed to enqueue or deliver Partner confirmation email:", err);
+  }
+
+  return {
+    adminOutboxId,
+    partnerOutboxId,
+    adminDelivered,
+    partnerDelivered,
   };
 }

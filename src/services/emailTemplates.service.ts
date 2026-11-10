@@ -518,3 +518,200 @@ Customer: ${data.guestName} (${data.guestEmail})
 Total: PKR ${data.totalAmount.toLocaleString()}`;
   return { subject, html, text };
 }
+
+
+export interface PartnerRegistrationEmailData {
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  whatsapp?: string;
+  city?: string;
+  cnicOrTaxNumber?: string;
+  createdAt?: string;
+}
+
+/**
+ * 7. Admin Alert: New Partner / Tour Operator Registration
+ */
+export function buildAdminPartnerRegistrationAlertEmail(data: PartnerRegistrationEmailData) {
+  const subject = `[Partner Application] New Tour Operator: ${data.companyName} (${data.city || "Pakistan"})`;
+  const adminUrl = `${SITE_URL}/secure-admin/vendors`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${escapeHtml(subject)}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="wrapper">
+          <div class="header" style="background: #0f766e;">
+            <h1>PakistanTravel.Agency Administration</h1>
+            <div class="tag">New Partner Application</div>
+          </div>
+          <div class="body">
+            <h2 style="font-size: 18px; margin-top: 0; color: #0f172a;">New Operator Registration Submitted</h2>
+            <p style="font-size: 13px; color: #475569; line-height: 1.6;">
+              A new tour operator has registered on the marketplace and is awaiting administrative verification and approval.
+            </p>
+            <div class="box">
+              <div class="row">
+                <span class="label">Operator / Agency:</span>
+                <span class="val">${escapeHtml(data.companyName)}</span>
+              </div>
+              <div class="row">
+                <span class="label">Primary Contact Person:</span>
+                <span class="val">${escapeHtml(data.contactName)}</span>
+              </div>
+              <div class="row">
+                <span class="label">Email Address:</span>
+                <span class="val"><a href="mailto:${escapeHtml(data.email)}" style="color: #0f766e; text-decoration: none; font-weight: bold;">${escapeHtml(data.email)}</a></span>
+              </div>
+              <div class="row">
+                <span class="label">Phone Number:</span>
+                <span class="val">${escapeHtml(data.phone)}</span>
+              </div>
+              ${data.whatsapp ? `
+              <div class="row">
+                <span class="label">WhatsApp:</span>
+                <span class="val"><a href="https://wa.me/${data.whatsapp.replace(/[^0-9]/g, '')}" style="color: #059669; font-weight: bold;">${escapeHtml(data.whatsapp)}</a></span>
+              </div>` : ''}
+              <div class="row">
+                <span class="label">Operational Base / City:</span>
+                <span class="val">${escapeHtml(data.city || "Not specified")}</span>
+              </div>
+              ${data.cnicOrTaxNumber ? `
+              <div class="row">
+                <span class="label">CNIC / Tax License:</span>
+                <span class="val">${escapeHtml(data.cnicOrTaxNumber)}</span>
+              </div>` : ''}
+              <div class="row">
+                <span class="label">Application Status:</span>
+                <span class="val" style="color: #b45309; font-weight: 800;">PENDING APPROVAL</span>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${adminUrl}" class="btn" style="background: #0f766e;">Review &amp; Approve in Admin Panel &rarr;</a>
+            </div>
+
+            <div class="notice">
+              <strong>Super Admin Action Required:</strong> Open the Vendor &amp; Partner Accounts dashboard to review documentation, set commission rate, and approve the partner for public tour listings.
+            </div>
+          </div>
+          <div class="footer">
+            <p>PakistanTravel.Agency Internal Notification System &bull; Confidential Administrative Dispatch</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `[Partner Application] New Tour Operator: ${data.companyName}
+Company: ${data.companyName}
+Contact Person: ${data.contactName}
+Email: ${data.email}
+Phone: ${data.phone}
+WhatsApp: ${data.whatsapp || "N/A"}
+City: ${data.city || "N/A"}
+CNIC/NTN: ${data.cnicOrTaxNumber || "N/A"}
+Status: PENDING APPROVAL
+
+Review and approve this partner at: ${adminUrl}`;
+
+  return { subject, html, text };
+}
+
+/**
+ * 8. Partner Confirmation: Application Received & Under Review
+ */
+export function buildPartnerRegistrationConfirmationEmail(data: PartnerRegistrationEmailData) {
+  const subject = `Partner Application Received - ${data.companyName} | PakistanTravel.Agency`;
+  const partnerHubUrl = `${SITE_URL}/partner-hub/login`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${escapeHtml(subject)}</title>
+        <style>${EMAIL_STYLES}</style>
+      </head>
+      <body>
+        <div class="wrapper">
+          <div class="header">
+            <h1>PakistanTravel.Agency</h1>
+            <div class="tag">Partner Onboarding</div>
+          </div>
+          <div class="body">
+            <h2 style="font-size: 18px; margin-top: 0; color: #0f172a;">Welcome, ${escapeHtml(data.contactName)}!</h2>
+            <p style="font-size: 13px; color: #475569; line-height: 1.6;">
+              Thank you for registering <strong>${escapeHtml(data.companyName)}</strong> with PakistanTravel.Agency, Pakistan&apos;s premier northern tour operator marketplace.
+            </p>
+            <p style="font-size: 13px; color: #475569; line-height: 1.6;">
+              We have successfully received your application. Your submitted details are summarized below:
+            </p>
+            <div class="box">
+              <div class="row">
+                <span class="label">Operator / Agency:</span>
+                <span class="val">${escapeHtml(data.companyName)}</span>
+              </div>
+              <div class="row">
+                <span class="label">Contact Person:</span>
+                <span class="val">${escapeHtml(data.contactName)}</span>
+              </div>
+              <div class="row">
+                <span class="label">Registered Email:</span>
+                <span class="val">${escapeHtml(data.email)}</span>
+              </div>
+              <div class="row">
+                <span class="label">Phone / WhatsApp:</span>
+                <span class="val">${escapeHtml(data.phone)}</span>
+              </div>
+              <div class="row">
+                <span class="label">Base City:</span>
+                <span class="val">${escapeHtml(data.city || "Pakistan")}</span>
+              </div>
+              <div class="row">
+                <span class="label">Status:</span>
+                <span class="val" style="color: #b45309; font-weight: 800;">Pending Verification</span>
+              </div>
+            </div>
+
+            <div class="notice">
+              <strong>What happens next?</strong><br />
+              Our compliance team will review your application within 24 hours. Once approved by administration, your account will be activated and you will receive a notification to log in to the <strong>Partner Hub</strong> (${partnerHubUrl}) to publish tour packages and receive booking vouchers.
+            </div>
+
+            <p style="font-size: 12px; color: #64748b; margin-top: 20px;">
+              Need assistance or want to expedite your verification? Reply directly to this email or reach our Partner Desk at <strong>${siteConfig.contact.supportEmail}</strong>.
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} PakistanTravel.Agency. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `Welcome to PakistanTravel.Agency, ${data.contactName}!
+
+Thank you for registering ${data.companyName} as a tour operator.
+Your application has been received and is currently under review by our administration.
+
+Company: ${data.companyName}
+Contact: ${data.contactName}
+Email: ${data.email}
+Phone: ${data.phone}
+Status: Pending Verification
+
+Once approved within 24 hours, you will receive an activation email and will be able to log in to the Partner Hub at ${partnerHubUrl}.
+
+For inquiries, contact: ${siteConfig.contact.supportEmail}`;
+
+  return { subject, html, text };
+}

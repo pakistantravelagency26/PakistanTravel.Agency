@@ -40,7 +40,7 @@ interface VendorData {
   email: string;
   loginId: string;
   passwordPlain?: string;
-  status: "ENABLED" | "DISABLED";
+  status: "ENABLED" | "DISABLED" | "PENDING_APPROVAL";
   commissionRate: number;
   listingsCount: number;
   createdAt: string;
@@ -50,7 +50,7 @@ export default function AdminVendorsPage() {
   const [vendors, setVendors] = useState<VendorData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ENABLED" | "DISABLED">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING_APPROVAL" | "ENABLED" | "DISABLED">("ALL");
 
   // Create Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,7 +80,7 @@ export default function AdminVendorsPage() {
     loginId: "",
     passwordPlain: "",
     commissionRate: 12,
-    status: "ENABLED" as "ENABLED" | "DISABLED",
+    status: "ENABLED" as "ENABLED" | "DISABLED" | "PENDING_APPROVAL",
   });
 
   function openEditModal(v: VendorData) {
@@ -178,6 +178,29 @@ export default function AdminVendorsPage() {
   }
 
   // Toggle Status (Enable / Disable)
+  
+  async function handleApproveVendor(id: string, companyName: string) {
+    try {
+      const res = await fetch(`/api/admin/vendors/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "APPROVE" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVendors((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, status: "ENABLED" } : v))
+        );
+        setActionSuccess(`Partner "${companyName}" has been APPROVED! Their account is now active and they can sign in to Partner Hub.`);
+        setTimeout(() => setActionSuccess(""), 6000);
+      } else {
+        setActionError(data.error || "Failed to approve partner");
+      }
+    } catch (err: any) {
+      setActionError("Network error while approving partner.");
+    }
+  }
+
   async function handleToggleStatus(id: string, currentStatus: "ENABLED" | "DISABLED") {
     try {
       const res = await fetch(`/api/admin/vendors/${id}/status`, {
@@ -290,6 +313,7 @@ export default function AdminVendorsPage() {
   });
 
   const totalVendors = vendors.length;
+  const pendingVendors = vendors.filter((v) => v.status === "PENDING_APPROVAL").length;
   const activeVendors = vendors.filter((v) => v.status === "ENABLED").length;
   const disabledVendors = vendors.filter((v) => v.status === "DISABLED").length;
   const totalTours = vendors.reduce((acc, curr) => acc + (curr.listingsCount || 0), 0);
@@ -344,6 +368,26 @@ export default function AdminVendorsPage() {
         </div>
       )}
 
+      
+      {/* Pending Applications Alert Banner */}
+      {pendingVendors > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-semibold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <span className="font-extrabold text-sm block sm:inline">${pendingVendors} New Partner Application(s) Awaiting Review</span>
+              <span className="text-amber-800 text-[11px] block sm:inline sm:ml-2">Tour operators have registered and are waiting for your verification.</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setStatusFilter("PENDING_APPROVAL")}
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
+          >
+            Review Pending (${pendingVendors})
+          </button>
+        </div>
+      )}
+
       {/* Analytics Counter Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
@@ -385,17 +429,20 @@ export default function AdminVendorsPage() {
         </div>
 
         <div className="flex items-center gap-2 self-stretch sm:self-auto">
-          {(["ALL", "ENABLED", "DISABLED"] as const).map((st) => (
+          {(["ALL", "PENDING_APPROVAL", "ENABLED", "DISABLED"] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                 statusFilter === st
-                  ? "bg-slate-900 text-white"
+                  ? "bg-slate-900 text-white shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              {st === "ALL" ? "All Partners" : st === "ENABLED" ? "Active Only" : "Disabled Only"}
+              <span>{st === "ALL" ? `All Partners (${totalVendors})` : st === "PENDING_APPROVAL" ? `Pending Review (${pendingVendors})` : st === "ENABLED" ? `Active (${activeVendors})` : `Disabled (${disabledVendors})`}</span>
+              {st === "PENDING_APPROVAL" && pendingVendors > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              )}
             </button>
           ))}
         </div>
@@ -572,9 +619,20 @@ export default function AdminVendorsPage() {
                         <span className="text-[10px] text-slate-400">Tours</span>
                       </td>
 
-                      {/* Actions: Enable / Disable + DELETE IF DISABLED */}
+                      {/* Actions: Approve / Edit / Enable / Disable / Delete */}
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {vendor.status === "PENDING_APPROVAL" && (
+                            <button
+                              onClick={() => handleApproveVendor(vendor.id, vendor.companyName)}
+                              title="Approve this new operator partner"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm shadow-emerald-600/20"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>Approve Partner</span>
+                            </button>
+                          )}
+
                           {/* EDIT PROFILE & CREDENTIALS BUTTON */}
                           <button
                             onClick={() => openEditModal(vendor)}
@@ -585,23 +643,25 @@ export default function AdminVendorsPage() {
                             <span>Edit Profile</span>
                           </button>
 
-                          <button
-                            onClick={() => handleToggleStatus(vendor.id, vendor.status)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
-                              isEnabled
-                                ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
-                                : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20"
-                            }`}
-                          >
-                            <Power className="w-3.5 h-3.5" />
-                            <span>{isEnabled ? "Disable Account" : "Enable & Show Tours"}</span>
-                          </button>
+                          {vendor.status !== "PENDING_APPROVAL" && (
+                            <button
+                              onClick={() => handleToggleStatus(vendor.id, vendor.status === "ENABLED" ? "ENABLED" : "DISABLED")}
+                              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
+                                isEnabled
+                                  ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                                  : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20"
+                              }`}
+                            >
+                              <Power className="w-3.5 h-3.5" />
+                              <span>{isEnabled ? "Disable Account" : "Enable & Show Tours"}</span>
+                            </button>
+                          )}
 
-                          {/* DELETE OPTION - ONLY APPEARS WHEN DISABLED */}
+                          {/* DELETE OPTION - ONLY APPEARS WHEN DISABLED OR PENDING */}
                           {!isEnabled && (
                             <button
                               onClick={() => setVendorToDelete(vendor)}
-                              title="Delete Disabled Partner Account"
+                              title="Delete Partner Account"
                               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition shadow-sm shadow-red-600/20"
                             >
                               <Trash2 className="w-3.5 h-3.5" />

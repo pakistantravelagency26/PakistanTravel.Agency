@@ -221,11 +221,41 @@ export const authOptions: NextAuthOptions = {
           throw new Error("This staff account has been blocked / suspended by Super Administrator. Access denied.");
         }
 
-        // 8. Verify that vendor account is not disabled by Super Admin
-        if (user.role === "VENDOR" && user.vendorId) {
-          const { isVendorEnabled } = await import("@/services/vendor.service");
-          if (!isVendorEnabled(user.vendorId)) {
-            throw new Error("This Vendor / Partner account has been deactivated by Super Admin. Please contact PakistanTravel.Agency administration.");
+        // 8. Verify that vendor account is not disabled by Super Admin or pending review
+        if (user.role === "VENDOR") {
+          try {
+            const dbVendor = await prisma.vendor.findFirst({
+              where: {
+                OR: [
+                  ...(user.vendorId ? [{ id: user.vendorId }] : []),
+                  { userId: user.id },
+                ],
+              },
+            });
+            if (dbVendor) {
+              if (
+                dbVendor.status === "PENDING"
+              ) {
+                throw new Error(
+                  "Your partner account application is currently pending review and approval by PakistanTravel.Agency administration. You will be able to sign in once your account is approved."
+                );
+              }
+              if (
+                dbVendor.status === "SUSPENDED" || dbVendor.status === "REJECTED"
+              ) {
+                throw new Error(
+                  "This Vendor / Partner account has been deactivated by Super Admin. Please contact PakistanTravel.Agency administration."
+                );
+              }
+            }
+          } catch (vendorErr: any) {
+            if (
+              vendorErr.message &&
+              (vendorErr.message.includes("pending review") ||
+                vendorErr.message.includes("deactivated"))
+            ) {
+              throw vendorErr;
+            }
           }
         }
 

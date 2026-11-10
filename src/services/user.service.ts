@@ -46,6 +46,8 @@ export async function findUserByIdentifier(identifier: string): Promise<LocalUse
               { phone: query.replace(/[\s\-()]/g, "") },
               { phone: query.replace(/[\s\-()]/g, "").replace(/^\+92/, "0") },
               { phone: query.replace(/[\s\-()]/g, "").replace(/^92/, "0") },
+              { vendorProfile: { is: { id: query } } },
+              { vendorProfile: { is: { id: `v-${query}` } } },
             ],
           },
           include: { vendorProfile: true },
@@ -105,9 +107,17 @@ export async function registerLocalUser(data: {
 
   try {
     const user = await prisma.$transaction(async (tx) => {
+      // Generate clean unique username for vendor login
+      const cleanBase = (data.businessName || data.name || data.email.split("@")[0])
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, 20);
+      const generatedUsername = data.role === "VENDOR" ? `${cleanBase || "partner"}${Date.now().toString().slice(-4)}` : undefined;
+
       const u = await tx.user.create({
         data: {
-          name: data.name,
+          name: data.businessName || data.name,
+          username: generatedUsername,
           email: normalized,
           phone: data.phone.trim(),
           passwordHash,
@@ -117,8 +127,14 @@ export async function registerLocalUser(data: {
 
       let vendorId = null;
       if (data.role === "VENDOR") {
+        const cleanVendorId = `v-${(data.businessName || data.name)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")}-${Date.now().toString().slice(-4)}`;
+
         const v = await tx.vendor.create({
           data: {
+            id: cleanVendorId,
             userId: u.id,
             businessName: data.businessName || `${data.name}'s Travel Agency`,
             city: data.city || "Islamabad",
@@ -127,6 +143,13 @@ export async function registerLocalUser(data: {
             cnicOrTaxNumber: data.cnicOrTaxNumber || null,
             status: "PENDING",
             commissionRate: siteConfig.marketplace.defaultCommissionRate || 10.0,
+            bankDetails: {
+              email: normalized,
+              phone1: data.phone.trim(),
+              whatsapp: data.whatsapp?.trim() || data.phone.trim(),
+              contactPerson: data.name,
+              loginId: generatedUsername,
+            },
           },
         });
         vendorId = v.id;

@@ -19,13 +19,22 @@ export async function PATCH(
     }
 
     const { id } = params;
+    const body = await req.json().catch(() => ({}));
 
     // 1. Update in Neon PostgreSQL Database permanently
     let updatedDbVendor = null;
     try {
-      const current = await prisma.vendor.findUnique({ where: { id } });
+      const current = await prisma.vendor.findUnique({ where: { id }, include: { user: true } });
       if (current) {
-        const nextStatus = current.status === "VERIFIED" ? "SUSPENDED" : "VERIFIED";
+        let nextStatus: "VERIFIED" | "SUSPENDED" | "REJECTED";
+        if (body?.action === "APPROVE" || body?.status === "ENABLED") {
+          nextStatus = "VERIFIED";
+        } else if (body?.action === "REJECT") {
+          nextStatus = "REJECTED";
+        } else {
+          nextStatus = current.status === "VERIFIED" ? "SUSPENDED" : "VERIFIED";
+        }
+
         updatedDbVendor = await prisma.vendor.update({
           where: { id },
           data: { status: nextStatus },

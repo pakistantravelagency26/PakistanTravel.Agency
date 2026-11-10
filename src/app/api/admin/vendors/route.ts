@@ -38,7 +38,11 @@ export async function GET() {
         phone3: details.phone3 || "",
         email: v.user?.email || details.email || "N/A",
         loginId: details.loginId || v.id.replace("v-", ""),
-        status: v.status === "VERIFIED" ? ("ENABLED" as const) : ("DISABLED" as const),
+        status: v.status === "VERIFIED"
+          ? ("ENABLED" as const)
+          : v.status === "PENDING"
+          ? ("PENDING_APPROVAL" as const)
+          : ("DISABLED" as const),
         commissionRate: v.commissionRate,
         listingsCount: v.listings.length,
         createdAt: v.createdAt.toISOString(),
@@ -109,6 +113,7 @@ export async function POST(req: Request) {
       const user = await prisma.user.create({
         data: {
           name: body.companyName,
+          username: body.loginId.toLowerCase().trim(),
           email: body.email.toLowerCase().trim(),
           phone: body.phone1 || "03000000000",
           passwordHash,

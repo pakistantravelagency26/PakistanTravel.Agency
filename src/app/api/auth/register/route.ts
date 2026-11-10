@@ -119,9 +119,30 @@ export async function POST(req: Request) {
       cnicOrTaxNumber,
     });
 
+    // If registered as VENDOR / Tour Operator, dispatch transactional emails
+    if (role === "VENDOR") {
+      try {
+        const { sendPartnerRegistrationEmails } = await import("@/services/email.service");
+        await sendPartnerRegistrationEmails({
+          companyName: businessName || `${name}'s Travel Agency`,
+          contactName: name,
+          email: normalizedEmail,
+          phone,
+          whatsapp,
+          city,
+          cnicOrTaxNumber,
+        });
+      } catch (mailErr) {
+        console.warn("[REGISTER API] Failed to send partner registration emails:", mailErr);
+      }
+    }
+
     return NextResponse.json(
       {
-        message: "Registration successful",
+        message: role === "VENDOR"
+          ? "Partner registration submitted successfully. Your account is awaiting administrative approval."
+          : "Registration successful",
+        pendingApproval: role === "VENDOR",
         user: {
           id: newUser.id,
           name: newUser.name,

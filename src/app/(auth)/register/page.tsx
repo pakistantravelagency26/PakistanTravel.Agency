@@ -71,9 +71,11 @@ function RegisterForm() {
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        router.push(role === "VENDOR" ? "/partner-hub/login?registered=true" : "/login?registered=true");
-      }, 1500);
+      if (role !== "VENDOR") {
+        setTimeout(() => {
+          router.push("/login?registered=true");
+        }, 1500);
+      }
     } catch (err: unknown) {
       setError("An unexpected network error occurred. Please try again.");
       setLoading(false);
@@ -141,6 +143,44 @@ function RegisterForm() {
           </div>
         )}
 
+        {success && role === "VENDOR" ? (
+          <div className="p-6 rounded-3xl bg-emerald-50/90 border border-emerald-200 text-center space-y-4 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-xl font-extrabold text-emerald-950">Application Submitted!</h3>
+              <p className="text-xs text-emerald-800 font-medium">
+                Thank you for applying to partner with PakistanTravel.Agency
+              </p>
+            </div>
+            <div className="text-left text-xs text-slate-600 bg-white p-4 rounded-2xl border border-emerald-100 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Company:</span>
+                <span className="font-bold text-slate-800">{formData.businessName || formData.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Confirmation Sent To:</span>
+                <span className="font-bold text-emerald-700">{formData.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Status:</span>
+                <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">Pending Review</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Our administration has received your operator details and is reviewing your application. You will receive an approval notification via email. Once approved, you will be able to log in to the Partner Hub to publish tour packages.
+            </p>
+            <div className="pt-2">
+              <a
+                href="/partner-hub/login"
+                className="w-full inline-block py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs transition shadow-md shadow-emerald-700/20"
+              >
+                Go to Partner Hub Login &rarr;
+              </a>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -335,6 +375,7 @@ function RegisterForm() {
             {loading ? "Creating your account..." : `Register as ${role === "VENDOR" ? "Partner Operator" : "Traveler"}`}
           </button>
         </form>
+        )}
 
         <p className="text-center text-xs text-slate-600">
           Already have an account?{" "}
