@@ -167,13 +167,29 @@ export async function middleware(req: NextRequest) {
     });
   }
 
-  // 1e. Auto-forward authenticated Admin away from login pages straight to dashboard
-  if ((path === "/secure-admin/login" || path === "/login") && token?.role === "ADMIN") {
-    const dashUrl = new URL("/secure-admin/dashboard", req.url);
-    return NextResponse.redirect(dashUrl);
+  // 1e. Strict Portal Role Separation & Auto-forwarding
+
+  // Admin routing guards:
+  if (token?.role === "ADMIN") {
+    if (path === "/secure-admin/login" || path === "/login" || path === "/partner-hub/login") {
+      return NextResponse.redirect(new URL("/secure-admin/dashboard", req.url));
+    }
+    if (path.startsWith("/partner-hub")) {
+      return NextResponse.redirect(new URL("/secure-admin/dashboard", req.url));
+    }
   }
 
-  // 2. Super Admin Portal protection (/secure-admin)
+  // Vendor routing guards:
+  if (token?.role === "VENDOR") {
+    if (path === "/partner-hub/login" || path === "/login" || path === "/secure-admin/login") {
+      return NextResponse.redirect(new URL("/partner-hub/dashboard", req.url));
+    }
+    if (path.startsWith("/secure-admin")) {
+      return NextResponse.redirect(new URL("/partner-hub/dashboard", req.url));
+    }
+  }
+
+  // 2. Super Admin Portal protection (/secure-admin) - STRICTLY ADMIN ONLY
   if (path.startsWith("/secure-admin") && path !== "/secure-admin/login") {
     if (!token) {
       const loginUrl = new URL("/secure-admin/login", req.url);
@@ -185,7 +201,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 2b. Admin API protection (/api/admin)
+  // 2b. Admin API protection (/api/admin) - STRICTLY ADMIN ONLY
   if (path.startsWith("/api/admin")) {
     if (!token) {
       return NextResponse.json({ success: false, error: "Unauthorized access: Session required." }, { status: 401 });
@@ -195,9 +211,9 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 3. Partner Hub Portal protection (/partner-hub)
+  // 3. Partner Hub Portal protection (/partner-hub) - STRICTLY VENDOR ONLY
   if (path.startsWith("/partner-hub") && path !== "/partner-hub/login") {
-    if (!token || (token.role !== "VENDOR" && token.role !== "ADMIN")) {
+    if (!token || token.role !== "VENDOR") {
       const loginUrl = new URL("/partner-hub/login", req.url);
       loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);

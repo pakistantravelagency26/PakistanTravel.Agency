@@ -171,6 +171,102 @@ export default function AdminTeamPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Customer Accounts Management State
+  const [activeTab, setActiveTab] = useState<"STAFF" | "CUSTOMERS">("STAFF");
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerLoading, setCustomerLoading] = useState(false);
+  const [customerToEdit, setCustomerToEdit] = useState<any | null>(null);
+  const [customerEditForm, setCustomerEditForm] = useState({
+    name: "",
+    username: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [updatingCustomer, setUpdatingCustomer] = useState(false);
+
+  async function fetchCustomers(q = "") {
+    try {
+      setCustomerLoading(true);
+      const res = await fetch(`/api/admin/customers?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (data.success) {
+        setCustomers(data.customers);
+      }
+    } catch (err) {
+      console.error("Failed to load customers:", err);
+    } finally {
+      setCustomerLoading(false);
+    }
+  }
+
+  function openCustomerEditModal(c: any) {
+    setCustomerToEdit(c);
+    setCustomerEditForm({
+      name: c.name || "",
+      username: c.username !== "—" ? c.username : "",
+      email: c.email || "",
+      phone: c.phone !== "—" ? c.phone : "",
+      password: "",
+    });
+  }
+
+  async function handleUpdateCustomer(e: React.FormEvent) {
+    e.preventDefault();
+    if (!customerToEdit) return;
+    setUpdatingCustomer(true);
+
+    try {
+      const res = await fetch(`/api/admin/customers/${customerToEdit.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: customerEditForm.name.trim(),
+          username: customerEditForm.username.trim() || undefined,
+          email: customerEditForm.email.toLowerCase().trim(),
+          phone: customerEditForm.phone.trim() || undefined,
+          password: customerEditForm.password.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setStatusMessage({
+          type: "success",
+          text: `Customer profile for ${customerEditForm.name} updated successfully!`,
+        });
+        setCustomerToEdit(null);
+        fetchCustomers(customerSearch);
+      } else {
+        alert(data.error || "Failed to update customer profile.");
+      }
+    } catch (err: any) {
+      alert("Error updating customer: " + err.message);
+    } finally {
+      setUpdatingCustomer(false);
+    }
+  }
+
+  async function handleDeleteCustomer(id: string, customerName: string) {
+    if (!confirm(`Are you sure you want to permanently delete traveler account "${customerName}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/customers/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setStatusMessage({ type: "success", text: data.message });
+        fetchCustomers(customerSearch);
+      } else {
+        alert(data.error || "Failed to delete customer.");
+      }
+    } catch (err: any) {
+      alert("Error deleting customer: " + err.message);
+    }
+  }
+
   // New staff form state
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -436,6 +532,36 @@ export default function AdminTeamPage() {
         </a>
       </div>
 
+      {/* Top Navigation Tabs: Staff vs Travelers */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+        <button
+          onClick={() => setActiveTab("STAFF")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition ${
+            activeTab === "STAFF"
+              ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+              : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>Staff Accounts ({team.length})</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab("CUSTOMERS");
+            if (customers.length === 0) fetchCustomers();
+          }}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition ${
+            activeTab === "CUSTOMERS"
+              ? "bg-slate-900 text-white shadow-md shadow-slate-900/10"
+              : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+          }`}
+        >
+          <Users className="w-4 h-4 text-sky-500" />
+          <span>Traveler &amp; Customer Profiles {customers.length > 0 ? `(${customers.length})` : ""}</span>
+        </button>
+      </div>
+
       {statusMessage && (
         <div
           className={`p-4 rounded-2xl border text-xs flex items-center gap-3 transition ${
@@ -453,6 +579,112 @@ export default function AdminTeamPage() {
         </div>
       )}
 
+      {activeTab === "CUSTOMERS" ? (
+        /* CUSTOMERS DIRECTORY */
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-slate-900">
+                  Registered Traveler &amp; Customer Accounts
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Super Admin control to view, update contact info, or reset sign-in passwords for any traveler
+                </p>
+              </div>
+            </div>
+
+            {/* Search Input */}
+            <div className="flex items-center gap-2 w-full sm:w-72">
+              <input
+                type="text"
+                placeholder="Search by name, email, phone..."
+                value={customerSearch}
+                onChange={(e) => {
+                  setCustomerSearch(e.target.value);
+                  fetchCustomers(e.target.value);
+                }}
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              />
+            </div>
+          </div>
+
+          {customerLoading ? (
+            <div className="py-12 text-center text-xs text-slate-500 font-semibold">
+              <Loader2 className="w-5 h-5 animate-spin mx-auto text-sky-600 mb-2" />
+              Loading customer profiles...
+            </div>
+          ) : customers.length === 0 ? (
+            <div className="py-12 text-center text-xs text-slate-500 font-semibold bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              No customer accounts found matching your search.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                    <th className="pb-3 px-3">Traveler Name</th>
+                    <th className="pb-3 px-3">Email Address</th>
+                    <th className="pb-3 px-3">Username</th>
+                    <th className="pb-3 px-3">Phone Number</th>
+                    <th className="pb-3 px-3">Bookings</th>
+                    <th className="pb-3 px-3">Registered</th>
+                    <th className="pb-3 px-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {customers.map((c) => (
+                    <tr key={c.id} className="hover:bg-slate-50/70 transition">
+                      <td className="py-3.5 px-3 font-extrabold text-slate-900">
+                        {c.name}
+                      </td>
+                      <td className="py-3.5 px-3 text-slate-600 font-medium font-mono text-[11px]">
+                        {c.email}
+                      </td>
+                      <td className="py-3.5 px-3 text-slate-600 font-medium">
+                        {c.username}
+                      </td>
+                      <td className="py-3.5 px-3 text-slate-600 font-medium">
+                        {c.phone}
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">
+                          {c.bookingsCount} Tours
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-slate-400 text-[11px]">
+                        {new Date(c.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3.5 px-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => openCustomerEditModal(c)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition"
+                          >
+                            <Edit className="w-3 h-3 text-slate-500" />
+                            <span>Edit Profile</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCustomer(c.id, c.name)}
+                            title="Delete customer account"
+                            className="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
       {/* Team Directory */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
         <div className="flex items-center justify-between">
@@ -825,6 +1057,118 @@ export default function AdminTeamPage() {
           </div>
         </form>
       </div>
+
+        </>
+      )}
+
+      {/* EDIT CUSTOMER MODAL */}
+      {customerToEdit && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-sky-600 block">
+                  Traveler Account Control
+                </span>
+                <h2 className="text-xl font-extrabold text-slate-900">
+                  Edit Traveler Profile
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Update customer contact details or assign a new password
+                </p>
+              </div>
+              <button
+                onClick={() => setCustomerToEdit(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateCustomer} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={customerEditForm.name}
+                  onChange={(e) => setCustomerEditForm({ ...customerEditForm, name: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={customerEditForm.email}
+                    onChange={(e) => setCustomerEditForm({ ...customerEditForm, email: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Username</label>
+                  <input
+                    type="text"
+                    value={customerEditForm.username}
+                    onChange={(e) => setCustomerEditForm({ ...customerEditForm, username: e.target.value })}
+                    placeholder="e.g. traveler88"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-bold mb-1">Mobile Phone Number</label>
+                <input
+                  type="text"
+                  value={customerEditForm.phone}
+                  onChange={(e) => setCustomerEditForm({ ...customerEditForm, phone: e.target.value })}
+                  placeholder="03001234567"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-slate-800 font-bold">
+                  Reset Password (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Leave blank to keep unchanged"
+                  value={customerEditForm.password}
+                  onChange={(e) => setCustomerEditForm({ ...customerEditForm, password: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono font-bold"
+                />
+                <p className="text-[10px] text-slate-500">
+                  Minimum 8 characters. Will immediately update the customer&apos;s password with bcrypt hash.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setCustomerToEdit(null)}
+                  className="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingCustomer}
+                  className="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold shadow-md shadow-sky-600/20 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {updatingCustomer ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{updatingCustomer ? "Saving..." : "Save Customer Profile"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Edit Member & Permissions Modal */}
       {editingMember && (

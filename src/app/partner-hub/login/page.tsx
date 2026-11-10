@@ -34,6 +34,7 @@ function VendorLoginForm() {
         email: identifier.trim(),
         password: password.trim(),
         totpCode: totpCode.trim(),
+        portal: "VENDOR",
         callbackUrl: safeCallback,
       });
 

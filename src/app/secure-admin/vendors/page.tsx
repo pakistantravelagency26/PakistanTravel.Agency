@@ -23,7 +23,10 @@ import {
   ExternalLink,
   Lock,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Edit,
+  KeyRound,
+  Loader2
 } from "lucide-react";
 
 interface VendorData {
@@ -62,6 +65,84 @@ export default function AdminVendorsPage() {
   // Visible Passwords map
   const [visiblePasswords, setVisiblePasswords] = useState<{ [id: string]: boolean }>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Edit Modal State
+  const [vendorToEdit, setVendorToEdit] = useState<VendorData | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    companyName: "",
+    city: "Skardu",
+    tourismLicense: "",
+    phone1: "",
+    phone2: "",
+    phone3: "",
+    email: "",
+    loginId: "",
+    passwordPlain: "",
+    commissionRate: 12,
+    status: "ENABLED" as "ENABLED" | "DISABLED",
+  });
+
+  function openEditModal(v: VendorData) {
+    setVendorToEdit(v);
+    setEditForm({
+      companyName: v.companyName || "",
+      city: v.city || "Skardu",
+      tourismLicense: v.tourismLicense || "",
+      phone1: v.phone1 || "",
+      phone2: v.phone2 || "",
+      phone3: v.phone3 || "",
+      email: v.email !== "N/A" ? v.email : "",
+      loginId: v.loginId || "",
+      passwordPlain: "",
+      commissionRate: v.commissionRate || 12,
+      status: v.status || "ENABLED",
+    });
+    setActionError("");
+  }
+
+  async function handleUpdateVendor(e: React.FormEvent) {
+    e.preventDefault();
+    if (!vendorToEdit) return;
+    setActionError("");
+    setEditing(true);
+
+    try {
+      const res = await fetch(`/api/admin/vendors/${vendorToEdit.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: editForm.companyName.trim(),
+          city: editForm.city.trim(),
+          tourismLicense: editForm.tourismLicense.trim(),
+          phone1: editForm.phone1.trim(),
+          phone2: editForm.phone2.trim(),
+          phone3: editForm.phone3.trim(),
+          email: editForm.email.toLowerCase().trim(),
+          loginId: editForm.loginId.trim(),
+          password: editForm.passwordPlain.trim() || undefined,
+          commissionRate: Number(editForm.commissionRate),
+          status: editForm.status,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.vendor) {
+        setVendors((prev) =>
+          prev.map((v) => (v.id === vendorToEdit.id ? data.vendor : v))
+        );
+        setVendorToEdit(null);
+        setActionSuccess(`Partner account "${data.vendor.companyName}" updated successfully!`);
+        setTimeout(() => setActionSuccess(""), 5000);
+      } else {
+        setActionError(data.error || "Failed to update partner account.");
+      }
+    } catch (err: any) {
+      setActionError("Network error while updating partner account.");
+    } finally {
+      setEditing(false);
+    }
+  }
 
   // Form State
   const [form, setForm] = useState({
@@ -494,6 +575,16 @@ export default function AdminVendorsPage() {
                       {/* Actions: Enable / Disable + DELETE IF DISABLED */}
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* EDIT PROFILE & CREDENTIALS BUTTON */}
+                          <button
+                            onClick={() => openEditModal(vendor)}
+                            title="Edit Partner Account Details & Credentials"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                          >
+                            <Edit className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Edit Profile</span>
+                          </button>
+
                           <button
                             onClick={() => handleToggleStatus(vendor.id, vendor.status)}
                             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm ${
@@ -764,6 +855,200 @@ export default function AdminVendorsPage() {
                   className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50"
                 >
                   {submitting ? "Creating Partner Account..." : "Create Partner Account"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* EDIT VENDOR MODAL */}
+      {vendorToEdit && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block">Super Admin Controls</span>
+                <h2 className="text-xl font-extrabold text-slate-900">Edit Partner Account</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Modify verified profile details, phone numbers, login ID, or reset password</p>
+              </div>
+              <button
+                onClick={() => setVendorToEdit(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {actionError && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{actionError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateVendor} className="space-y-4 text-xs">
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider text-slate-400">1. Company &amp; Location Details</h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Company / Agency Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.companyName}
+                      onChange={(e) => setEditForm({ ...editForm, companyName: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Operational City / Base *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Tourism License / CNIC Reference</label>
+                  <input
+                    type="text"
+                    value={editForm.tourismLicense}
+                    onChange={(e) => setEditForm({ ...editForm, tourismLicense: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider text-slate-400">2. Contact Numbers (Anti-Leakage Protected)</h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Phone 1 (Primary / WhatsApp) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.phone1}
+                      onChange={(e) => setEditForm({ ...editForm, phone1: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Phone 2 (Office / Desk)</label>
+                    <input
+                      type="text"
+                      value={editForm.phone2}
+                      onChange={(e) => setEditForm({ ...editForm, phone2: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Phone 3 (Emergency / Field)</label>
+                    <input
+                      type="text"
+                      value={editForm.phone3}
+                      onChange={(e) => setEditForm({ ...editForm, phone3: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider text-slate-400">3. Partner Hub Sign-In Credentials &amp; Status</h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Registered Sign-In Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Login ID / Username *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.loginId}
+                      onChange={(e) => setEditForm({ ...editForm, loginId: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-semibold font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Account Status</label>
+                    <select
+                      value={editForm.status}
+                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value as "ENABLED" | "DISABLED" })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-bold text-xs"
+                    >
+                      <option value="ENABLED">ENABLED (Tours visible on marketplace)</option>
+                      <option value="DISABLED">DISABLED (Suspended &amp; tours hidden)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Commission Take Rate (%)</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="100"
+                      value={editForm.commissionRate}
+                      onChange={(e) => setEditForm({ ...editForm, commissionRate: Number(e.target.value) })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <label className="block text-slate-800 font-bold">
+                    Reset Partner Password (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Leave blank to keep current password unchanged"
+                    value={editForm.passwordPlain}
+                    onChange={(e) => setEditForm({ ...editForm, passwordPlain: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono text-xs font-bold"
+                  />
+                  <p className="text-[11px] text-slate-500">
+                    If entered, this will immediately overwrite the vendor partner&apos;s sign-in password and hash it with bcrypt cost 12.
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setVendorToEdit(null)}
+                  className="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editing}
+                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {editing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit className="w-4 h-4" />}
+                  <span>{editing ? "Saving Changes..." : "Save Partner Changes"}</span>
                 </button>
               </div>
             </form>

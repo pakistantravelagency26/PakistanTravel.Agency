@@ -55,6 +55,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Login ID / Email / Phone", type: "text" },
         password: { label: "Password", type: "password" },
         totpCode: { label: "2FA Authenticator Code", type: "text" },
+        portal: { label: "Portal", type: "text" },
       },
       async authorize(credentials: Record<string, string> | undefined, req: any) {
         if (!credentials?.email || !credentials?.password) {
@@ -113,6 +114,39 @@ export const authOptions: NextAuthOptions = {
             );
           }
           throw new Error("Invalid Login ID or password");
+        }
+
+        // 4a. Strict Portal Role Separation
+        const reqPortal = String((credentials as any)?.portal || "").toUpperCase().trim();
+        const referer = String(req?.headers?.referer || req?.headers?.get?.("referer") || "").toLowerCase();
+
+        let targetPortal: "ADMIN" | "VENDOR" | "CUSTOMER" = "CUSTOMER";
+        if (reqPortal === "ADMIN" || referer.includes("/secure-admin")) {
+          targetPortal = "ADMIN";
+        } else if (reqPortal === "VENDOR" || referer.includes("/partner-hub")) {
+          targetPortal = "VENDOR";
+        } else {
+          targetPortal = "CUSTOMER";
+        }
+
+        if (targetPortal === "ADMIN" && user.role !== "ADMIN") {
+          throw new Error("Access restricted. This portal is for platform administrators only. Vendor partners must sign in at /partner-hub/login.");
+        }
+
+        if (targetPortal === "VENDOR" && user.role !== "VENDOR") {
+          if (user.role === "ADMIN") {
+            throw new Error("Administrative accounts cannot log in to the Partner Portal. Please sign in at /secure-admin/login.");
+          }
+          throw new Error("Access restricted. This portal is for registered vendor partners only. Please sign in at /partner-hub/login.");
+        }
+
+        if (targetPortal === "CUSTOMER") {
+          if (user.role === "ADMIN") {
+            throw new Error("Administrative accounts cannot log in as customers. Please sign in at /secure-admin/login.");
+          }
+          if (user.role === "VENDOR") {
+            throw new Error("Vendor accounts must sign in at the Partner Extranet Portal (/partner-hub/login).");
+          }
         }
 
         // 4b. Transparent Migration: Upgrade legacy password hashes (< cost 12) on successful login

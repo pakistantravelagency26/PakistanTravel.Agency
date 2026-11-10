@@ -43,6 +43,7 @@ function AdminLoginForm() {
         email: identifier.trim(),
         password: password.trim(),
         totpCode: totpCode.trim(),
+        portal: "ADMIN",
         callbackUrl: safeCallback,
       });
 

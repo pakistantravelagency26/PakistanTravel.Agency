@@ -56,6 +56,7 @@ function CustomerLoginForm() {
         email: identifier.trim(),
         password: password.trim(),
         totpCode: totpCode.trim(),
+        portal: "CUSTOMER",
         callbackUrl,
       });
 
