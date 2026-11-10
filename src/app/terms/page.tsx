@@ -150,7 +150,7 @@ export default function TermsPage() {
                   <strong>Traveler Booking Fees:</strong> Travelers pay the direct operator listing price. The platform charges zero booking fees to travelers.
                 </li>
                 <li>
-                  <strong>Platform Commission:</strong> A standardized {siteConfig.marketplace.commissionPercent}% platform commission is deducted from the operator&apos;s gross booking value upon completed reservations. Operators receive the remaining {100 - siteConfig.marketplace.commissionPercent}% net of applicable payment processing charges.
+                  <strong>Platform Commission:</strong> A customized platform commission agreed upon per tour package (percentage, fixed amount, or waived) is applied to the gross booking value upon completed reservations. Operators receive their guaranteed demanded base rate net of applicable payment processing charges.
                 </li>
                 <li>
                   <strong>Payment Processing Fees:</strong> Third-party payment gateway and transaction processing fees (including JazzCash, debit/credit card merchant fees, or interbank IBFT charges) are deducted separately from operator disbursements.

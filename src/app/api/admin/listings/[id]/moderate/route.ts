@@ -44,6 +44,12 @@ export async function PATCH(
       }
       if (body.totalPrice !== undefined && body.totalPrice !== null) {
         updateData.basePrice = Number(body.totalPrice);
+        try {
+          await prisma.listingUnit.updateMany({
+            where: { listingId: id },
+            data: { basePrice: Number(body.totalPrice) },
+          });
+        } catch {}
       }
       updatedDbListing = await prisma.listing.update({
         where: { id },

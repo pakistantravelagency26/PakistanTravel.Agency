@@ -44,7 +44,9 @@ export default function AdminListingsPage() {
 
   // Approval & Commission Modal State
   const [approvingTour, setApprovingTour] = useState<ListingData | null>(null);
-  const [commissionRate, setCommissionRate] = useState<number>(COMMISSION_PERCENT);
+  const [commissionMode, setCommissionMode] = useState<"PERCENT" | "FIXED" | "OFF">("PERCENT");
+  const [commissionRate, setCommissionRate] = useState<number>(10);
+  const [commissionFixed, setCommissionFixed] = useState<number>(5000);
 
   useEffect(() => {
     fetchListings();
@@ -80,7 +82,19 @@ export default function AdminListingsPage() {
 
   function handleOpenApproval(tour: ListingData) {
     setApprovingTour(tour);
-    setCommissionRate(tour.commissionRate !== undefined ? tour.commissionRate : COMMISSION_PERCENT);
+    const vRate = Number(tour.vendorPrice || tour.basePrice) || 0;
+    const bPrice = Number(tour.basePrice) || 0;
+    const diff = Math.max(0, bPrice - vRate);
+    
+    if (tour.commissionRate === 0) {
+      setCommissionMode("OFF");
+      setCommissionRate(0);
+      setCommissionFixed(0);
+    } else {
+      setCommissionMode("PERCENT");
+      setCommissionRate(tour.commissionRate !== undefined && tour.commissionRate !== null ? tour.commissionRate : 10);
+      setCommissionFixed(diff > 0 ? diff : 5000);
+    }
   }
 
   async function handleConfirmApproval() {
@@ -464,7 +478,7 @@ export default function AdminListingsPage() {
                   </button>
 
                   {/* Quick Action Buttons for Pending */}
-                  {isPending && (
+                  {isPending ? (
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => handleOpenApproval(item)}
@@ -486,7 +500,15 @@ export default function AdminListingsPage() {
                         <span>Reject / Notes</span>
                       </button>
                     </div>
-                  )}
+                  ) : !isRejected ? (
+                    <button
+                      onClick={() => handleOpenApproval(item)}
+                      className="w-full py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Percent className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Edit Commission / Price</span>
+                    </button>
+                  ) : null}
                 </div>
               </div>
             );
@@ -740,58 +762,165 @@ export default function AdminListingsPage() {
               </div>
             </div>
 
-            {/* Commission Percentage Input */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  Our Agency Commission Markup (%)
-                </label>
-                <span className="text-xs text-slate-500 font-medium">Enter % to add to Vendor Amount</span>
+            {/* Commission Mode Selector: Percentage vs Fixed Amount vs OFF */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
+                Platform Commission Setting (Percentage, Fixed Amount, or Off)
+              </label>
+
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCommissionMode("PERCENT")}
+                  className={`py-2.5 px-3 rounded-2xl text-xs font-bold border transition flex flex-col items-center justify-center gap-1 ${
+                    commissionMode === "PERCENT"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="font-extrabold text-sm">%</span>
+                  <span>Percentage (%)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCommissionMode("FIXED")}
+                  className={`py-2.5 px-3 rounded-2xl text-xs font-bold border transition flex flex-col items-center justify-center gap-1 ${
+                    commissionMode === "FIXED"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="font-extrabold text-sm">PKR</span>
+                  <span>Fixed Amount (PKR)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCommissionMode("OFF")}
+                  className={`py-2.5 px-3 rounded-2xl text-xs font-bold border transition flex flex-col items-center justify-center gap-1 ${
+                    commissionMode === "OFF"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-md"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="font-extrabold text-sm">0%</span>
+                  <span>Turn OFF (0 PKR)</span>
+                </button>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    max="100"
-                    value={commissionRate}
-                    onChange={(e) => setCommissionRate(Number(e.target.value) || 0)}
-                    className="w-full pl-4 pr-10 py-3 rounded-2xl border-2 border-emerald-500/40 focus:border-emerald-600 text-lg font-black text-slate-900 focus:outline-none"
-                    placeholder="10"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-sm">
-                    %
-                  </span>
+              {/* Mode 1: Percentage */}
+              {commissionMode === "PERCENT" && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-slate-700">Commission Percentage:</span>
+                    <span className="text-slate-500">Calculates % on top of vendor price</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-1">
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        max="100"
+                        value={commissionRate}
+                        onChange={(e) => setCommissionRate(Number(e.target.value) || 0)}
+                        className="w-full pl-4 pr-10 py-3 rounded-2xl border-2 border-emerald-500/40 focus:border-emerald-600 text-lg font-black text-slate-900 focus:outline-none"
+                        placeholder="10"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-sm">
+                        %
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {[5, 10, 12, 15, 20].map((rate) => (
+                        <button
+                          key={rate}
+                          type="button"
+                          onClick={() => setCommissionRate(rate)}
+                          className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition ${
+                            commissionRate === rate
+                              ? "bg-emerald-600 text-white border-emerald-600"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                          }`}
+                        >
+                          {rate}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+              )}
 
-                {/* Quick Presets */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {[10, 12, 15, 20].map((rate) => (
-                    <button
-                      key={rate}
-                      type="button"
-                      onClick={() => setCommissionRate(rate)}
-                      className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition ${
-                        commissionRate === rate
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      {rate}%
-                    </button>
-                  ))}
+              {/* Mode 2: Fixed Amount */}
+              {commissionMode === "FIXED" && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-slate-700">Fixed Commission in PKR:</span>
+                    <span className="text-slate-500">Exact amount added per seat / package</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-1">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-xs">
+                        PKR
+                      </span>
+                      <input
+                        type="number"
+                        step="500"
+                        min="0"
+                        value={commissionFixed}
+                        onChange={(e) => setCommissionFixed(Number(e.target.value) || 0)}
+                        className="w-full pl-14 pr-4 py-3 rounded-2xl border-2 border-emerald-500/40 focus:border-emerald-600 text-lg font-black text-slate-900 focus:outline-none"
+                        placeholder="5000"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {[2500, 5000, 7500, 10000].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setCommissionFixed(amt)}
+                          className={`px-2 py-2 rounded-xl text-xs font-bold border transition ${
+                            commissionFixed === amt
+                              ? "bg-emerald-600 text-white border-emerald-600"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                          }`}
+                        >
+                          +{amt.toLocaleString()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Mode 3: Commission OFF */}
+              {commissionMode === "OFF" && (
+                <div className="p-3.5 rounded-2xl bg-slate-100 border border-slate-200 text-xs text-slate-700 flex items-center gap-2">
+                  <span className="font-bold">Commission Off (0%):</span>
+                  <span>Customer will pay exactly the vendor demanded price with zero platform markup.</span>
+                </div>
+              )}
             </div>
 
-            {/* Real-Time Live Amount Breakdown Card (Amounts show hongi) */}
+            {/* Real-Time Live Amount Breakdown Card */}
             {(() => {
               const vendorRate = Number(approvingTour.vendorPrice || approvingTour.basePrice) || 0;
-              const rate = Number(commissionRate) || 0;
-              const commissionAmt = Math.round((vendorRate * rate) / 100);
-              const totalWebPrice = vendorRate + commissionAmt;
+              let commAmt = 0;
+              let effectiveRate = 0;
+
+              if (commissionMode === "PERCENT") {
+                effectiveRate = Number(commissionRate) || 0;
+                commAmt = Math.round((vendorRate * effectiveRate) / 100);
+              } else if (commissionMode === "FIXED") {
+                commAmt = Math.max(0, Number(commissionFixed) || 0);
+                effectiveRate = vendorRate > 0 ? Number(((commAmt / vendorRate) * 100).toFixed(1)) : 0;
+              } else {
+                commAmt = 0;
+                effectiveRate = 0;
+              }
+
+              const totalWebPrice = vendorRate + commAmt;
 
               return (
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-slate-50 border border-emerald-200/80 space-y-3">
@@ -812,14 +941,20 @@ export default function AdminListingsPage() {
                     </div>
 
                     {/* Agency Commission */}
-                    <div className="p-3 rounded-xl bg-amber-500 text-white shadow-sm">
+                    <div className={`p-3 rounded-xl text-white shadow-sm ${commissionMode === "OFF" ? "bg-slate-600" : "bg-amber-500"}`}>
                       <span className="text-[10px] text-amber-100 font-bold block uppercase">
-                        Agency Markup (+{rate}%)
+                        {commissionMode === "OFF"
+                          ? "Commission (OFF)"
+                          : commissionMode === "FIXED"
+                          ? "Agency Markup (Fixed PKR)"
+                          : `Agency Markup (+${effectiveRate}%)`}
                       </span>
                       <span className="text-base sm:text-lg font-black block mt-0.5">
-                        + PKR {commissionAmt.toLocaleString()}
+                        {commAmt > 0 ? `+ PKR ${commAmt.toLocaleString()}` : "PKR 0 (Free Listing)"}
                       </span>
-                      <span className="text-[9px] text-amber-100/90 block">Humara Profit</span>
+                      <span className="text-[9px] text-amber-100/90 block">
+                        {commissionMode === "FIXED" ? `Equivalent: ~${effectiveRate}%` : "Humara Profit"}
+                      </span>
                     </div>
                   </div>
 
@@ -830,7 +965,7 @@ export default function AdminListingsPage() {
                         Total Amount Jo Web Par Jaye Ga (Customer Price)
                       </span>
                       <span className="text-xs text-emerald-100">
-                        Vendor (PKR {vendorRate.toLocaleString()}) + Commission (PKR {commissionAmt.toLocaleString()})
+                        Vendor (PKR {vendorRate.toLocaleString()}) + Commission (PKR {commAmt.toLocaleString()})
                       </span>
                     </div>
                     <div className="text-right">

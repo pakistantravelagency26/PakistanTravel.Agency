@@ -55,7 +55,7 @@ export default function ListYourTourPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            List your northern Pakistan guided tour packages and trekking expeditions on Pakistan&apos;s dedicated tour marketplace. Zero monthly software fees—you only pay a simple {commissionRate}% platform commission on completed bookings. Travelers pay zero booking fees.
+            List your northern Pakistan guided tour packages and trekking expeditions on Pakistan&apos;s dedicated tour marketplace. Zero monthly software fees—transparent and flexible platform commission is agreed per tour package upon publishing. Travelers pay zero booking fees.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
@@ -137,7 +137,7 @@ export default function ListYourTourPage() {
             <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
               <Percent className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">Fair {commissionRate}% Commission</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Flexible &amp; Transparent Commission</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               No hidden listing fees or subscriptions. We succeed only when your departures fill up.
             </p>
@@ -231,10 +231,10 @@ export default function ListYourTourPage() {
                 Transparent Fee Structure
               </span>
               <h3 className="text-3xl font-black mt-2">
-                {commissionRate}% <span className="text-lg font-medium text-emerald-200">Commission</span>
+                Customized <span className="text-lg font-medium text-emerald-200">Tour Commission</span>
               </h3>
               <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                No monthly subscription, no setup costs, no hidden software fees. You only pay a flat {commissionRate}% commission deducted from fulfilled bookings. Travelers pay zero booking fees.
+                No monthly subscription, no setup costs, no hidden software fees. Transparent platform commission is agreed per tour package when approved. You always receive your full demanded operator price. Travelers pay zero booking fees.
               </p>
             </div>
 

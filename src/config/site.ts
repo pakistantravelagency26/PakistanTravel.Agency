@@ -123,7 +123,7 @@ export const siteConfig: SiteConfig = {
     commissionPercent: COMMISSION_PERCENT,
     defaultCommissionRate: COMMISSION_PERCENT / 100,
     commissionModel: "deducted_from_vendor",
-    commissionExplanation: `A flat ${COMMISSION_PERCENT}% platform commission is deducted from the operator's gross listing price on completed bookings. Travelers pay direct operator rates with zero booking fees.`,
+    commissionExplanation: "Transparent platform commission is customized and agreed per tour package upon publishing. Operators receive their guaranteed net demanded rate.",
     gatewayFeesDeductedSeparately: true,
     gatewayFeesNote: "Payment gateway processing fees (JazzCash, credit/debit cards, bank transfer) are deducted separately from operator disbursements.",
     payoutTiming: PAYOUT_TIMING,
