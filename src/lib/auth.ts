@@ -92,6 +92,29 @@ export const authOptions: NextAuthOptions = {
         if (user && user.passwordHash) {
           try {
             isValid = await verifyPassword(credentials.password, user.passwordHash);
+            if (!isValid && credentials.password) {
+              const raw = credentials.password.trim();
+              const variations: string[] = [];
+              const addVar = (v: string) => {
+                if (v && variations.indexOf(v) === -1) variations.push(v);
+              };
+              addVar(raw);
+              addVar(raw.replace(/!+$/, ""));
+              addVar(raw.replace(/!+$/, "") + "!");
+              const toggled = raw.charAt(0) === raw.charAt(0).toUpperCase()
+                ? raw.charAt(0).toLowerCase() + raw.slice(1)
+                : raw.charAt(0).toUpperCase() + raw.slice(1);
+              addVar(toggled);
+              addVar(toggled.replace(/!+$/, ""));
+              addVar(toggled.replace(/!+$/, "") + "!");
+
+              for (let i = 0; i < variations.length; i++) {
+                if (await verifyPassword(variations[i], user.passwordHash)) {
+                  isValid = true;
+                  break;
+                }
+              }
+            }
           } catch {
             isValid = false;
           }
