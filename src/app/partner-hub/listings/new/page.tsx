@@ -51,7 +51,7 @@ export default function NewListingPage() {
     soloPrice: 58000, // 3. Solo Traveler / Private Room Price
     singleSupplement: 13000,
     depositPercent: 25,
-    unitTitle: "Per Person Package (Twin Sharing)",
+    unitTitle: "Sharing Room",
     maxGuests: 2,
     inventory: 12,
     freeCancellationDays: 3,
@@ -802,7 +802,7 @@ export default function NewListingPage() {
               <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-extrabold text-emerald-950 uppercase flex items-center gap-1">
-                    <Users className="w-4 h-4 text-emerald-600" /> 1. Per Person Price (PKR) *
+                    <Users className="w-4 h-4 text-emerald-600" /> 1. Sharing Room Price (PKR) *
                   </label>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
                     Base Sharing
@@ -825,7 +825,7 @@ export default function NewListingPage() {
               <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-extrabold text-amber-950 uppercase flex items-center gap-1">
-                    <Heart className="w-4 h-4 text-rose-500" /> 2. Couple Price (PKR)
+                    <Heart className="w-4 h-4 text-rose-500" /> 2. Private Room Price (PKR)
                   </label>
                   <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
                     Private Room for 2

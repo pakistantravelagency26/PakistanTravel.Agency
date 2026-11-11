@@ -38,6 +38,20 @@ interface ListingDetailClientProps {
   listing: ListingData;
 }
 
+function formatUnitTitle(title: string) {
+  const lower = (title || "").toLowerCase();
+  if (lower.includes("couple") || lower.includes("master") || lower.includes("private room")) {
+    return "Private Room";
+  }
+  if (lower.includes("per person") || lower.includes("twin") || lower.includes("sharing") || lower.includes("standard")) {
+    return "Sharing Room";
+  }
+  if (lower.includes("solo") || lower.includes("single")) {
+    return "Solo Room";
+  }
+  return title;
+}
+
 export function ListingDetailClient({ listing }: ListingDetailClientProps) {
   const router = useRouter();
 
@@ -324,14 +338,8 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                       <div className="flex flex-col md:flex-row justify-between gap-5">
                         {/* Unit Details */}
                         <div className="space-y-2 flex-1">
-                          <h3 className="font-bold text-base text-slate-900">{unit.title}</h3>
+                          <h3 className="font-bold text-base text-slate-900">{formatUnitTitle(unit.title)}</h3>
                           <p className="text-xs text-slate-500">{unit.description}</p>
-                          <p className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                            <Users className="w-3.5 h-3.5 text-slate-400" /> 
-                            {isTour 
-                              ? `Capacity: ${unit.maxGuests} Travelers / Seats · ${unit.bedType}` 
-                              : `Max Guests: ${unit.maxGuests} Adults · ${unit.bedType}`}
-                          </p>
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {unit.amenities.map((a) => (
                               <span key={a} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">
@@ -551,7 +559,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  For {selectedQuantity} {selectedQuantity > 1 ? "Travelers / Seats" : "Traveler / Seat"} · All taxes included
+                  Total for {selectedQuantity} {selectedQuantity > 1 ? "Travelers" : "Traveler"} · {selectedUnit ? formatUnitTitle(selectedUnit.title) : "Tour Package"}
                 </p>
               </div>
 
@@ -621,41 +629,63 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </div>
                 </div>
 
-              {/* Traveler Capacity Selection */}
-              <div className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
-                <div>
-                  <span className="text-slate-600 font-medium block">
-                    Travelers / Seats
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    Max Capacity: {maxCapacity} seats max
-                  </span>
-                </div>
-                <select
-                  value={Math.min(selectedQuantity, maxCapacity)}
-                  onChange={(e) => setSelectedQuantity(Number(e.target.value))}
-                  className="font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
-                >
-                  {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((num) => (
-                    <option key={num} value={num}>
-                      {num} {num > 1 ? "Travelers / Seats" : "Traveler / Seat"}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Solo Traveler Supplement Notice */}
-              {isSingleTraveler && (
-                <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold">Solo Private Room Supplement:</span>
-                    <span className="font-bold">+PKR {singleSupplementRate.toLocaleString()}</span>
+                            {/* Number of Travelers (کتنے افراد ہیں) */}
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-slate-900 font-extrabold block text-xs">
+                      کتنے لوگ ہیں؟ (Number of Travelers)
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      {selectedUnit ? formatUnitTitle(selectedUnit.title) : "Tour Package"} کے لیے افراد منتخب کریں
+                    </span>
                   </div>
-                  <p className="text-[11px] text-sky-700 leading-tight">
-                    Standard rates are based on twin sharing. Solo supplement ensures a private hotel room throughout the journey.
-                  </p>
+                  <span className="text-xs font-bold text-brand-emerald bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                    {selectedQuantity} {selectedQuantity > 1 ? "Persons" : "Person"}
+                  </span>
                 </div>
-              )}
+
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
+                      className="w-8 h-8 rounded-lg bg-white border border-slate-300 font-extrabold text-slate-700 hover:bg-slate-100 flex items-center justify-center text-base shadow-sm"
+                      title="Decrease travelers"
+                    >
+                      -
+                    </button>
+                    <span className="w-10 text-center font-black text-slate-900 text-base">
+                      {selectedQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedQuantity(selectedQuantity + 1)}
+                      className="w-8 h-8 rounded-lg bg-white border border-slate-300 font-extrabold text-slate-700 hover:bg-slate-100 flex items-center justify-center text-base shadow-sm"
+                      title="Increase travelers"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setSelectedQuantity(n)}
+                        className={`w-7 h-7 rounded-lg text-xs font-bold transition ${
+                          selectedQuantity === n
+                            ? "bg-brand-emerald text-white shadow-sm"
+                            : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
               {/* Itemized Price Breakdown */}
               <div className="space-y-1 text-xs border-t border-slate-100 pt-3">
@@ -663,16 +693,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   <span>Base Rate ({selectedQuantity} {selectedQuantity > 1 ? "Travelers" : "Traveler"}):</span>
                   <span>PKR {baseTravelerPrice.toLocaleString()}</span>
                 </div>
-                {activeSupplement > 0 && (
-                  <div className="flex justify-between text-sky-700 font-medium">
-                    <span>Solo Room Supplement:</span>
-                    <span>+PKR {activeSupplement.toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-slate-600">
-                  <span>Provincial Tourism Taxes:</span>
-                  <span className="text-emerald-700 font-semibold">Included</span>
-                </div>
+                
                 <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">
                   <span>Total Package Price:</span>
                   <span>PKR {totalPrice.toLocaleString()}</span>

@@ -314,7 +314,7 @@ export async function POST(req: Request) {
     const packageUnits: any[] = [
       {
         id: `${uniqueSlug}-unit-perperson`,
-        title: body.unitTitle || "Per Person Package (Twin / Triple Sharing)",
+        title: body.unitTitle || "Sharing Room",
         description: "Standard per person tour seat with shared hotel room accommodation and complete transport inclusions.",
         maxGuests: Number(body.maxGuests || 2),
         totalQuantity: Number(body.inventory || 10),
@@ -328,7 +328,7 @@ export async function POST(req: Request) {
     if (body.couplePrice && Number(body.couplePrice) > 0) {
       packageUnits.push({
         id: `${uniqueSlug}-unit-couple`,
-        title: "Couple Package (Dedicated Private Master Bedroom)",
+        title: "Private Room",
         description: "Private room for 2 persons / couple throughout the tour with all package inclusions.",
         maxGuests: 2,
         totalQuantity: Math.max(1, Math.floor(Number(body.inventory || 10) / 2)),
@@ -342,7 +342,7 @@ export async function POST(req: Request) {
     if (body.soloPrice && Number(body.soloPrice) > 0) {
       packageUnits.push({
         id: `${uniqueSlug}-unit-solo`,
-        title: "Solo Traveler / Private Single Room",
+        title: "Solo Room",
         description: "Single occupancy private room throughout the trip without sharing with other travelers.",
         maxGuests: 1,
         totalQuantity: Math.max(1, Math.floor(Number(body.inventory || 10) / 3)),
