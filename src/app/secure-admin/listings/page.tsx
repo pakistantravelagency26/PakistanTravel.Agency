@@ -629,6 +629,81 @@ export default function AdminListingsPage() {
               </div>
             </div>
 
+{/* Departure & Pickup Meeting Points */}
+            {selectedTour.address && (
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                  Departure &amp; Pickup Meeting Points
+                </span>
+                <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-xs text-slate-800 space-y-1.5">
+                  {selectedTour.address.split(" | ").map((pt, pIdx) => (
+                    <div key={pIdx} className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-md bg-emerald-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                        {pIdx + 1}
+                      </span>
+                      <span className="font-semibold">{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Package Units & Room Options (Per Person, Couple, Solo) */}
+            {selectedTour.units && selectedTour.units.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                  Package Units &amp; Room Rates (Vendor Demanded Pricing)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {selectedTour.units.map((u, uIdx) => (
+                    <div key={uIdx} className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                      <span className="font-bold text-slate-800 block line-clamp-1">{u.title}</span>
+                      <div className="flex items-baseline justify-between pt-1">
+                        <span className="text-[10px] text-slate-400 font-semibold">Base Price</span>
+                        <span className="font-extrabold text-emerald-700 text-sm">
+                          PKR {Number(u.basePrice).toLocaleString()}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block">
+                        Max: {u.maxGuests} Guests · Qty: {u.totalQuantity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Scheduled Departures */}
+            {selectedTour.departures && selectedTour.departures.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                    Fixed Scheduled Departures ({selectedTour.departures.length} Dates)
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-h-44 overflow-y-auto">
+                  {selectedTour.departures.map((dep, dIdx) => (
+                    <div key={dIdx} className="p-2.5 rounded-xl bg-orange-50/50 border border-orange-200 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-orange-950">Trip {dIdx + 1}</span>
+                        <span className="text-[10px] font-bold text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded">
+                          {dep.seatsTotal} Seats
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-700 font-semibold mt-1">
+                        🛫 {dep.startDate}
+                      </div>
+                      {dep.endDate && (
+                        <div className="text-[10px] text-slate-500">
+                          🛬 Return: {dep.endDate}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Included Amenities & Services */}
             <div className="space-y-2">
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">

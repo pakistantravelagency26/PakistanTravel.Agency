@@ -43,13 +43,35 @@ export async function PATCH(
         updateData.vendorPrice = Number(body.vendorPrice);
       }
       if (body.totalPrice !== undefined && body.totalPrice !== null) {
-        updateData.basePrice = Number(body.totalPrice);
+        const approvedBasePrice = Number(body.totalPrice);
+        updateData.basePrice = approvedBasePrice;
         try {
-          await prisma.listingUnit.updateMany({
+          const existingUnits = await prisma.listingUnit.findMany({
             where: { listingId: id },
-            data: { basePrice: Number(body.totalPrice) },
           });
-        } catch {}
+
+          const primaryUnit = existingUnits.find((u) => u.id.includes("perperson")) || existingUnits[0];
+          const vendorBasePrice = Number(body.vendorPrice || primaryUnit?.basePrice || updateData.vendorPrice || approvedBasePrice);
+          const markupMultiplier = vendorBasePrice > 0 ? (approvedBasePrice / vendorBasePrice) : 1;
+
+          for (const unit of existingUnits) {
+            if (unit.id.includes("perperson") || existingUnits.length === 1) {
+              await prisma.listingUnit.update({
+                where: { id: unit.id },
+                data: { basePrice: approvedBasePrice },
+              });
+            } else {
+              const currentPrice = Number(unit.basePrice);
+              const newPrice = Math.round(currentPrice * markupMultiplier);
+              await prisma.listingUnit.update({
+                where: { id: unit.id },
+                data: { basePrice: newPrice },
+              });
+            }
+          }
+        } catch (unitErr) {
+          console.warn("Unit update error during moderate:", unitErr);
+        }
       }
       updatedDbListing = await prisma.listing.update({
         where: { id },
@@ -58,6 +80,7 @@ export async function PATCH(
           vendor: true,
           destination: true,
           units: true,
+          departures: { orderBy: { startDate: "asc" } },
           reviews: {
             include: { user: true },
           },
