@@ -20,7 +20,8 @@ import { prisma } from "@/lib/prisma";
 import { formatDbListing } from "@/services/serverListing.service";
 import { CustomTripRequestForm } from "@/components/tours/CustomTripRequestForm";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   return Object.keys(tourIntentsData).map((slug) => ({ intent: slug }));
@@ -50,7 +51,7 @@ export async function generateMetadata({ params }: TourIntentPageProps): Promise
       where: {
         type: "TOUR",
         status: "PUBLISHED",
-        vendor: { status: "VERIFIED" },
+        
         ...(intent.destinationSlug ? { destination: { slug: intent.destinationSlug } } : {}),
       },
     });
@@ -107,7 +108,7 @@ export default async function TourIntentPage({ params }: TourIntentPageProps) {
       where: {
         type: "TOUR",
         status: "PUBLISHED",
-        vendor: { status: "VERIFIED" },
+        
         ...(intent.destinationSlug ? { destination: { slug: intent.destinationSlug } } : {}),
       },
       include: {

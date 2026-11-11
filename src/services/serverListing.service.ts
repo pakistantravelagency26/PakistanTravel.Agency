@@ -122,7 +122,7 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
       where: {
         status: "PUBLISHED",
         type: "TOUR",
-        vendor: { status: "VERIFIED" },
+        
       },
       include: {
         vendor: {

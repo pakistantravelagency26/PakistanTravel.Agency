@@ -7,7 +7,8 @@ import { SITE_URL, siteConfig } from "@/config/site";
 import { MapPin, Calendar, Compass, ChevronRight, HelpCircle, ShieldCheck } from "lucide-react";
 import { CustomTripRequestForm } from "@/components/tours/CustomTripRequestForm";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata(): Promise<Metadata> {
   let count = 0;
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
       where: {
         type: "TOUR",
         status: "PUBLISHED",
-        vendor: { status: "VERIFIED" },
+        
       },
     });
   } catch (err) {
@@ -92,7 +93,7 @@ export default async function ToursPage() {
       where: {
         type: "TOUR",
         status: "PUBLISHED",
-        vendor: { status: "VERIFIED" },
+        
       },
       include: {
         vendor: true,

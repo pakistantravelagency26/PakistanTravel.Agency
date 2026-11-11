@@ -15,7 +15,8 @@ import { getActiveDbListings } from "@/services/serverListing.service";
 import { TourMarketplaceSection } from "@/components/home/TourMarketplaceSection";
 import { getSiteSettings } from "@/services/siteSettings.service";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const siteUrl = SITE_URL;
 

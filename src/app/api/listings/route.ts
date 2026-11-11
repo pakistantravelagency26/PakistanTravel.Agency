@@ -109,7 +109,7 @@ export async function GET(req: Request) {
 
     if (!includeAll) {
       whereCondition.status = "PUBLISHED";
-      whereCondition.vendor = { status: "VERIFIED" };
+      // whereCondition.vendor status check omitted so all published tours appear
     }
 
     if (vendorId) {
