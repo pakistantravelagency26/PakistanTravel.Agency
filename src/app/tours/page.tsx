@@ -7,8 +7,7 @@ import { SITE_URL, siteConfig } from "@/config/site";
 import { MapPin, Calendar, Compass, ChevronRight, HelpCircle, ShieldCheck } from "lucide-react";
 import { CustomTripRequestForm } from "@/components/tours/CustomTripRequestForm";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   let count = 0;

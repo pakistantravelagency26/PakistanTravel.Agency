@@ -20,8 +20,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDbListing } from "@/services/serverListing.service";
 import { CustomTripRequestForm } from "@/components/tours/CustomTripRequestForm";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   return Object.keys(tourIntentsData).map((slug) => ({ intent: slug }));

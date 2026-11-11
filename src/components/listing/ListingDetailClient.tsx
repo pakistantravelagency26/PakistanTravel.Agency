@@ -100,11 +100,9 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
   const activeSupplement = isSingleTraveler && isSoloSupplementApplied ? singleSupplementRate : 0;
 
   // Pricing Calculation
-  const baseTravelerPrice = isTour
-    ? unitPrice * Math.min(selectedQuantity, maxCapacity)
-    : unitPrice * nightsCount * Math.min(selectedQuantity, maxCapacity);
+  const baseTravelerPrice = isTour ? unitPrice * selectedQuantity : unitPrice * nightsCount * selectedQuantity;
 
-  const totalPrice = baseTravelerPrice + activeSupplement;
+  const totalPrice = baseTravelerPrice;
   const depositPercent = listing.depositPercent || 25;
   const depositAmount = Math.round((totalPrice * depositPercent) / 100);
   const balanceDue = totalPrice - depositAmount;

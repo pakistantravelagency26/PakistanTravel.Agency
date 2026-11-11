@@ -20,8 +20,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDbListing } from "@/services/serverListing.service";
 import { ListingData } from "@/services/listing.service";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   return Object.keys(destinationsData).map((slug) => ({ slug }));

@@ -5,8 +5,7 @@ import { notFound } from "next/navigation";
 import { getDbListingBySlugOrId, getActiveDbListings } from "@/services/serverListing.service";
 import { ListingDetailClient } from "@/components/listing/ListingDetailClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   try {

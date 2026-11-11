@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import { getActiveDbListings } from "@/services/serverListing.service";
 import { SearchClientView } from "@/components/search/SearchClientView";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 interface SearchPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
