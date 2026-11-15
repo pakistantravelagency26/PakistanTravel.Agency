@@ -22,7 +22,9 @@ export function formatDbListing(l: any): ListingData {
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
   ];
 
-  const amenities = Array.isArray(l.amenities) ? l.amenities.filter(Boolean) : [];
+  const amenities = Array.isArray(l.amenities)
+    ? l.amenities.filter(Boolean).map((a: any) => typeof a === "string" ? a.replace(/Certified Alpine Guide/g, "Local Mountain Guide") : a)
+    : [];
 
   const durationDays = Number(l.durationDays) || (l.title.includes("7-Day") ? 7 : l.title.includes("5-Day") ? 5 : l.title.includes("4-Day") ? 4 : 1);
   const durationNights = l.durationNights !== undefined && l.durationNights !== null ? Number(l.durationNights) : Math.max(0, durationDays - 1);
@@ -86,7 +88,9 @@ export function formatDbListing(l: any): ListingData {
       totalQuantity: u.totalQuantity || 1,
       basePrice: Number(u.basePrice),
       photos: u.photos || [],
-      amenities: u.amenities || [],
+      amenities: Array.isArray(u.amenities)
+        ? u.amenities.map((a: any) => typeof a === "string" ? a.replace(/Certified Alpine Guide/g, "Local Mountain Guide") : a)
+        : [],
       bedType: u.bedType || "Standard Tour Seat",
     })) : [
       {
@@ -131,6 +135,7 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
             businessName: true,
             city: true,
             status: true,
+            createdAt: true,
           },
         },
         destination: true,
@@ -176,6 +181,7 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
             businessName: true,
             city: true,
             status: true,
+            createdAt: true,
           },
         },
         destination: true,
