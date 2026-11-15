@@ -22,12 +22,21 @@ export const metadata: Metadata = {
     title: "Editorial Policy & Standards | PakistanTravel",
     description:
       "Read the PakistanTravel editorial standards: who writes our travel guides, fact-checking process, no sponsored tour rankings, and corrections.",
+    images: [
+      {
+        url: `${siteUrl}/images/og/home-og.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "PakistanTravel Editorial Policy",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Editorial Policy & Standards | PakistanTravel",
     description:
       "Read the PakistanTravel editorial standards: who writes our travel guides, fact-checking process, no sponsored tour rankings, and corrections.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 
