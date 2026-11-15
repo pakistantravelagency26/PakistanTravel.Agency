@@ -78,6 +78,19 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "PakistanTravel",
+        url: siteUrl,
+        logo: {
+          "@type": "ImageObject",
+          "@id": `${siteUrl}/#logo`,
+          url: `${siteUrl}/favicon.png`,
+          caption: "PakistanTravel",
+        },
+        email: siteConfig.contact.supportEmail || "support@pakistantravel.agency",
+      },
+      {
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,
         url: siteUrl,

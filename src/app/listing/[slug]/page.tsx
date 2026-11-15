@@ -151,12 +151,28 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
       validFrom: "2026-01-01",
       url: `${siteUrl}/listing/${listing.slug}`,
       seller: {
-        "@type": "TravelAgency",
-        name: "PakistanTravel.Agency",
-        url: siteUrl,
+        "@type": "Organization",
+        name: listing.vendor?.businessName || "Independent Local Tour Operator",
+        url: `${siteUrl}/listing/${listing.slug}`,
       },
     },
+    provider: {
+      "@type": "Organization",
+      name: "PakistanTravel",
+      url: siteUrl,
+    },
   };
+
+  // AggregateRating only with 10 or more real reviews
+  if (listing.totalReviews && listing.totalReviews >= 10 && listing.avgRating) {
+    mainJsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: listing.avgRating,
+      reviewCount: listing.totalReviews,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
