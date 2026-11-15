@@ -154,11 +154,11 @@ export default function PartnerInfoPage() {
           <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600">
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-              <span>Review the day-by-day itinerary, vehicle type, and hotel inclusions carefully before completing your reservation.</span>
+              <span>Review the day-by-day itinerary, vehicle type, accommodation standards, and package inclusions carefully before completing your reservation.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-              <span>Note the platform cancellation policy (100% refund $\ge 7$ days before departure, 50% 3–6 days, non-refundable within 72 hours).</span>
+              <span>Note the platform cancellation policy (100% refund 7 or more days before departure, 50% 3–6 days, non-refundable within 72 hours).</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
