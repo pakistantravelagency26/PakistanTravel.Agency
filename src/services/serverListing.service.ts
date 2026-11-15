@@ -169,11 +169,12 @@ export const getActiveDbListings = cache(async (): Promise<ListingData[]> => {
 
 export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<ListingData | null> => {
   let dbListing;
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+  const whereClause = isUuid ? { OR: [{ id: idOrSlug }, { slug: idOrSlug }] } : { slug: idOrSlug };
+
   try {
     dbListing = await prisma.listing.findFirst({
-      where: {
-        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
-      },
+      where: whereClause,
       include: {
         vendor: {
           select: {
