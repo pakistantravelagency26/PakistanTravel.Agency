@@ -531,7 +531,7 @@ export default function SupportChatWidget() {
                           <span>{parsed.listing.destination}</span>
                         </div>
                         <Link
-                          href={`/listings/${parsed.listing.slug}`}
+                          href={`/listing/${parsed.listing.slug}`}
                           className="mt-2.5 inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition-colors"
                         >
                           <span>View Listing Details</span>

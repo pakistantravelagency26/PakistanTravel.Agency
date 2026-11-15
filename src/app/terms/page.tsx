@@ -98,12 +98,31 @@ export default function TermsPage() {
           </div>
         </div>
 
+                {/* Table of Contents */}
+        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+          <p className="font-bold text-xs uppercase tracking-wider text-slate-700">Table of Contents</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <a href="#section-1" className="text-sky-600 hover:underline">1. Platform Role & Booking Contract</a>
+            <a href="#section-2" className="text-sky-600 hover:underline">2. Independent Status of Vendors</a>
+            <a href="#section-3" className="text-sky-600 hover:underline">3. Payments, Commission & Payouts</a>
+            <a href="#section-4" className="text-sky-600 hover:underline">4. Standardized Cancellation Policy</a>
+            <a href="#section-5" className="text-sky-600 hover:underline">5. Mountain Logistics & Liability</a>
+            <a href="#section-6" className="text-sky-600 hover:underline">6. Anti-Circumvention Integrity</a>
+            <a href="#section-7" className="text-sky-600 hover:underline">7. Mandatory Travel Documents</a>
+            <a href="#section-8" className="text-sky-600 hover:underline">8. User Accounts & Security</a>
+            <a href="#section-9" className="text-sky-600 hover:underline">9. Prohibited Activities</a>
+            <a href="#section-10" className="text-sky-600 hover:underline">10. Dispute Resolution</a>
+            <a href="#section-11" className="text-sky-600 hover:underline">11. Governing Law & Jurisdiction</a>
+            <a href="#section-12" className="text-sky-600 hover:underline">12. Modifications to Terms</a>
+          </div>
+        </div>
+
         <div className="space-y-8 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
           {/* Section 1 */}
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>1. Platform Role &amp; The Direct Booking Contract</span>
+              <span id="section-1">1. Platform Role &amp; The Direct Booking Contract</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -122,7 +141,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <Handshake className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>2. Independent Contractor Status of Vendors</span>
+              <span id="section-2">2. Independent Contractor Status of Vendors</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -139,7 +158,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>3. Payments, Platform Commission and Operator Payouts</span>
+              <span id="section-3">3. Payments, Platform Commission and Operator Payouts</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -172,7 +191,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>4. Standardized Cancellation &amp; Refund Policy</span>
+              <span id="section-4">4. Standardized Cancellation &amp; Refund Policy</span>
             </h2>
             <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 space-y-2">
               <p className="font-semibold text-emerald-950">
@@ -202,7 +221,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>5. Mountain Logistics &amp; Limitation of Liability</span>
+              <span id="section-5">5. Mountain Logistics &amp; Limitation of Liability</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -221,7 +240,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>6. Anti-Circumvention &amp; Platform Integrity</span>
+              <span id="section-6">6. Anti-Circumvention &amp; Platform Integrity</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -237,7 +256,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <FileText className="w-4 h-4 text-slate-600 shrink-0" />
-              <span>7. Mandatory Travel Documents &amp; Checkpoints</span>
+              <span id="section-7">7. Mandatory Travel Documents &amp; Checkpoints</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -251,7 +270,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>8. User Accounts &amp; Security</span>
+              <span id="section-8">8. User Accounts &amp; Security</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -265,7 +284,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>9. Prohibited Activities &amp; Content</span>
+              <span id="section-9">9. Prohibited Activities &amp; Content</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -279,7 +298,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <Handshake className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>10. Dispute Resolution &amp; Escalation</span>
+              <span id="section-10">10. Dispute Resolution &amp; Escalation</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -293,7 +312,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <FileText className="w-4 h-4 text-slate-600 shrink-0" />
-              <span>11. Governing Law &amp; Jurisdiction</span>
+              <span id="section-11">11. Governing Law &amp; Jurisdiction</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
@@ -307,7 +326,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>12. Modifications to Terms</span>
+              <span id="section-12">12. Modifications to Terms</span>
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>

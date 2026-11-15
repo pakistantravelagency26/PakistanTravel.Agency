@@ -85,7 +85,7 @@ export default function PrivacyPage() {
       />
       <div className="max-w-4xl mx-auto bg-white p-6 sm:p-12 rounded-3xl shadow-sm border border-slate-200/80 space-y-8">
         <div>
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:underline mb-3">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:underline mb-3" aria-label="Return to PakistanTravel home page">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
           </Link>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
           </div>
           <p className="text-xs sm:text-sm text-slate-600 mt-3 leading-relaxed">
             This Privacy Policy explains how PakistanTravel (&quot;PakistanTravel&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;the Platform&quot;) collects, uses, protects, and discloses personal information when you use our website at{" "}
-            <a href={siteUrl} className="text-sky-600 underline font-medium">{siteUrl}</a>, our mobile interfaces, and related tourism marketplace services.
+            <a href={siteUrl} className="text-sky-600 underline font-medium" aria-label="Visit PakistanTravel home page">{siteUrl}</a>, our mobile interfaces, and related tourism marketplace services.
           </p>
         </div>
 
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
             </p>
             <p>
               The platform is administered by PakistanTravel Operations. Registered business entity details, legal company registration number, and formal legal domicile are recorded as: <strong>TODO: [Platform Operator Legal Business Entity Name, SECP Registration Number, and Registered Physical Office Address]</strong>. For any inquiries regarding personal data processing, you may contact our dedicated privacy officer at{" "}
-              <a href={`mailto:${supportEmail}`} className="text-sky-700 underline font-semibold">{supportEmail}</a>.
+              <a href={`mailto:${supportEmail}`} className="text-sky-700 underline font-semibold" aria-label="Email PakistanTravel Data Protection Officer">{supportEmail}</a>.
             </p>
           </section>
 

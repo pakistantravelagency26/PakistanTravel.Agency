@@ -1,0 +1,43 @@
+# PakistanTravel.Agency
+> Direct multi-vendor marketplace connecting travelers with licensed, independent local tour operators across Northern Pakistan.
+
+## Overview
+PakistanTravel (https://www.pakistantravel.agency) is an online guided tours platform specializing in experiential mountain travel across Gilgit-Baltistan, Khyber Pakhtunkhwa, and Azad Jammu & Kashmir. All tours are operated by registered local operators with verified CNIC details, local permits, transparent itineraries, and standard digital booking vouchers.
+
+## Core Marketplace Sections
+- Guided Tour Catalog: https://www.pakistantravel.agency/tours
+- Regional Destination Guides: https://www.pakistantravel.agency/destinations
+- Travel Advice & Packing Guides: https://www.pakistantravel.agency/blog
+- Frequently Asked Questions: https://www.pakistantravel.agency/faq
+- Booking & Payment Mechanics: https://www.pakistantravel.agency/how-booking-works
+- Partner Tour Operator Information: https://www.pakistantravel.agency/partner-info
+- Mountain Safety & Travel Permits: https://www.pakistantravel.agency/safety-and-permits
+- Terms of Service & Cancellation Policy: https://www.pakistantravel.agency/terms
+- Privacy Policy: https://www.pakistantravel.agency/privacy
+
+## Featured Regional Destinations
+- Hunza Valley & Attabad Lake: https://www.pakistantravel.agency/destinations/hunza
+- Skardu, Deosai & Baltistan: https://www.pakistantravel.agency/destinations/skardu
+- Swat Valley & Kalam: https://www.pakistantravel.agency/destinations/swat
+- Kumrat Valley & Dir: https://www.pakistantravel.agency/destinations/kumrat
+- Fairy Meadows & Nanga Parbat: https://www.pakistantravel.agency/destinations/fairy-meadows
+- Neelum Valley (Azad Kashmir): https://www.pakistantravel.agency/destinations/neelum
+- Naran Kaghan Valley: https://www.pakistantravel.agency/destinations/naran-kaghan
+- Gilgit & Karakoram Highway: https://www.pakistantravel.agency/destinations/gilgit
+- Astore & Rama Meadows: https://www.pakistantravel.agency/destinations/astore
+- Chitral & Kalash Valleys: https://www.pakistantravel.agency/destinations/chitral-kalash
+- Naltar Valley Lakes: https://www.pakistantravel.agency/destinations/naltar
+- Shogran & Siri Paye: https://www.pakistantravel.agency/destinations/shogran-siri-paye
+- Murree & Galyat: https://www.pakistantravel.agency/destinations/murree
+
+## Curated Tour Packages
+- Hunza Tour Packages: https://www.pakistantravel.agency/tours/hunza-tour-packages
+- Skardu Tour Packages: https://www.pakistantravel.agency/tours/skardu-tour-packages
+- Swat Tour Packages: https://www.pakistantravel.agency/tours/swat-tour-packages
+- Swat Kalam Tour Packages: https://www.pakistantravel.agency/tours/swat-kalam-tour-packages
+- Kumrat Valley Packages: https://www.pakistantravel.agency/tours/kumrat-tour-packages
+- Neelum Valley Packages: https://www.pakistantravel.agency/tours/neelum-tour-packages
+- Neelum Valley Expeditions: https://www.pakistantravel.agency/tours/neelum-valley-tour-packages
+- Gilgit-Baltistan Tours: https://www.pakistantravel.agency/tours/gilgit-baltistan-tour-packages
+- Fairy Meadows Treks: https://www.pakistantravel.agency/tours/fairy-meadows-tours
+- Winter Tours Pakistan: https://www.pakistantravel.agency/tours/winter-tours-pakistan

@@ -77,6 +77,142 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
   };
 }
 
+
+const destinationTourIntentMap: Record<string, string> = {
+  hunza: "/tours/hunza-tour-packages",
+  skardu: "/tours/skardu-tour-packages",
+  swat: "/tours/swat-tour-packages",
+  kumrat: "/tours/kumrat-tour-packages",
+  neelum: "/tours/neelum-tour-packages",
+  "fairy-meadows": "/tours/fairy-meadows-tours",
+  gilgit: "/tours/gilgit-baltistan-tour-packages",
+  naltar: "/tours/gilgit-baltistan-tour-packages",
+  astore: "/tours/gilgit-baltistan-tour-packages",
+};
+
+const relatedDestinationsMap: Record<string, { slug: string; name: string; province: string }[]> = {
+  hunza: [
+    { slug: "gilgit", name: "Gilgit Valley", province: "Gilgit-Baltistan" },
+    { slug: "naltar", name: "Naltar Valley", province: "Gilgit-Baltistan" },
+    { slug: "skardu", name: "Skardu & Deosai", province: "Gilgit-Baltistan" },
+  ],
+  skardu: [
+    { slug: "hunza", name: "Hunza Valley", province: "Gilgit-Baltistan" },
+    { slug: "astore", name: "Astore & Rama", province: "Gilgit-Baltistan" },
+    { slug: "gilgit", name: "Gilgit Valley", province: "Gilgit-Baltistan" },
+  ],
+  swat: [
+    { slug: "kumrat", name: "Kumrat Valley", province: "Khyber Pakhtunkhwa" },
+    { slug: "shogran-siri-paye", name: "Shogran & Siri Paye", province: "Khyber Pakhtunkhwa" },
+    { slug: "chitral-kalash", name: "Chitral & Kalash", province: "Khyber Pakhtunkhwa" },
+  ],
+  kumrat: [
+    { slug: "swat", name: "Swat Valley", province: "Khyber Pakhtunkhwa" },
+    { slug: "chitral-kalash", name: "Chitral & Kalash", province: "Khyber Pakhtunkhwa" },
+    { slug: "naran-kaghan", name: "Naran Kaghan", province: "Khyber Pakhtunkhwa" },
+  ],
+  murree: [
+    { slug: "naran-kaghan", name: "Naran Kaghan", province: "Khyber Pakhtunkhwa" },
+    { slug: "shogran-siri-paye", name: "Shogran & Siri Paye", province: "Khyber Pakhtunkhwa" },
+    { slug: "neelum", name: "Neelum Valley", province: "Azad Kashmir" },
+  ],
+  neelum: [
+    { slug: "murree", name: "Murree & Galyat", province: "Punjab" },
+    { slug: "naran-kaghan", name: "Naran Kaghan", province: "Khyber Pakhtunkhwa" },
+    { slug: "shogran-siri-paye", name: "Shogran & Siri Paye", province: "Khyber Pakhtunkhwa" },
+  ],
+  "fairy-meadows": [
+    { slug: "astore", name: "Astore & Rama", province: "Gilgit-Baltistan" },
+    { slug: "gilgit", name: "Gilgit Valley", province: "Gilgit-Baltistan" },
+    { slug: "hunza", name: "Hunza Valley", province: "Gilgit-Baltistan" },
+  ],
+  "naran-kaghan": [
+    { slug: "shogran-siri-paye", name: "Shogran & Siri Paye", province: "Khyber Pakhtunkhwa" },
+    { slug: "neelum", name: "Neelum Valley", province: "Azad Kashmir" },
+    { slug: "murree", name: "Murree & Galyat", province: "Punjab" },
+  ],
+  naltar: [
+    { slug: "gilgit", name: "Gilgit Valley", province: "Gilgit-Baltistan" },
+    { slug: "hunza", name: "Hunza Valley", province: "Gilgit-Baltistan" },
+    { slug: "fairy-meadows", name: "Fairy Meadows", province: "Gilgit-Baltistan" },
+  ],
+  astore: [
+    { slug: "fairy-meadows", name: "Fairy Meadows", province: "Gilgit-Baltistan" },
+    { slug: "skardu", name: "Skardu & Deosai", province: "Gilgit-Baltistan" },
+    { slug: "gilgit", name: "Gilgit Valley", province: "Gilgit-Baltistan" },
+  ],
+  "chitral-kalash": [
+    { slug: "swat", name: "Swat Valley", province: "Khyber Pakhtunkhwa" },
+    { slug: "kumrat", name: "Kumrat Valley", province: "Khyber Pakhtunkhwa" },
+    { slug: "gilgit", name: "Gilgit Valley", province: "Gilgit-Baltistan" },
+  ],
+  "shogran-siri-paye": [
+    { slug: "naran-kaghan", name: "Naran Kaghan", province: "Khyber Pakhtunkhwa" },
+    { slug: "swat", name: "Swat Valley", province: "Khyber Pakhtunkhwa" },
+    { slug: "murree", name: "Murree & Galyat", province: "Punjab" },
+  ],
+  gilgit: [
+    { slug: "hunza", name: "Hunza Valley", province: "Gilgit-Baltistan" },
+    { slug: "naltar", name: "Naltar Valley", province: "Gilgit-Baltistan" },
+    { slug: "fairy-meadows", name: "Fairy Meadows", province: "Gilgit-Baltistan" },
+  ],
+};
+
+const relatedBlogGuidesMap: Record<string, { slug: string; title: string; category: string }[]> = {
+  hunza: [
+    { slug: "hunza-best-time-to-visit", title: "Best Time to Visit Hunza Valley: Cherry Blossom & Autumn", category: "Season Guide" },
+    { slug: "skardu-vs-hunza", title: "Skardu vs Hunza: Which Northern Pakistan Valley Should You Choose?", category: "Comparison" },
+  ],
+  skardu: [
+    { slug: "skardu-trip-cost-2026", title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown", category: "Cost Guide" },
+    { slug: "skardu-vs-hunza", title: "Skardu vs Hunza: Which Northern Pakistan Valley Should You Choose?", category: "Comparison" },
+  ],
+  swat: [
+    { slug: "kumrat-valley-route-tips", title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips", category: "Route Tips" },
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+  ],
+  kumrat: [
+    { slug: "kumrat-valley-route-tips", title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips", category: "Route Tips" },
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+  ],
+  murree: [
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+    { slug: "hunza-best-time-to-visit", title: "Best Time to Visit Hunza Valley: Cherry Blossom & Autumn", category: "Season Guide" },
+  ],
+  neelum: [
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+    { slug: "kumrat-valley-route-tips", title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips", category: "Route Tips" },
+  ],
+  "fairy-meadows": [
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+    { slug: "skardu-trip-cost-2026", title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown", category: "Cost Guide" },
+  ],
+  "naran-kaghan": [
+    { slug: "kumrat-valley-route-tips", title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips", category: "Route Tips" },
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+  ],
+  naltar: [
+    { slug: "hunza-best-time-to-visit", title: "Best Time to Visit Hunza Valley: Cherry Blossom & Autumn", category: "Season Guide" },
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+  ],
+  astore: [
+    { slug: "skardu-trip-cost-2026", title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown", category: "Cost Guide" },
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+  ],
+  "chitral-kalash": [
+    { slug: "kumrat-valley-route-tips", title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips", category: "Route Tips" },
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+  ],
+  "shogran-siri-paye": [
+    { slug: "northern-pakistan-packing-list", title: "Northern Pakistan Packing List: What to Bring for Mountain Tours", category: "Packing Guide" },
+    { slug: "kumrat-valley-route-tips", title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips", category: "Route Tips" },
+  ],
+  gilgit: [
+    { slug: "hunza-best-time-to-visit", title: "Best Time to Visit Hunza Valley: Cherry Blossom & Autumn", category: "Season Guide" },
+    { slug: "skardu-trip-cost-2026", title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown", category: "Cost Guide" },
+  ],
+};
+
 export default async function DestinationDetailPage({ params }: DestinationPageProps) {
   const dest = destinationsData[params.slug];
   const siteUrl = SITE_URL;
@@ -367,10 +503,10 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               </h2>
             </div>
             <Link
-              href={`/tours?destination=${dest.slug}`}
+              href={destinationTourIntentMap[dest.slug] || `/tours?destination=${dest.slug}`}
               className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1 self-start sm:self-auto"
             >
-              <span>View all tour packages</span>
+              <span>View all {dest.name} tour packages</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -453,6 +589,93 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
                 <h3 className="font-extrabold text-sm sm:text-base text-slate-900">{f.q}</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{f.a}</p>
               </div>
+            ))}
+          </div>
+        </section>
+        {/* Section 7: Nearby & Related Destinations */}
+        <section className="space-y-4 pt-6 border-t border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+                Regional Exploration
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                Nearby &amp; Related Destinations
+              </h2>
+            </div>
+            <Link
+              href="/destinations"
+              className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1"
+            >
+              <span>All 13 Destinations</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {(relatedDestinationsMap[dest.slug] || []).map((rel) => (
+              <Link
+                key={rel.slug}
+                href={`/destinations/${rel.slug}`}
+                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+              >
+                <div>
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
+                    {rel.province}
+                  </span>
+                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-sky-600 transition mt-1">
+                    {rel.name}
+                  </h3>
+                </div>
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 mt-3">
+                  <span>View destination guide</span>
+                  <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Section 8: Related Travel Guides */}
+        <section className="space-y-4 pt-6 border-t border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+                Editorial Guides
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                Related Travel Guides &amp; Route Advice
+              </h2>
+            </div>
+            <Link
+              href="/blog"
+              className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1"
+            >
+              <span>Explore All Guides</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {(relatedBlogGuidesMap[dest.slug] || []).map((guide) => (
+              <Link
+                key={guide.slug}
+                href={`/blog/${guide.slug}`}
+                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+              >
+                <div>
+                  <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider block">
+                    {guide.category}
+                  </span>
+                  <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-sky-600 transition mt-1 line-clamp-2">
+                    {guide.title}
+                  </h3>
+                </div>
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 mt-3">
+                  <span>Read travel guide</span>
+                  <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition" />
+                </div>
+              </Link>
             ))}
           </div>
         </section>

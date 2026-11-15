@@ -95,6 +95,49 @@ function renderParagraphWithLinks(text: string) {
   return parts.length > 0 ? parts : text;
 }
 
+
+
+const relatedBlogPostsMap: Record<string, string[]> = {
+  "skardu-trip-cost-2026": ["skardu-vs-hunza", "northern-pakistan-packing-list"],
+  "hunza-best-time-to-visit": ["skardu-vs-hunza", "northern-pakistan-packing-list"],
+  "kumrat-valley-route-tips": ["northern-pakistan-packing-list", "skardu-trip-cost-2026"],
+  "skardu-vs-hunza": ["skardu-trip-cost-2026", "hunza-best-time-to-visit"],
+  "northern-pakistan-packing-list": ["hunza-best-time-to-visit", "kumrat-valley-route-tips"],
+};
+
+const blogDestinationMap: Record<string, { slug: string; name: string; tourIntentUrl: string; tourIntentLabel: string }> = {
+  "skardu-trip-cost-2026": {
+    slug: "skardu",
+    name: "Skardu & Deosai Plains",
+    tourIntentUrl: "/tours/skardu-tour-packages",
+    tourIntentLabel: "Browse Skardu Tour Packages",
+  },
+  "hunza-best-time-to-visit": {
+    slug: "hunza",
+    name: "Hunza Valley & Attabad Lake",
+    tourIntentUrl: "/tours/hunza-tour-packages",
+    tourIntentLabel: "Browse Hunza Tour Packages",
+  },
+  "kumrat-valley-route-tips": {
+    slug: "kumrat",
+    name: "Kumrat Valley & Dir",
+    tourIntentUrl: "/tours/kumrat-tour-packages",
+    tourIntentLabel: "Browse Kumrat Tour Packages",
+  },
+  "skardu-vs-hunza": {
+    slug: "hunza",
+    name: "Hunza & Skardu Valleys",
+    tourIntentUrl: "/tours/gilgit-baltistan-tour-packages",
+    tourIntentLabel: "Browse Gilgit-Baltistan Tours",
+  },
+  "northern-pakistan-packing-list": {
+    slug: "fairy-meadows",
+    name: "Fairy Meadows & Northern Valleys",
+    tourIntentUrl: "/tours/fairy-meadows-tours",
+    tourIntentLabel: "Browse Fairy Meadows Treks",
+  },
+};
+
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const post = blogPosts.find((p) => p.slug === params.slug);
   const siteUrl = SITE_URL;
@@ -342,16 +385,22 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
             <Link
-              href="/tours"
+              href={blogDestinationMap[post.slug]?.tourIntentUrl || "/tours"}
               className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition"
             >
-              Browse All Tour Packages
+              {blogDestinationMap[post.slug]?.tourIntentLabel || "Browse All Tour Packages"}
             </Link>
             <Link
-              href="/destinations"
+              href={`/destinations/${blogDestinationMap[post.slug]?.slug || 'hunza'}`}
               className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl transition"
             >
-              Explore Destinations
+              Explore {blogDestinationMap[post.slug]?.name || "Destinations"}
+            </Link>
+            <Link
+              href="/tours"
+              className="px-5 py-2.5 bg-white/5 hover:bg-white/15 text-white font-bold text-xs rounded-xl transition text-slate-300"
+            >
+              All Tours Catalog
             </Link>
           </div>
         </div>
@@ -375,6 +424,53 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </section>
         )}
+
+        {/* Related Northern Pakistan Travel Guides */}
+        <section className="space-y-4 pt-6 border-t border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+                Recommended Reading
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                Related Northern Pakistan Travel Guides
+              </h2>
+            </div>
+            <Link
+              href="/blog"
+              className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1"
+            >
+              <span>All Articles</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {((relatedBlogPostsMap[post.slug] || []).map((slug) => blogPosts.find((p) => p.slug === slug)).filter(Boolean) as typeof blogPosts).map((relPost) => (
+              <Link
+                key={relPost.slug}
+                href={`/blog/${relPost.slug}`}
+                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+              >
+                <div>
+                  <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider block">
+                    {relPost.category}
+                  </span>
+                  <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-sky-600 transition mt-1 line-clamp-2">
+                    {relPost.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-2 line-clamp-2">
+                    {relPost.excerpt}
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 mt-3">
+                  <span>Read guide &rarr;</span>
+                  <span className="text-[10px] text-slate-400 font-normal">{relPost.readTime}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         {/* Back to Blog */}
         <div className="pt-8 border-t border-slate-200 flex items-center justify-between">

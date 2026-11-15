@@ -18,6 +18,8 @@ export default function robots(): MetadataRoute.Robots {
           "/account/",
           "/confirmation/",
           "/dashboard/",
+          "/partner-hub/",
+          "/secure-admin/",
         ],
       },
     ],

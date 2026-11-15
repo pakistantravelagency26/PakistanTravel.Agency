@@ -71,9 +71,16 @@ export default async function HomePage() {
   const allDestinations = [
     { slug: "hunza", label: "Hunza Valley & Attabad" },
     { slug: "skardu", label: "Skardu & Deosai Plains" },
-    { slug: "kumrat", label: "Kumrat Valley & Dir" },
     { slug: "swat", label: "Swat & Kalam" },
+    { slug: "kumrat", label: "Kumrat Valley & Dir" },
+    { slug: "fairy-meadows", label: "Fairy Meadows & Nanga Parbat" },
     { slug: "neelum", label: "Neelum Valley" },
+    { slug: "naran-kaghan", label: "Naran Kaghan Valley" },
+    { slug: "gilgit", label: "Gilgit & Karakoram Highway" },
+    { slug: "astore", label: "Astore & Rama Meadows" },
+    { slug: "chitral-kalash", label: "Chitral & Kalash Valleys" },
+    { slug: "naltar", label: "Naltar Valley Lakes" },
+    { slug: "shogran-siri-paye", label: "Shogran & Siri Paye" },
     { slug: "murree", label: "Murree & Galyat" },
   ];
 
@@ -213,6 +220,49 @@ export default async function HomePage() {
               </span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Popular Northern Pakistan Destinations Hub */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+          <div>
+            <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+              Regional Destinations
+            </span>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              Popular Northern Pakistan Destinations
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Explore comprehensive destination travel guides across Gilgit-Baltistan, Khyber Pakhtunkhwa, and Azad Kashmir.
+            </p>
+          </div>
+          <Link
+            href="/destinations"
+            className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1 shrink-0"
+          >
+            <span>Explore all 13 destination guides</span>
+            <Compass className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {allDestinations.map((dest) => (
+            <Link
+              key={dest.slug}
+              href={`/destinations/${dest.slug}`}
+              className="group p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+            >
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold text-slate-900 group-hover:text-sky-600 transition block">
+                  {dest.label}
+                </span>
+              </div>
+              <span className="text-[10px] text-sky-600 font-semibold mt-2 flex items-center gap-0.5 group-hover:underline">
+                View guide &amp; tours &rarr;
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 

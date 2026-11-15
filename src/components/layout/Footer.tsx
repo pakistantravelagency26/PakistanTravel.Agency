@@ -54,7 +54,7 @@ export function Footer() {
               <p className="font-bold text-white text-sm">{footer.card1Title || "Independent Local Tour Operators"}</p>
               <p className="text-xs text-slate-400 mt-1">
                 {footer.card1Desc || "Independent local tour operators publish and manage their own guided tour packages."}{" "}
-                <Link href="/partner-info" className="text-sky-400 hover:underline">Learn more</Link>
+                <Link href="/partner-info" className="text-sky-400 hover:underline">Learn about our partner tour operators</Link>
               </p>
             </div>
           </div>

@@ -168,7 +168,7 @@ export default async function BlogIndexPage() {
                   href={`/blog/${blogPosts[0].slug}`}
                   className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700"
                 >
-                  <span>Read Article</span>
+                  <span>Read {blogPosts[0].title}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -229,7 +229,7 @@ export default async function BlogIndexPage() {
                     href={`/blog/${post.slug}`}
                     className="font-bold text-sky-600 group-hover:text-sky-700 flex items-center gap-1"
                   >
-                    <span>Read</span>
+                    <span>Read {post.title} guide</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                   </Link>
                 </div>

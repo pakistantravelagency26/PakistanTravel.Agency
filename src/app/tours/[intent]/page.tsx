@@ -326,7 +326,7 @@ export default async function TourIntentPage({ params }: TourIntentPageProps) {
               Explore Northern Destinations
             </h2>
             <Link href="/destinations" className="text-xs font-bold text-sky-600 hover:underline flex items-center gap-1">
-              <span>View All</span>
+              <span>View all northern destinations</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
