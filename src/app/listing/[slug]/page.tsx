@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   let pageTitle = listing.title;
   if (pageTitle.length > 42) {
     if (listing.slug.includes("hunza-valley-attabad-2640")) {
-      pageTitle = "Hunza & Attabad 8-Day Tour from Islamabad";
+      pageTitle = "Hunza & Attabad 8-Day Tour";
     } else if (listing.slug.includes("hunza-valley-attabad-5207")) {
       pageTitle = "Grand Hunza 10-Day Tour from Islamabad";
     } else {
