@@ -35,6 +35,9 @@ export const metadata: Metadata = {
   authors: [{ name: "PakistanTravel", url: siteUrl }],
   creator: "PakistanTravel",
   publisher: "PakistanTravel",
+  twitter: {
+    card: "summary_large_image",
+  },
   openGraph: {
     type: "website",
     locale: "en_PK",

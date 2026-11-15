@@ -573,7 +573,7 @@ export default function NewListingPage() {
                   <MapPin className="w-4 h-4 text-orange-600" /> Destination Valley / Region (Select or Type Custom) *
                 </label>
                 <span className="text-[11px] text-orange-700 font-medium">
-                  آپ اپنی مرضی کی ویلی بھی خود درج کر سکتے ہیں
+                  Enter custom valley name if not listed above
                 </span>
               </div>
 
@@ -696,7 +696,7 @@ export default function NewListingPage() {
                     <Navigation className="w-4 h-4 text-emerald-600" /> Departure / Pickup Meeting Points (Max 3 Points) *
                   </label>
                   <p className="text-[11px] text-slate-500">
-                    پہلا پک اپ پوائنٹ درج کریں، اس کے بعد دوسرا اور تیسرا پوائنٹ شامل کر سکتے ہیں (زیادہ سے زیادہ 3)۔
+                    Enter your primary pickup point. You can add up to 3 departure meeting points.
                   </p>
                 </div>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
@@ -878,10 +878,10 @@ export default function NewListingPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <label className="text-xs font-bold text-purple-950 uppercase flex items-center gap-1.5">
-                    <Tag className="w-4 h-4 text-purple-600" /> 4. Group &amp; Family Discount Pricing (کتنے لوگ ہوں گے تو کتنا ریٹ بنے گا)
+                    <Tag className="w-4 h-4 text-purple-600" /> 4. Group &amp; Family Discount Pricing (Tiered Group Rates)
                   </label>
                   <p className="text-[11px] text-slate-600">
-                    جب فیملی یا دوستوں کا گروپ بک کرے گا تو فی بندہ رعایت کے ساتھ کیا قیمت ہو گی:
+                    Discounted rate per traveler when booking as a family or group of friends:
                   </p>
                 </div>
                 <button
@@ -986,10 +986,10 @@ export default function NewListingPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <div>
                   <label className="text-xs font-bold text-slate-900 uppercase flex items-center gap-1.5">
-                    <Route className="w-4 h-4 text-amber-600" /> Tour Journey Route &amp; Sightseeing Stops (کہاں سے کہاں جائیں گے اور کیا کیا دیکھیں گے)
+                    <Route className="w-4 h-4 text-amber-600" /> Tour Journey Route &amp; Sightseeing Stops (Transit Cities & Attractions)
                   </label>
                   <p className="text-[11px] text-slate-600">
-                    جیسے کراچی سے ہنزہ جاتے ہوئے کون کون سے شہر، جھیلیں، اور نظارے دیکھیں گے:
+                    Key transit cities, mountain passes, lakes, and attractions visited during the journey:
                   </p>
                 </div>
                 <button
@@ -1079,7 +1079,7 @@ export default function NewListingPage() {
                 <Calendar className="w-5 h-5 text-orange-600" /> 3. Fixed Departure Dates &amp; Seat Limits
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                ہفتہ وار شیڈول (جیسے ہر اتوار) یا مہینے کی مخصوص تاریخیں (جیسے ہر ماہ 10، 20، 30 تاریخ) خودکار جنریٹ کریں:
+                Automatically generate weekly recurring departures or specific monthly dates:
               </p>
             </div>
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
@@ -1117,7 +1117,7 @@ export default function NewListingPage() {
           {scheduleMode === "weekly" && (
             <div className="p-4 rounded-2xl bg-orange-50/50 border border-orange-200 space-y-3">
               <span className="text-xs font-bold text-orange-950 uppercase block">
-                Weekly Recurring Departure Generator (ہفتہ وار شیڈول)
+                Weekly Recurring Departure Generator
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div>
@@ -1127,13 +1127,13 @@ export default function NewListingPage() {
                     onChange={(e) => setSelectedWeekday(Number(e.target.value))}
                     className="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-900 text-xs focus:ring-2 focus:ring-orange-500"
                   >
-                    <option value={0}>Every Sunday (اتوار)</option>
-                    <option value={5}>Every Friday (جمعہ)</option>
-                    <option value={6}>Every Saturday (ہفتہ)</option>
-                    <option value={4}>Every Thursday Night (جمعرات)</option>
-                    <option value={1}>Every Monday (پیر)</option>
-                    <option value={2}>Every Tuesday (منگل)</option>
-                    <option value={3}>Every Wednesday (بدھ)</option>
+                    <option value={0}>Every Sunday</option>
+                    <option value={5}>Every Friday</option>
+                    <option value={6}>Every Saturday</option>
+                    <option value={4}>Every Thursday Night</option>
+                    <option value={1}>Every Monday</option>
+                    <option value={2}>Every Tuesday</option>
+                    <option value={3}>Every Wednesday</option>
                   </select>
                 </div>
 
@@ -1180,7 +1180,7 @@ export default function NewListingPage() {
           {scheduleMode === "monthly" && (
             <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-3">
               <span className="text-xs font-bold text-amber-950 uppercase block">
-                Monthly Specific Dates Schedule (مہینے کی مخصوص تاریخیں جیسے 10، 20، 30)
+                Monthly Specific Dates Schedule (e.g. 10th, 20th, 30th of each month)
               </span>
 
               {/* Quick Presets */}
@@ -1365,7 +1365,7 @@ export default function NewListingPage() {
                 <ShieldCheck className="w-5 h-5 text-sky-600" /> 4. Tour Inclusions &amp; Perks
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                مارکیٹ میں شامل جدید ترین مراعات اور سروسز منتخب کریں یا اپنی کسٹم سروس بھی شامل کریں:
+                Select standard tour inclusions or enter custom perks provided on this trip:
               </p>
             </div>
             <span className="text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">

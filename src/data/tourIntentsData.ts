@@ -95,13 +95,13 @@ export const tourIntentsData: Record<string, TourIntentData> = {
     destinationSlug: "kumrat",
     introText: [
       "Kumrat Valley in Upper Dir is renowned as one of Pakistan's most pristine alpine pine wildernesses. Towering deodar cedar forest canopies, the crystal currents of the roaring Panjkora River, and secluded glacial lakes make Kumrat an authentic eco-adventure destination for travelers seeking unspoiled nature.",
-      "Standard cars can only reach Thal village on paved highways. From Thal onward into Kumrat Forest and Taki Top, guided packages provide specialized high-clearance 4x4 mountain jeeps. For trekking enthusiasts, packages incorporate the iconic hike to the high alpine meadow of Jahaz Banda (3,100m) and the emerald glacial amphitheater of Katora Lake (3,500m).",
+      "Standard cars can only reach Thal village on paved highways. From Thal onward into Kumrat Forest and Taki Top, guided packages provide specialized high-clearance dedicated 4x4 mountain transport. For trekking enthusiasts, packages incorporate the iconic hike to the high alpine meadow of Jahaz Banda (3,100m) and the emerald glacial amphitheater of Katora Lake (3,500m).",
       "Tour packages on our marketplace are arranged by independent regional operators providing campsite or cottage lodgings, 4x4 transportation, campfire meals, and experienced local trail guides."
     ],
     faqs: [
       {
         q: "Do Kumrat tour packages provide 4x4 transport past Thal?",
-        a: "Yes. Because regular cars cannot traverse the boulder tracks past Thal, guided Kumrat packages include dedicated 4x4 mountain jeeps."
+        a: "Yes. Because regular cars cannot traverse the boulder tracks past Thal, guided Kumrat packages include dedicated dedicated 4x4 mountain transport."
       },
       {
         q: "What accommodation is provided in Kumrat?",

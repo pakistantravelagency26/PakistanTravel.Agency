@@ -627,15 +627,15 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </div>
                 </div>
 
-                            {/* Number of Travelers (کتنے افراد ہیں) */}
+                            {/* Number of Travelers */}
               <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <div>
                     <span className="text-slate-900 font-extrabold block text-xs">
-                      کتنے لوگ ہیں؟ (Number of Travelers)
+                      Number of Travelers
                     </span>
                     <span className="text-[10px] text-slate-500">
-                      {selectedUnit ? formatUnitTitle(selectedUnit.title) : "Tour Package"} کے لیے افراد منتخب کریں
+                      Select travelers for {selectedUnit ? formatUnitTitle(selectedUnit.title) : 'Tour Package'}
                     </span>
                   </div>
                   <span className="text-xs font-bold text-brand-emerald bg-emerald-100 px-2.5 py-0.5 rounded-full">

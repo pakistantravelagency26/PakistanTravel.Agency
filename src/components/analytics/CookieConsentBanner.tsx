@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Cookie, Shield, Check, X } from "lucide-react";
 import { updateAnalyticsConsent } from "@/lib/analytics";
@@ -38,6 +39,16 @@ export function saveStoredConsent(value: "granted" | "denied"): void {
 }
 
 export default function CookieConsentBanner() {
+  const pathname = usePathname();
+  const isPortal =
+    !pathname ||
+    pathname.startsWith("/partner-hub") ||
+    pathname.startsWith("/secure-admin") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/account") ||
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/forgot-password");
   const [consentState, setConsentState] = useState<"granted" | "denied" | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);

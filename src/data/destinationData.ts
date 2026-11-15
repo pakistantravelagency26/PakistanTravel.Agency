@@ -238,7 +238,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 5,500 – 9,500",
       midRangePerDay: "PKR 14,000 – 26,000",
       luxuryPerDay: "PKR 30,000 – 55,000+",
-      notes: "Estimated costs are based on 2026 market rates. 4x4 mountain jeeps and camping arrangements are included in organized tour packages from Thal into Kumrat Forest and Jahaz Banda."
+      notes: "Estimated costs are based on 2026 market rates. dedicated 4x4 mountain transport and camping arrangements are included in organized tour packages from Thal into Kumrat Forest and Jahaz Banda."
     },
     topAttractions: [
       { name: "Dense Kumrat Pine Forest", description: "Towering deodar cedar forest canopy along the crystal-clear roaring Panjkora River." },
@@ -343,7 +343,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 6,000 – 10,000",
       midRangePerDay: "PKR 15,000 – 28,000",
       luxuryPerDay: "PKR 32,000 – 60,000+",
-      notes: "Estimated package costs are based on 2026 market rates. 4x4 mountain jeeps are included in guided tour packages to access high-altitude alpine lakes such as Ratti Gali and Baboon Valley."
+      notes: "Estimated package costs are based on 2026 market rates. dedicated 4x4 mountain transport are included in guided tour packages to access high-altitude alpine lakes such as Ratti Gali and Baboon Valley."
     },
     topAttractions: [
       { name: "Arang Kel Plateau Village", description: "Car-free plateau meadow accessible by cable-lift and hike, perched above the roaring river." },
@@ -380,7 +380,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     },
     overview: [
       "Nestled directly beneath the towering northern Raikot face of Nanga Parbat (8,126 meters)—the world's ninth-highest mountain and the western anchor of the Himalayas—Fairy Meadows is one of the most iconic wilderness trekking destinations in Asia. Known locally as Joot, the lush alpine meadows offer unobstructed, dramatic panoramas of tumbling glaciers, seracs, and sheer ice walls rising over 4,000 vertical meters above the valley floor.",
-      "The adventure begins at Raikot Bridge on the Karakoram Highway. From here, travelers transfer into rugged, locally operated 4x4 mountain jeeps for a cliffside drive along the Raikot Gorge to Tato village. From Tato, the final leg is an exhilarating 5-kilometer hike through fragrant pine and deodar forests alongside mountain torrents, arriving at the broad green pastures of Fairy Meadows.",
+      "The adventure begins at Raikot Bridge on the Karakoram Highway. From here, travelers transfer into rugged, locally operated dedicated 4x4 mountain transport for a cliffside drive along the Raikot Gorge to Tato village. From Tato, the final leg is an exhilarating 5-kilometer hike through fragrant pine and deodar forests alongside mountain torrents, arriving at the broad green pastures of Fairy Meadows.",
       "Traditional log cabins, wooden cottages, and organized campsites dot the meadow edges, offering panoramic sunset views as the evening light paints Nanga Parbat's snowy summit in brilliant gold and crimson. Strolling through the meadows, visitors encounter grazing horses, mountain streams, and the warm hospitality of the local Shina-speaking mountain community.",
       "For active hikers, Fairy Meadows serves as the base for the day trek to Beyal Camp (3,850 meters) and the Nanga Parbat Base Camp (3,967 meters). Continuing past Beyal Camp along the edge of the Raikot Glacier, trekkers walk right up to the historic German climbers' memorial viewpoint, standing face-to-face with sheer glacial amphitheaters."
     ],
@@ -504,7 +504,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       budgetPerDay: "PKR 7,000 – 11,000",
       midRangePerDay: "PKR 18,000 – 32,000",
       luxuryPerDay: "PKR 42,000 – 75,000+",
-      notes: "Estimated package costs are based on 2026 market rates. Guided tour packages include private 4x4 mountain jeeps from Gilgit or Nomal, hotel/cottage accommodation, and local guides."
+      notes: "Estimated package costs are based on 2026 market rates. Guided tour packages include private dedicated 4x4 mountain transport from Gilgit or Nomal, hotel/cottage accommodation, and local guides."
     },
     topAttractions: [
       { name: "Bashkiri (Naltar) Lakes", description: "Three high-altitude glacial lakes famed for their emerald green and electric turquoise colors." },
