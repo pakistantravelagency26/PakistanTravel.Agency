@@ -10,12 +10,7 @@ export default function NotFound() {
   ];
 
   return (
-    <>
-      <head>
-        <title>404 - Page Not Found | PakistanTravel</title>
-        <meta name="robots" content="noindex, nofollow, noarchive" />
-      </head>
-      <div className="min-h-[75vh] flex items-center justify-center bg-slate-50 py-16 px-4 sm:px-6 lg:px-8 text-slate-800">
+    <div className="min-h-[75vh] flex items-center justify-center bg-slate-50 py-16 px-4 sm:px-6 lg:px-8 text-slate-800">
       <div className="max-w-xl mx-auto text-center space-y-6">
         <div className="w-16 h-16 rounded-3xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto shadow-sm">
           <Compass className="w-8 h-8 animate-spin-slow" />
@@ -82,6 +77,5 @@ export default function NotFound() {
         </p>
       </div>
     </div>
-    </>
   );
 }

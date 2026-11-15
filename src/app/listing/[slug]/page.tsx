@@ -38,7 +38,14 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   const siteUrl = SITE_URL;
 
   if (!listing) {
-    notFound();
+    return {
+      title: "Tour Not Found",
+      description: "The requested tour package is not available or has been removed from PakistanTravel.",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
   }
 
   // Generate concise page title without brand (template adds " | PakistanTravel", 17 chars).
