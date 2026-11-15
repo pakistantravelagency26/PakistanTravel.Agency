@@ -56,7 +56,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       "Perched high amidst the majestic Karakoram Range in northern Gilgit-Baltistan, Hunza Valley stands as one of the most mesmerizing mountain sanctuaries on earth. Famed globally for its exceptionally welcoming Wakhi and Burusho communities, pristine turquoise glacial waters, and soaring 7,000-meter sentinels like Rakaposhi, Ladyfinger Peak, and Ultar Sar, Hunza captures the imagination of travelers seeking both serenity and high-altitude adventure.",
       "The historical heartbeat of Hunza beats within Karimabad, once the royal capital of the princely state of Hunza. Here, two ancient stone fortresses—Baltit Fort (over 700 years old with Tibetan architectural influences) and the 900-year-old Altit Fort—stand as testaments to centuries of Silk Road heritage. Walking through the stone alleyways of Karimabad, visitors discover family-run apricot oil presses, walnut wood workshops, and gemstone boutiques.",
       "Upper Hunza, known locally as Gojal, unfolds into breathtaking glacial landscapes. The world-famous Attabad Lake, formed in 2010 following a massive mountain landslide, dazzles visitors with electric turquoise water framed by towering slate cliffs. Further north, the jagged cathedral spires of the Passu Cones (Tupopdan) pierce the alpine sky alongside the vast Passu Glacier and the daring Passu suspension bridge swaying gently across the glacial river.",
-      "Beyond scenic wonders, Hunza is renowned for culinary excellence rooted in organic mountain agriculture. Savor traditional chapshuro (Karakoram meat pies baked over stone fires), ghol-ghol, apricot kernel soup, and fresh cherries plucked right from terrace orchards. With exceptionally high literacy rates and exemplary mountain hospitality, Hunza consistently ranks as one of Pakistan's safest and most rewarding travel destinations for families, couples, and solo travelers alike."
+      "Beyond scenic wonders, Hunza is renowned for culinary excellence rooted in organic mountain agriculture. Savor traditional chapshuro (Karakoram meat pies baked over stone fires), ghol-ghol, apricot kernel soup, and fresh cherries plucked right from terrace orchards. Known for strong community traditions, high educational value, and welcoming mountain hospitality, Hunza is widely regarded by travelers as an exceptionally hospitable and rewarding valley destination for families, couples, and solo travelers alike."
     ],
     bestTimeToVisit: {
       peakSeason: "May to August (Summer)",
@@ -91,7 +91,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       },
       {
         q: "Is Hunza safe for solo and family travelers?",
-        a: "Yes. Hunza is widely recognized as one of the safest regions in South Asia, characterized by high literacy, progressive community culture, and welcoming hospitality."
+        a: "Yes. Hunza has a well-established reputation for community hospitality, low crime, and welcoming attitudes toward travelers, making it popular for family and solo travelers. Standard travel vigilance and mountain road precautions are always advised."
       }
     ]
   },
@@ -114,11 +114,11 @@ export const destinationsData: Record<string, DestinationSeoData> = {
       "Set against the rugged granite battlements of the central Karakoram, Skardu is the historic capital of Baltistan and Pakistan's premier high-altitude adventure center. Lying at the confluence of the mighty Indus and Shigar Rivers, this expansive alpine basin presents startling geographical contrasts: high-elevation cold desert sand dunes immediately bordered by snow-capped 7,000-meter peaks and shimmering glacial lakes.",
       "Skardu serves as the starting springboard for worldwide expeditions to K2, Broad Peak, Gasherbrum I & II, and the legendary Trango Towers. Beyond mountaineering expeditions, Skardu has evolved into a premier northern vacation hub. Travelers explore the Katpana and Sarfaranga Cold Deserts, where snow-dusted dunes meet craggy alpine cliffs under crystal-clear night skies.",
       "Just south of the valley lies Deosai National Park, affectionately nicknamed 'The Land of the Giants'. Spanning over 3,000 square kilometers at an average elevation of 4,114 meters, it is the second-highest alpine plateau on Earth. During mid-summer, Deosai transforms into rolling wildflower grasslands surrounding Sheosar Lake, while providing habitat for the Himalayan Brown Bear.",
-      "In the lower valleys of Shigar and Khaplu, ancient Balti culture thrives. The 400-year-old Shigar Fort (Fong-Khar) and 19th-century Khaplu Palace have been restored into heritage accommodations, preserving traditional Tibetan-Mughal timber carvings and lush royal orchards."
+      "In the lower valleys of Shigar and Khaplu, ancient Balti culture thrives. The historic Shigar Fort (Fong-Khar, dating back to the 17th century) and Khaplu Palace (Yabgo Khar, constructed in 1840) have been carefully restored into heritage accommodations, preserving traditional Tibetan-Mughal timber carvings and lush royal orchards."
     ],
     bestTimeToVisit: {
       peakSeason: "June to August (Mid-Summer)",
-      peakDescription: "Warm daytime temperatures around 20°C to 28°C. Deosai National Park opens after snow clearance, lakes are accessible, and direct commercial flights operate from Islamabad, Lahore, and Karachi.",
+      peakDescription: "Warm daytime temperatures around 20°C to 28°C. Deosai National Park opens after snow clearance, lakes are accessible, and direct commercial flights operate from Islamabad, with seasonal flights occasionally scheduled from Lahore and Karachi during peak summer months.",
       shoulderSeason: "September to October (Autumn Foliage)",
       shoulderDescription: "Vibrant yellow poplars and orange apricot orchards set against clear blue skies. Crisp mountain air and minimal tourist traffic.",
       offSeason: "November to March (Winter Snow)",
@@ -140,7 +140,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     faqs: [
       {
         q: "Are there direct flights to Skardu?",
-        a: "Direct commercial flights operate from Islamabad, and seasonally from Lahore and Karachi, to Skardu International Airport. All flights operate strictly under Visual Flight Rules (VFR) and are weather-dependent. Flights are frequently canceled or delayed during winter fog, poor visibility, or mountain cloud cover. Travelers should always maintain 1 to 2 buffer days in their itinerary."
+        a: "Commercial flights operate between Islamabad and Skardu International Airport (with occasional seasonal summer flights from Lahore or Karachi). All flights operate strictly under Visual Flight Rules (VFR) and are weather-dependent. Flights are frequently canceled or delayed during winter fog, poor visibility, or mountain cloud cover. Travelers should always maintain 1 to 2 buffer days in their itinerary."
       },
       {
         q: "When is Deosai National Park road open?",

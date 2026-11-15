@@ -165,6 +165,8 @@ export function Footer() {
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© 2026 {siteConfig.name}. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-5 font-medium">
+            <Link href="/how-booking-works" className="hover:text-white transition">How It Works</Link>
+            <Link href="/safety-and-permits" className="hover:text-white transition">Safety & Permits</Link>
             <Link href="/about" className="hover:text-white transition">About Us</Link>
             <Link href="/blog" className="hover:text-white transition">Blog</Link>
             <Link href="/contact" className="hover:text-white transition">Contact & Help</Link>

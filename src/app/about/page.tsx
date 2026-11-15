@@ -1,7 +1,8 @@
 import { SITE_URL } from "@/config/site";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Compass, ShieldCheck, Heart, Award, Target, Eye, BookOpen } from "lucide-react";
+import { Compass, ShieldCheck, Heart, Award, Target, Eye, BookOpen, Users } from "lucide-react";
+import { siteConfig } from "@/config/site";
 import { getSiteSettings } from "@/services/siteSettings.service";
 import { prisma } from "@/lib/prisma";
 
@@ -122,6 +123,26 @@ export default async function AboutPage() {
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             {about.story}
           </p>
+        </div>
+
+        {/* Who We Are */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+              <Users className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900">Who We Are</h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            PakistanTravel is an independent digital tourism marketplace dedicated to travel across northern Pakistan. We operate strictly as an intermediary platform connecting travelers directly with independent local tour operators who organize and guide each departure. We do not operate our own tour buses, hotels, or private guide services.
+          </p>
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1.5 text-xs text-slate-700">
+            <p><strong>Platform Ownership:</strong> PakistanTravel Intermediary Platform</p>
+            <p><strong>Founder &amp; Principal Operations Lead:</strong> TODO: [Provide Founder / Operations Director Full Legal Name]</p>
+            <p><strong>Registered Physical Office / Domicile:</strong> TODO: [Provide Registered Office City, Address &amp; SECP Registration Details]</p>
+            <p><strong>Official Support Desk:</strong> <a href={`mailto:${siteConfig.contact.supportEmail}`} className="text-sky-700 underline font-medium">{siteConfig.contact.supportEmail}</a></p>
+            <p><strong>Operating Support Hours:</strong> {siteConfig.contact.supportHours.humanEmail}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
