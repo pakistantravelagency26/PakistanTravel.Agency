@@ -10,7 +10,7 @@ import {
   Handshake, 
   HelpCircle 
 } from "lucide-react";
-import { siteConfig , SITE_URL } from "@/config/site";
+import { siteConfig, SITE_URL, COMMISSION_PERCENT } from "@/config/site";
 
 export const revalidate = 60;
 
