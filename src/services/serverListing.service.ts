@@ -209,7 +209,7 @@ export const getDbListingBySlugOrId = cache(async (idOrSlug: string): Promise<Li
     throw new DatabaseError(`Database failure while retrieving listing "${idOrSlug}"`, { cause: error });
   }
 
-  if (!dbListing || dbListing.type !== "TOUR") return null;
+  if (!dbListing || dbListing.type !== "TOUR" || dbListing.status !== "PUBLISHED") return null;
 
   return formatDbListing(dbListing);
 });

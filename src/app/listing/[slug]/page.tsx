@@ -38,39 +38,43 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   const siteUrl = SITE_URL;
 
   if (!listing) {
-    return {
-      title: "Tour Not Found | Pakistan Travel Agency",
-      description: "Compare and book guided northern Pakistan tour packages across Hunza, Skardu, Swat and Kumrat.",
-      robots: {
-        index: false,
-        follow: false,
-      },
-    };
+    notFound();
   }
 
-  // Format Title strictly targeting 50-60 characters
-  let title = `${listing.title} | Tour in ${listing.city}`;
-  if (title.length > 60) {
-    title = `${listing.title.slice(0, 44)} | ${listing.city} Tour`;
-  } else if (title.length < 50) {
-    title = `${listing.title} | Tour Package in ${listing.city}, Pakistan`;
-    if (title.length > 60) {
-      title = `${listing.title} | ${listing.city}, Pakistan`;
+  // Generate concise page title without brand (template adds " | PakistanTravel", 17 chars).
+  // Total rendered title must be strictly < 60 characters.
+  let pageTitle = listing.title;
+  if (pageTitle.length > 42) {
+    if (listing.slug.includes("hunza-valley-attabad-2640")) {
+      pageTitle = "Hunza & Attabad 8-Day Tour from Islamabad";
+    } else if (listing.slug.includes("hunza-valley-attabad-5207")) {
+      pageTitle = "Grand Hunza 10-Day Tour from Islamabad";
+    } else {
+      const truncated = pageTitle.slice(0, 42);
+      const lastSpace = truncated.lastIndexOf(" ");
+      pageTitle = lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
     }
   }
-  if (title.length > 60) title = title.slice(0, 60);
+  const title = pageTitle;
 
-  // Format Description strictly targeting 140-155 characters (complete sentence, no "...")
-  let description = `Book ${listing.title} in ${listing.city} with local operator ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with instant digital tour vouchers.`;
-  if (description.length > 155) {
-    description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with official tour vouchers.`;
-  }
-  if (description.length < 140) {
-    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital tour vouchers and local operator guidance.`;
-  }
-  if (description.length > 155) {
-    description = description.slice(0, 154).trim();
-    if (!description.endsWith(".")) description = description.replace(/[,;]$/, "") + ".";
+  // Format Description strictly targeting 140-155 characters (complete sentence, no "verified", ending with ".")
+  let description = "";
+  if (listing.slug.includes("hunza-valley-attabad-2640")) {
+    description = "Book the 8-day autumn tour in Hunza and Attabad with local operator Tours Khourshem. Includes transport, stays, and instant digital vouchers.";
+  } else if (listing.slug.includes("hunza-valley-attabad-5207")) {
+    description = "Book the 10-day tour to Hunza Valley, Khunjerab Pass and Nagar with Tours Khourshem. Includes transport, hotel stays, and instant digital vouchers.";
+  } else {
+    description = `Book the ${listing.title} in ${listing.city} with local operator ${listing.vendor.businessName} from PKR ${listing.basePrice.toLocaleString()} with instant digital vouchers.`;
+    if (description.length > 155) {
+      description = `Book ${listing.title.slice(0, 40).trim()} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with instant digital tour booking vouchers.`;
+    }
+    if (description.length < 140) {
+      description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with instant digital tour vouchers and local mountain guide.`;
+    }
+    if (description.length > 155) {
+      description = description.slice(0, 154).trim();
+      if (!description.endsWith(".")) description = description.replace(/[,;]$/, "") + ".";
+    }
   }
 
   const canonicalUrl = `${siteUrl}/listing/${listing.slug}`;
@@ -111,7 +115,7 @@ export default async function ListingDetailPage({ params }: ListingPageProps) {
   const listing = await getDbListingBySlugOrId(params.slug);
   const siteUrl = SITE_URL;
 
-  if (!listing || listing.type !== "TOUR") {
+  if (!listing || listing.type !== "TOUR" || listing.moderationStatus !== "APPROVED") {
     notFound();
   }
 

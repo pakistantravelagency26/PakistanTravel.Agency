@@ -34,7 +34,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "skardu-trip-cost-2026",
     title: "Skardu Trip Cost 2026: Complete Budget & Luxury Breakdown",
-    seoTitle: "Skardu Trip Cost 2026: Budget & Luxury Breakdown",
+    seoTitle: "Skardu Trip Cost Guide 2026",
     metaDescription: "Plan your Skardu trip in 2026 with an itemized cost breakdown for flights, guided 4x4 packages, Deosai safaris, tour inclusions, and local dining.",
     date: "10 May 2026",
     isoDate: "2026-05-10",
@@ -131,7 +131,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "hunza-best-time-to-visit",
     title: "Best Time to Visit Hunza Valley: Cherry Blossom, Summer & Autumn",
-    seoTitle: "Best Time to Visit Hunza Valley: Seasonal Travel Guide",
+    seoTitle: "Best Time to Visit Hunza Valley",
     metaDescription: "Discover the best season to visit Hunza Valley: spring cherry blossom, summer lake adventures, and golden autumn foliage along the Karakoram Highway.",
     date: "12 May 2026",
     isoDate: "2026-05-12",
@@ -201,8 +201,8 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "kumrat-valley-route-tips",
     title: "Kumrat Valley Travel Guide: Route, 4x4 Road Conditions & Tips",
-    seoTitle: "Kumrat Valley Travel Guide: Route & 4x4 Road Conditions",
-    metaDescription: "Plan your trip to Kumrat Valley with our route guide from Islamabad, 4x4 jeep requirements, Jahaz Banda trek details, and camping advice.",
+    seoTitle: "Kumrat Valley Travel & Route Guide",
+    metaDescription: "Plan your trip to Kumrat Valley with our complete route guide from Islamabad, 4x4 jeep requirements, Jahaz Banda trek details, and camping advice.",
     date: "14 May 2026",
     isoDate: "2026-05-14",
     lastUpdated: "08 November 2026",
@@ -276,7 +276,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "skardu-vs-hunza",
     title: "Skardu vs Hunza: Which Northern Pakistan Valley Should You Choose?",
-    seoTitle: "Skardu vs Hunza: Which Northern Valley to Choose?",
+    seoTitle: "Skardu vs Hunza Tour Comparison",
     metaDescription: "Comparing Skardu vs Hunza for your northern Pakistan journey: mountain scenery, travel time, tour itineraries, flight reliability, and expenses.",
     date: "16 May 2026",
     isoDate: "2026-05-16",
@@ -341,7 +341,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "northern-pakistan-packing-list",
     title: "Northern Pakistan Packing List: What to Bring for Mountain Tours",
-    seoTitle: "Northern Pakistan Packing List: Mountain Travel Gear",
+    seoTitle: "Northern Pakistan Packing List",
     metaDescription: "Essential packing checklist for northern Pakistan tours: layering systems, hiking footwear, medications, power backups, and cultural modesty tips.",
     date: "18 May 2026",
     isoDate: "2026-05-18",

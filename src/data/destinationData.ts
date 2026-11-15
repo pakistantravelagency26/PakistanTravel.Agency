@@ -45,7 +45,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     heroImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Jewel of the Karakoram Highway & Ancient Terraced Mountain Valleys",
     seoTitle: "Hunza Valley Tour Packages",
-    seoDescription: "Compare and book guided tour packages across Hunza, Karimabad, Attabad Lake, and Passu Cones from independent local tour operators.",
+    seoDescription: "Compare and book guided tour packages across Hunza, Karimabad, Attabad Lake, and Passu Cones directly from independent local mountain tour operators.",
     keyFacts: {
       altitude: "2,438 meters (Karimabad) to 2,500+ meters (Upper Hunza / Gojal)",
       bestSeason: "May to October (Blossom: April; Autumn foliage: October)",
@@ -103,7 +103,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     heroImage: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Realm of 8,000m Giants, Cold Deserts & Turquoise Alpine Lakes",
     seoTitle: "Skardu Tour Packages",
-    seoDescription: "Compare and book guided Skardu tour packages, Deosai Plains excursions, and Upper Kachura trips directly from independent local operators.",
+    seoDescription: "Compare and book guided Skardu tour packages, Deosai Plains excursions, and Upper Kachura trips directly from independent local operators in Pakistan.",
     keyFacts: {
       altitude: "2,228 meters (Skardu town) to 4,114 meters (Deosai National Park plateau)",
       bestSeason: "May to October (Deosai plateau road strictly accessible mid-July to mid-September)",
@@ -160,7 +160,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     heroImage: "https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=1600&auto=format&fit=crop&q=80",
     tagline: "The Switzerland of the East: Alpine Meadows, Glacial Lakes & Buddhist Heritage",
     seoTitle: "Swat Valley Tour Packages",
-    seoDescription: "Compare and book guided tour packages across Swat, Kalam, Malam Jabba, and Mahodand Lake from independent local tour operators in Pakistan.",
+    seoDescription: "Compare and book guided tour packages across Swat Valley, Kalam, Malam Jabba, and Mahodand Lake from independent local tour operators in Pakistan.",
     keyFacts: {
       altitude: "980 meters (Mingora) to 2,000+ meters (Kalam) and 3,100 meters (Malam Jabba ski resort)",
       bestSeason: "April to October (Spring/Summer), December to February (Malam Jabba ski season)",
@@ -213,7 +213,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     heroImage: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&auto=format&fit=crop&q=80",
     tagline: "Dense Deodar Pine Wilderness, Roaring Rivers & Alpine Glacial Tarns",
     seoTitle: "Kumrat Valley Tour Packages",
-    seoDescription: "Discover guided Kumrat Valley tour packages, Jahaz Banda treks, and river camping in Upper Dir directly from independent local operators.",
+    seoDescription: "Discover guided Kumrat Valley tour packages, Jahaz Banda treks, and scenic pine river camping in Upper Dir directly from independent local tour operators.",
     keyFacts: {
       altitude: "2,400 meters (Kumrat Forest) to 3,100 meters (Jahaz Banda) and 3,500 meters (Katora Lake)",
       bestSeason: "June to September (Jahaz Banda trek and Katora Lake accessible after snow melts)",
@@ -266,7 +266,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     heroImage: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&auto=format&fit=crop&q=80",
     tagline: "Colonial Hill Stations, Pine Ridges & Winter Snowscapes",
     seoTitle: "Murree Tour Packages",
-    seoDescription: "Explore guided Murree and Galyat tour packages, Patriata chairlift excursions, and scenic pine ridge getaways from independent operators.",
+    seoDescription: "Explore guided Murree and Galyat tour packages, Patriata chairlift excursions, and scenic pine ridge getaways from independent local tour operators.",
     keyFacts: {
       altitude: "2,291 meters (Murree Mall Road) to 2,800+ meters (Mukshpuri & Miranjani Peaks)",
       bestSeason: "May to September (Cool summer escape), December to February (Winter snowfall)",
@@ -318,7 +318,7 @@ export const destinationsData: Record<string, DestinationSeoData> = {
     heroImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&auto=format&fit=crop&q=80",
     tagline: "Verdant Kashmir Valleys, Ancient Stone Shrines & Turquoise Alpine Glacial Tarns",
     seoTitle: "Neelum Valley Tour Packages",
-    seoDescription: "Compare and book guided Neelum Valley tour packages across Keran, Sharda, Arang Kel, and Ratti Gali Lake with independent local operators.",
+    seoDescription: "Compare and book guided Neelum Valley tour packages across Keran, Sharda, Arang Kel, and Ratti Gali Lake with independent local operators in Pakistan.",
     keyFacts: {
       altitude: "1,600 meters (Kutton) to 2,000+ meters (Kel) and 3,700 meters (Ratti Gali Lake)",
       bestSeason: "May to October (Alpine lakes accessible late June to mid-September)",

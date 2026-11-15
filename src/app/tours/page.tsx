@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Compare Northern Pakistan Tour Packages",
     description:
-      "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct verified operator bookings.",
+      "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct independent operator bookings.",
     alternates: {
       canonical: `${SITE_URL}/tours`,
     },
@@ -47,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Compare Northern Pakistan Tour Packages | PakistanTravel",
       description:
-        "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct verified operator bookings.",
+        "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct independent operator bookings.",
       url: `${SITE_URL}/tours`,
       siteName: "PakistanTravel",
       locale: "en_PK",
@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "Compare Northern Pakistan Tour Packages | PakistanTravel",
       description:
-        "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct verified operator bookings.",
+        "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct independent operator bookings.",
     },
   };
 }

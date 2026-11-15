@@ -21,6 +21,7 @@ import { formatDbListing } from "@/services/serverListing.service";
 import { CustomTripRequestForm } from "@/components/tours/CustomTripRequestForm";
 
 export const revalidate = 60;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return Object.keys(tourIntentsData).map((slug) => ({ intent: slug }));

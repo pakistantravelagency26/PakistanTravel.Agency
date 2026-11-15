@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     absolute: "Northern Pakistan Tour Marketplace | PakistanTravel",
   },
   description:
-    "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat.",
+    "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat at direct rates.",
   alternates: {
     canonical: siteUrl,
   },
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Northern Pakistan Tour Marketplace | PakistanTravel",
     description:
-      "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat.",
+      "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat at direct rates.",
     images: [
       {
         url: `${siteUrl}/images/og/home-og.jpg`,
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Northern Pakistan Tour Marketplace | PakistanTravel",
     description:
-      "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat.",
+      "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat at direct rates.",
     images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };

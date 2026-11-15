@@ -7,6 +7,7 @@ import { Calendar, Clock, RefreshCw, ArrowLeft, ChevronRight, HelpCircle, Compas
 import { blogPosts } from "@/data/blogData";
 
 export const revalidate = 60;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
@@ -23,10 +24,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const siteUrl = SITE_URL;
 
   if (!post) {
-    return {
-      title: "Article Not Found | Pakistan Travel Agency",
-      description: "Explore northern Pakistan travel guides, itineraries, and expert booking advice.",
-    };
+    notFound();
   }
 
   const canonicalUrl = `${siteUrl}/blog/${post.slug}`;

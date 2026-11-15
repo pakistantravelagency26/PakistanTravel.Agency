@@ -18,7 +18,7 @@ export const tourIntentsData: Record<string, TourIntentData> = {
     slug: "hunza-tour-packages",
     title: "Hunza Tour Packages",
     seoTitle: "Hunza Tour Packages",
-    metaDescription: "Compare and book guided Hunza tour packages to Karimabad, Attabad Lake, and Passu Cones directly with independent local tour operators.",
+    metaDescription: "Compare and book guided Hunza tour packages to Karimabad, Attabad Lake, and Passu Cones directly with independent local tour operators in Pakistan.",
     h1: "Guided Hunza Valley Tour Packages",
     destinationSlug: "hunza",
     introText: [
@@ -42,7 +42,7 @@ export const tourIntentsData: Record<string, TourIntentData> = {
     slug: "skardu-tour-packages",
     title: "Skardu Tour Packages",
     seoTitle: "Skardu Tour Packages",
-    metaDescription: "Compare and book guided Skardu tour packages, Deosai Plains safaris, and Upper Kachura excursions with independent local tour operators.",
+    metaDescription: "Compare and book guided Skardu tour packages, Deosai Plains safaris, and Upper Kachura excursions with independent local tour operators in Pakistan.",
     h1: "Guided Skardu & Baltistan Tour Packages",
     destinationSlug: "skardu",
     introText: [
@@ -90,7 +90,7 @@ export const tourIntentsData: Record<string, TourIntentData> = {
     slug: "kumrat-tour-packages",
     title: "Kumrat Valley Tour Packages",
     seoTitle: "Kumrat Valley Tour Packages",
-    metaDescription: "Discover guided Kumrat Valley tour packages, pine forest camping, and Jahaz Banda treks in Upper Dir with independent local tour operators.",
+    metaDescription: "Discover guided Kumrat Valley tour packages, pine forest camping, and scenic Jahaz Banda treks in Upper Dir with independent local tour operators.",
     h1: "Guided Kumrat Valley Tour Packages",
     destinationSlug: "kumrat",
     introText: [
