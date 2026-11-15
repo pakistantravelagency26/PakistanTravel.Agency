@@ -1,5 +1,5 @@
 // Client analytics utility for Google Analytics 4 (GA4) / Google Tag Manager (GTM)
-// Consent-aware and type-safe event tracking for PakistanTravel.Agency
+// Consent-aware, type-safe, and strictly PII-free event tracking for PakistanTravel.Agency
 
 declare global {
   interface Window {
@@ -38,7 +38,7 @@ export function updateAnalyticsConsent(granted: boolean) {
   if (typeof window.gtag === "function") {
     window.gtag("consent", "update", {
       analytics_storage: state,
-      // Advertising consent remains strictly denied unless explicitly opted into
+      // Advertising consent remains strictly denied
       ad_storage: "denied",
       ad_user_data: "denied",
       ad_personalization: "denied",
@@ -61,109 +61,123 @@ export function updateConsentState(granted: boolean) {
 }
 
 // ==========================================
-// Strongly-Typed Custom Events
+// Strongly-Typed Custom Events (Strictly PII-Free)
 // ==========================================
 
-export function trackSearchUsed(params: {
-  searchTerm?: string;
-  destination?: string;
-  duration?: string;
-  resultsCount?: number;
-}) {
-  pushAnalyticsEvent("search_used", {
-    search_term: params.searchTerm || "",
-    destination: params.destination || "all",
-    duration: params.duration || "any",
-    results_count: params.resultsCount ?? null,
-  });
-}
-
-export function trackDestinationViewed(params: {
-  slug: string;
-  name: string;
-  province: string;
-}) {
-  pushAnalyticsEvent("destination_viewed", {
-    destination_slug: params.slug,
-    destination_name: params.name,
-    province: params.province,
-  });
-}
-
-export function trackTourViewed(params: {
-  tourId: string;
+/**
+ * 1. tour_view
+ * Emitted when traveler navigates to a tour package detail page
+ */
+export function trackTourView(params: {
+  listingId: string;
   slug: string;
   title: string;
-  price: number;
-  vendorName: string;
   destination: string;
+  price: number;
+  durationDays?: number;
 }) {
-  pushAnalyticsEvent("tour_viewed", {
-    tour_id: params.tourId,
+  pushAnalyticsEvent("tour_view", {
+    listing_id: params.listingId,
     tour_slug: params.slug,
     tour_title: params.title,
-    price_pkr: params.price,
-    vendor_name: params.vendorName,
     destination: params.destination,
+    price_pkr: params.price,
+    duration_days: params.durationDays ?? null,
   });
 }
 
-export function trackCustomTripSubmitted(params: {
+/**
+ * 2. booking_started
+ * Emitted when traveler initiates checkout / booking flow
+ */
+export function trackBookingStarted(params: {
+  listingId: string;
+  title: string;
+  destination?: string;
+  travelersCount: number;
+  tierId?: string;
+  totalPrice: number;
+  depositAmount: number;
+}) {
+  pushAnalyticsEvent("booking_started", {
+    listing_id: params.listingId,
+    item_name: params.title,
+    destination: params.destination || "general",
+    travelers_count: params.travelersCount,
+    tier_id: params.tierId || "standard",
+    total_amount_pkr: params.totalPrice,
+    deposit_amount_pkr: params.depositAmount,
+    currency: "PKR",
+  });
+}
+
+/**
+ * 3. deposit_paid
+ * Emitted when deposit confirmation is loaded after checkout
+ */
+export function trackDepositPaid(params: {
+  bookingId: string;
+  listingId: string;
+  depositAmount: number;
+  paymentMethod?: string;
+}) {
+  pushAnalyticsEvent("deposit_paid", {
+    transaction_id: params.bookingId,
+    listing_id: params.listingId,
+    deposit_amount_pkr: params.depositAmount,
+    currency: "PKR",
+    payment_method: params.paymentMethod || "bank_transfer",
+  });
+}
+
+/**
+ * 4. trip_request_submitted
+ * Emitted when custom trip inquiry form is submitted
+ */
+export function trackTripRequestSubmitted(params: {
   destination: string;
-  travelers: number;
+  travelersCount?: number;
+  travelers?: number;
   travelDate?: string;
 }) {
-  pushAnalyticsEvent("custom_trip_submitted", {
+  const count = params.travelersCount ?? params.travelers ?? 1;
+  pushAnalyticsEvent("trip_request_submitted", {
     destination: params.destination,
-    travelers_count: params.travelers,
+    travelers_count: count,
     travel_date: params.travelDate || "flexible",
   });
 }
 
-export function trackPartnerSignupClicked(params: {
-  location: "header" | "footer" | "banner" | "dedicated_page";
+/**
+ * 5. vendor_registered
+ * Emitted when a tour operator completes partner registration
+ */
+export function trackVendorRegistered(params: {
+  city?: string;
+  businessType?: string;
 }) {
-  pushAnalyticsEvent("partner_signup_clicked", {
-    click_location: params.location,
+  pushAnalyticsEvent("vendor_registered", {
+    city: params.city || "Islamabad",
+    business_type: params.businessType || "TOUR_OPERATOR",
+    registered_at: new Date().toISOString(),
   });
 }
 
-export function trackContactClicked(params: {
-  contactMethod: "whatsapp" | "email" | "form" | "phone";
+/**
+ * 6. chat_started
+ * Emitted when traveler opens or sends first message in support chat
+ */
+export function trackChatStarted(params: {
+  pagePath: string;
 }) {
-  pushAnalyticsEvent("contact_clicked", {
-    contact_method: params.contactMethod,
+  pushAnalyticsEvent("chat_started", {
+    page_path: params.pagePath,
+    started_at: new Date().toISOString(),
   });
 }
 
-export function trackCheckoutStarted(params: {
-  listingId: string;
-  title: string;
-  price: number;
-  travelers: number;
-  currency?: string;
-}) {
-  pushAnalyticsEvent("checkout_started", {
-    listing_id: params.listingId,
-    item_name: params.title,
-    value: params.price,
-    currency: params.currency || "PKR",
-    travelers_count: params.travelers,
-  });
-}
-
-export function trackBookingConfirmed(params: {
-  bookingId: string;
-  listingId: string;
-  title: string;
-  value: number;
-  currency?: string;
-}) {
-  pushAnalyticsEvent("booking_confirmed", {
-    transaction_id: params.bookingId,
-    listing_id: params.listingId,
-    item_name: params.title,
-    value: params.value,
-    currency: params.currency || "PKR",
-  });
-}
+// Backward compatibility aliases
+export const trackTourViewed = trackTourView;
+export const trackCustomTripSubmitted = trackTripRequestSubmitted;
+export const trackCheckoutStarted = trackBookingStarted;
+export const trackBookingConfirmed = trackDepositPaid;

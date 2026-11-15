@@ -34,6 +34,7 @@ import type { ListingData } from "@/services/listing.service";
 import { WriteReviewModal } from "@/components/reviews/WriteReviewModal";
 import { AskOperatorModal } from "./AskOperatorModal";
 import { TourStructuredDetails } from "./TourStructuredDetails";
+import { trackTourView, trackBookingStarted } from "@/lib/analytics";
 
 interface ListingDetailClientProps {
   listing: ListingData;
@@ -135,6 +136,15 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
   const balanceDue = totalPrice - depositAmount;
 
   useEffect(() => {
+    trackTourView({
+      listingId: listing.id,
+      slug: listing.slug,
+      title: listing.title,
+      destination: listing.destinationName || listing.city || "Pakistan",
+      price: listing.basePrice,
+      durationDays: listing.durationDays,
+    });
+
     fetch(`/api/bookings/eligible-review?listingId=${listing.id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -143,10 +153,19 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
         }
       })
       .catch(() => {});
-  }, [listing.id]);
+  }, [listing.id, listing.slug, listing.title, listing.destinationName, listing.city, listing.basePrice, listing.durationDays]);
 
   function handleReserve() {
     if (!listing) return;
+    trackBookingStarted({
+      listingId: listing.id,
+      title: listing.title,
+      destination: listing.destinationName || listing.city,
+      travelersCount: selectedQuantity,
+      tierId: selectedUnit?.id,
+      totalPrice,
+      depositAmount,
+    });
     router.push(
       `/checkout/${listing.id}?unitId=${selectedUnit?.id || ""}&depId=${selectedDeparture?.id || ""}&qty=${selectedQuantity}&isSolo=${isSingleTraveler && isSoloSupplementApplied ? "1" : "0"}&start=${effectiveStartDate}&end=${effectiveEndDate}`
     );

@@ -18,6 +18,7 @@ import {
   Square
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { trackVendorRegistered } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,12 @@ function RegisterForm() {
       }
 
       setSuccess(true);
+      if (role === "VENDOR") {
+        trackVendorRegistered({
+          city: formData.city,
+          businessType: "TOUR_OPERATOR",
+        });
+      }
       if (role !== "VENDOR") {
         setTimeout(() => {
           router.push("/login?registered=true");

@@ -21,6 +21,7 @@ import {
 import type { ListingData } from "@/services/listing.service";
 import { calculateBookingPricing } from "@/lib/bookingPricing";
 import { siteConfig } from "@/config/site";
+import { trackBookingStarted } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,15 @@ function CheckoutContent() {
       .then((data) => {
         if (data.success && data.listing) {
           setListing(data.listing);
+          trackBookingStarted({
+            listingId: data.listing.id,
+            title: data.listing.title,
+            destination: data.listing.destinationName || data.listing.city,
+            travelersCount: qty,
+            tierId: unitId || undefined,
+            totalPrice: data.listing.basePrice * qty,
+            depositAmount: Math.round(data.listing.basePrice * qty * 0.25),
+          });
         }
       })
       .catch((err) => console.error("Error loading checkout listing:", err))

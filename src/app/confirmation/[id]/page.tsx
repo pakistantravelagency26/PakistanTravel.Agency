@@ -16,6 +16,7 @@ import {
   PhoneCall
 } from "lucide-react";
 import type { BookingRecord } from "@/services/booking.service";
+import { trackDepositPaid } from "@/lib/analytics";
 
 export default function ConfirmationPage() {
   const params = useParams();
@@ -31,6 +32,12 @@ export default function ConfirmationPage() {
         const data = await res.json();
         if (data.success && data.booking) {
           setBooking(data.booking);
+          trackDepositPaid({
+            bookingId: data.booking.id,
+            listingId: data.booking.listingId || "",
+            depositAmount: data.booking.depositAmount || data.booking.totalPrice || 0,
+            paymentMethod: data.booking.paymentMethod,
+          });
           setLoading(false);
           return;
         }

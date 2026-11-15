@@ -18,6 +18,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { trackChatStarted } from "@/lib/analytics";
 
 interface ChatMessage {
   id: string;
@@ -329,7 +330,10 @@ export default function SupportChatWidget() {
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50">
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              setIsOpen(true);
+              trackChatStarted({ pagePath: pathname || "/" });
+            }}
             aria-label="Open PakistanTravel AI Assistant"
             className="group relative flex items-center gap-2.5 px-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5 border border-emerald-500/30"
           >
