@@ -244,7 +244,7 @@ export default function TermsPage() {
             </h2>
             <div className="space-y-2 text-slate-700">
               <p>
-                <strong>Platform Integrity:</strong> To protect the safety, secure deposit protection, and dispute resolution guarantees offered by {siteConfig.name}, travelers and registered vendors agree not to circumvent the platform.
+                <strong>Platform Integrity:</strong> To protect the safety, secure deposit protection, and dispute resolution protections offered by {siteConfig.name}, travelers and registered vendors agree not to circumvent the platform.
               </p>
               <p>
                 <strong>No Off-Platform Booking:</strong> Users agree not to exchange direct private phone numbers or bank accounts prior to a confirmed booking, nor solicit off-platform cash transactions for listings found through the marketplace. Violating this clause terminates buyer dispute protection and may result in vendor expulsion.

@@ -461,7 +461,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                     <p>Departure: 06:30 AM from pickup terminal</p>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <span className="font-semibold text-slate-800 block mb-1">Cancellation Guarantee</span>
+                    <span className="font-semibold text-slate-800 block mb-1">Cancellation Policy</span>
                     <p>{listing.cancellationPolicy}</p>
                   </div>
                 </div>
@@ -774,7 +774,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 </p>
                 <p className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-brand-emerald shrink-0" /> 
-                  Guaranteed seat reservation &amp; official tour voucher
+                  Confirmed seat reservation &amp; official tour voucher
                 </p>
               </div>
             </div>

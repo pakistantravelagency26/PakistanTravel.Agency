@@ -27,7 +27,7 @@ export const metadata: Metadata = {
       "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree with essential seasonal mountain road advice.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200",
+        url: `${siteUrl}/og?title=Top+Northern+Pakistan+Destinations&category=DESTINATIONS&subtitle=Hunza%2C+Skardu%2C+Swat%2C+Kumrat+%26+More`,
         width: 1200,
         height: 630,
         alt: "Explore Northern Pakistan Travel Destinations",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "Top Northern Pakistan Destinations",
     description:
       "Explore top tourist destinations in northern Pakistan including Hunza, Skardu, Swat, Kumrat, and Murree with essential seasonal mountain road advice.",
-    images: ["https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200"],
+    images: [`${siteUrl}/og?title=Top+Northern+Pakistan+Destinations&category=DESTINATIONS&subtitle=Hunza%2C+Skardu%2C+Swat%2C+Kumrat+%26+More`],
   },
 };
 

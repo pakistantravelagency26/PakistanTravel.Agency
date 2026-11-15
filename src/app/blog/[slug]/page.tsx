@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   const canonicalUrl = `${siteUrl}/blog/${post.slug}`;
+  const ogImageUrl = `${siteUrl}/og?title=${encodeURIComponent(post.title)}&category=TRAVEL%20GUIDE&subtitle=${encodeURIComponent((post.readTime || "5 min read") + " • Northern Pakistan Editorial")}`;
 
   return {
     title: post.seoTitle,
@@ -47,9 +48,9 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       authors: [post.author.name],
       images: [
         {
-          url: post.coverImage,
-          width: 1600,
-          height: 900,
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
           alt: post.coverAlt,
         },
       ],
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       card: "summary_large_image",
       title: post.seoTitle,
       description: post.metaDescription,
-      images: [post.coverImage],
+      images: [ogImageUrl],
     },
   };
 }

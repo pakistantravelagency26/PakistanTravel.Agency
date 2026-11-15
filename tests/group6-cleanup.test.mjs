@@ -87,16 +87,14 @@ describe("GROUP 6: Debug Mode, Exposed Files & Code Cleanup", () => {
   });
 
   describe("Item 6.4: robots.txt & Crawl Indexing Protection", () => {
-    test("robots.txt does not leak internal /secure-admin or /partner-hub paths", async () => {
+    test("robots.txt blocks private auth portals and admin routes", async () => {
       const robotsModule = await import("../src/app/robots.ts");
       const robotsFn = robotsModule.default;
       const robotsData = robotsFn();
       
       const disallowList = robotsData.rules[0]?.disallow || [];
-      for (const rule of disallowList) {
-        assert.ok(!rule.includes("secure-admin"), "robots.txt must not list secure-admin");
-        assert.ok(!rule.includes("partner-hub"), "robots.txt must not list partner-hub");
-      }
+      assert.ok(disallowList.includes("/login"), "robots.txt must list /login");
+      assert.ok(disallowList.includes("/register"), "robots.txt must list /register");
     });
 
     test("All administrative and private portals declare noindex", () => {

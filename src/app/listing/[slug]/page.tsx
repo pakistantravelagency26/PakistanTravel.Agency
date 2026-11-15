@@ -85,7 +85,9 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
   }
 
   const canonicalUrl = `${siteUrl}/listing/${listing.slug}`;
-  const mainPhoto = listing.photos[0] || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200";
+  const days = listing.durationDays || 8;
+  const nights = days > 1 ? days - 1 : 1;
+  const ogImageUrl = `${siteUrl}/og?title=${encodeURIComponent(listing.title)}&category=TOUR%20PACKAGE&subtitle=${encodeURIComponent(`${days} Days / ${nights} Nights • ${listing.city}`)}`;
 
   return {
     title,
@@ -102,7 +104,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
       description,
       images: [
         {
-          url: mainPhoto,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: `${listing.title} in ${listing.city}`,
@@ -113,7 +115,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
       card: "summary_large_image",
       title,
       description,
-      images: [mainPhoto],
+      images: [ogImageUrl],
     },
   };
 }

@@ -32,13 +32,13 @@ function createGracefulFallbackStream(userQuery: string): ReadableStream<Uint8Ar
       `Need help with a payment? Contact **${siteConfig.contact.supportEmail}**.`;
   } else if (lower.includes("list") || lower.includes("vendor") || lower.includes("host") || lower.includes("partner")) {
     fallbackMessage += `**List your Tour Package:**\n` +
-      `Independent local tour operators across northern Pakistan can register and list verified tour packages on our platform.\n\n` +
+      `Independent local tour operators across northern Pakistan can register and list guided tour packages on our platform.\n\n` +
       `Visit our [Partner Information](/partner-info) page or [Operator Registration](/register) to get started.`;
   } else if (lower.includes("hunza") || lower.includes("skardu") || lower.includes("swat") || lower.includes("kumrat") || lower.includes("neelum")) {
-    fallbackMessage += `We feature guided tour packages across Hunza, Skardu, Swat, Kumrat, and Neelum Valley from independent local verified operators.\n\n` +
+    fallbackMessage += `We feature guided tour packages across Hunza, Skardu, Swat, Kumrat, and Neelum Valley from independent local operators.\n\n` +
       `Browse our current packages on our [Tours Page](/tours) or [Destinations Guide](/destinations). For custom trip enquiries, feel free to use our [Contact Form](/contact).`;
   } else {
-    fallbackMessage += `I am currently operating in verified information mode. You can explore verified tour packages across northern Pakistan on our [Tours Page](/tours).\n\n` +
+    fallbackMessage += `I am currently operating in factual information mode. You can explore guided tour packages across northern Pakistan on our [Tours Page](/tours).\n\n` +
       `If you have questions about bookings, payments, or itineraries, our human support team is ready to assist at **${siteConfig.contact.supportEmail}** or via our [Contact Page](/contact).`;
   }
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Create Account | Traveler Registration",
-  description: "Create an account to book verified guided tour packages across northern Pakistan.",
+  description: "Create an account to book guided tour packages across northern Pakistan.",
   robots: {
     index: false,
     follow: false,

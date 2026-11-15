@@ -101,7 +101,7 @@ export default function ConfirmationPage() {
                 } uppercase tracking-widest block`}
               >
                 {isConfirmed
-                  ? "Booking Confirmed & Guaranteed"
+                  ? "Booking Confirmed & Voucher Issued"
                   : "Booking Request Received · Awaiting Payment / Confirmation"}
               </span>
               <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">

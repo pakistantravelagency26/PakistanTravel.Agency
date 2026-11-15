@@ -38,7 +38,7 @@ export function generateBookingConfirmationHtml(booking: BookingRecord): string 
         <div class="container">
           <div class="header">
             <h1>PakistanTravel.agency</h1>
-            <div class="badge">Booking Confirmed & Guaranteed</div>
+            <div class="badge">Booking Confirmed</div>
           </div>
           <div class="content">
             <h2>Assalam-o-Alaikum, ${booking.guestName}!</h2>

@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Search and compare guided tour packages across Hunza, Skardu, Swat, and Kumrat from independent local tour operators.",
       images: [
         {
-          url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
+          url: `${siteUrl}/og?title=Search+Northern+Pakistan+Tour+Packages&category=TOUR%20SEARCH&subtitle=Compare+Guided+Tours+Across+Hunza%2C+Skardu%2C+Swat`,
           width: 1200,
           height: 630,
           alt: "Search Tour Packages across Northern Pakistan",
@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Search Northern Pakistan Tour Packages",
       description:
         "Search and compare guided tour packages across Hunza, Skardu, Swat, and Kumrat from independent local tour operators.",
-      images: ["https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200"],
+      images: [`${siteUrl}/og?title=Search+Northern+Pakistan+Tour+Packages&category=TOUR%20SEARCH&subtitle=Compare+Guided+Tours+Across+Hunza%2C+Skardu%2C+Swat`],
     },
   };
 }

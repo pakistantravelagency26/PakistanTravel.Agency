@@ -71,7 +71,7 @@ export function buildCustomerBookingConfirmationEmail(data: BookingEmailData) {
         <div class="wrapper">
           <div class="header">
             <h1>PakistanTravel.Agency</h1>
-            <div class="tag">Booking Confirmed & Guaranteed</div>
+            <div class="tag">Booking Confirmed</div>
           </div>
           <div class="body">
             <h2 style="font-size: 18px; margin-top: 0; color: #0f172a;">Assalam-o-Alaikum, ${escapeHtml(data.guestName)}!</h2>
@@ -122,7 +122,7 @@ export function buildCustomerBookingConfirmationEmail(data: BookingEmailData) {
 
             <div style="background: #f1f5f9; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
               <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 6px;">Your Tour Operator:</span>
-              <strong style="color: #0f172a; font-size: 14px;">${escapeHtml(data.vendorBusinessName || "Local Verified Partner")}</strong>
+              <strong style="color: #0f172a; font-size: 14px;">${escapeHtml(data.vendorBusinessName || "Local Tour Operator")}</strong>
               ${data.vendorPhone ? `<div style="font-size: 13px; color: #475569; margin-top: 4px;">Operator Contact: <strong>${escapeHtml(data.vendorPhone)}</strong></div>` : ""}
               ${data.vendorWhatsapp ? `<div style="font-size: 13px; color: #0A5C36; margin-top: 2px;">Operator WhatsApp: <strong>${escapeHtml(data.vendorWhatsapp)}</strong></div>` : ""}
             </div>
@@ -154,7 +154,7 @@ Your reservation has been confirmed:
 - Dates: ${data.startDate} to ${data.endDate} (${data.nightsCount} Nights)
 - Guests: ${data.guestsCount} Person(s)
 - Total Amount: PKR ${data.totalAmount.toLocaleString()} (${data.paymentStatus})
-${data.balanceDue > 0 ? `- Balance Due on Departure: PKR ${data.balanceDue.toLocaleString()}\n` : ""}- Tour Operator: ${data.vendorBusinessName || "Local Verified Partner"}
+${data.balanceDue > 0 ? `- Balance Due on Departure: PKR ${data.balanceDue.toLocaleString()}\n` : ""}- Tour Operator: ${data.vendorBusinessName || "Local Tour Operator"}
 ${data.vendorPhone ? `- Operator Contact: ${data.vendorPhone}\n` : ""}
 Download your Official Travel Voucher:
 ${voucherUrl}

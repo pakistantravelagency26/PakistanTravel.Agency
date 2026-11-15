@@ -242,7 +242,7 @@ export default async function TourIntentPage({ params }: TourIntentPageProps) {
                   New Seasonal Packages Are Being Onboarded
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Local operators are currently updating their 2026 departure dates and itineraries for {intent.title.toLowerCase()}. Submit a custom trip request below to receive custom proposals directly from verified operators.
+                  Local operators are currently updating their 2026 departure dates and itineraries for {intent.title.toLowerCase()}. Submit a custom trip request below to receive custom proposals directly from licensed local operators.
                 </p>
               </div>
 

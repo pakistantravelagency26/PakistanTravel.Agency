@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
   }
 
   const canonicalUrl = `${siteUrl}/destinations/${dest.slug}`;
+  const ogImageUrl = `${siteUrl}/og?title=${encodeURIComponent(dest.name + " Travel Guide")}&category=DESTINATION&subtitle=${encodeURIComponent((dest.tagline || dest.name) + " • " + dest.province)}`;
 
   return {
     title: dest.seoTitle,
@@ -61,9 +62,9 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
       description: dest.seoDescription,
       images: [
         {
-          url: dest.heroImage,
-          width: 1600,
-          height: 900,
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
           alt: `${dest.name} northern Pakistan scenery`,
         },
       ],
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: DestinationPageProps): Promis
       card: "summary_large_image",
       title: dest.seoTitle,
       description: dest.seoDescription,
-      images: [dest.heroImage],
+      images: [ogImageUrl],
     },
   };
 }

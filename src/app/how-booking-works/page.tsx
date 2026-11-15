@@ -198,7 +198,7 @@ export default function HowBookingWorksPage() {
             <div className="space-y-2">
               <h2 className="text-xl font-bold text-slate-900">Receive Your Confirmed Digital Tour Voucher</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Once payment is verified, your official digital tour voucher is generated instantly. The voucher contains your unique booking reference ID, verified operator contact phone numbers, assigned assembly point in Islamabad, departure schedule, and mandatory packing checklist.
+                Once payment is verified, your official digital tour voucher is generated instantly. The voucher contains your unique booking reference ID, direct operator contact phone numbers, assigned assembly point in Islamabad, departure schedule, and mandatory packing checklist.
               </p>
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function HowBookingWorksPage() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
           <div className="flex items-center gap-2.5 text-slate-900">
             <ShieldCheck className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-lg font-bold">Standard Platform Cancellation Guarantee</h2>
+            <h2 className="text-lg font-bold">Standard Platform Cancellation Policy</h2>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             All tours booked through PakistanTravel are backed by our transparent cancellation tier:
