@@ -28,6 +28,7 @@ import {
   Bed,
   UtensilsCrossed,
   LifeBuoy,
+  AlertCircle,
   Camera,
   Layers
 } from "lucide-react";
@@ -440,7 +441,8 @@ export default function NewListingPage() {
     try {
       const validDepartures = departures.map((d) => {
         const start = new Date(d.startDate);
-        const end = new Date(start.getTime() + (Number(formData.durationDays) || 5) * 24 * 60 * 60 * 1000);
+        const safeDays = Math.max(1, Number(formData.durationDays) || 5);
+        const end = new Date(start.getTime() + (safeDays - 1) * 24 * 60 * 60 * 1000);
         return {
           startDate: d.startDate,
           endDate: end.toISOString().split("T")[0],
@@ -664,7 +666,8 @@ export default function NewListingPage() {
                   required
                   value={formData.durationNights}
                   onChange={(e) => {
-                    const nights = Math.max(0, Number(e.target.value));
+                    const maxNights = Math.max(0, formData.durationDays - 1);
+                    const nights = Math.min(maxNights, Math.max(0, Number(e.target.value)));
                     setFormData({
                       ...formData,
                       durationNights: nights,
@@ -872,6 +875,17 @@ export default function NewListingPage() {
                 </span>
               </div>
             </div>
+
+            
+            {/* Warning if pricing tiers are identical */}
+            {(formData.basePrice > 0 && (formData.couplePrice === formData.basePrice || formData.soloPrice === formData.basePrice)) && (
+              <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-800 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  <strong>Pricing Alert:</strong> Two or more package tiers have identical pricing (PKR {formData.basePrice.toLocaleString()}). Each tier (Sharing Room, Dedicated Private Room for Couple, and Solo Single Room) should have its own distinct price to reflect differing room occupancy.
+                </span>
+              </div>
+            )}
 
             {/* 4. Group & Family Discount Tiers ("itny log ho gy tu itny amount bane ga") */}
             <div className="p-4 sm:p-5 rounded-2xl bg-purple-50/40 border border-purple-200 space-y-3">
@@ -1299,7 +1313,8 @@ export default function NewListingPage() {
             <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
               {departures.map((dep, idx) => {
                 const start = new Date(dep.startDate);
-                const end = new Date(start.getTime() + (Number(formData.durationDays) || 5) * 24 * 60 * 60 * 1000);
+                const safeDays = Math.max(1, Number(formData.durationDays) || 5);
+        const end = new Date(start.getTime() + (safeDays - 1) * 24 * 60 * 60 * 1000);
                 const endDateStr = isNaN(end.getTime()) ? "" : end.toISOString().split("T")[0];
 
                 return (

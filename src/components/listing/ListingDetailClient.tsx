@@ -33,6 +33,7 @@ import {
 import type { ListingData } from "@/services/listing.service";
 import { WriteReviewModal } from "@/components/reviews/WriteReviewModal";
 import { AskOperatorModal } from "./AskOperatorModal";
+import { TourStructuredDetails } from "./TourStructuredDetails";
 
 interface ListingDetailClientProps {
   listing: ListingData;
@@ -99,8 +100,34 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
   const [isSoloSupplementApplied, setIsSoloSupplementApplied] = useState(true);
   const activeSupplement = isSingleTraveler && isSoloSupplementApplied ? singleSupplementRate : 0;
 
+  const isPrivateUnit = selectedUnit?.title?.toLowerCase().includes("private") || selectedUnit?.title?.toLowerCase().includes("couple");
+  const isSoloUnit = selectedUnit?.title?.toLowerCase().includes("solo") || selectedUnit?.title?.toLowerCase().includes("single");
+
   // Pricing Calculation
-  const baseTravelerPrice = isTour ? unitPrice * selectedQuantity : unitPrice * nightsCount * selectedQuantity;
+  let baseTravelerPrice = 0;
+  let groupDiscountApplied = 0;
+
+  if (isTour) {
+    if (isPrivateUnit) {
+      // 1 private room covers up to 2 travelers
+      const rooms = Math.ceil(selectedQuantity / 2);
+      baseTravelerPrice = unitPrice * rooms;
+    } else if (isSoloUnit) {
+      baseTravelerPrice = unitPrice * selectedQuantity;
+    } else {
+      // Sharing room: apply group discount for 5+ travelers
+      const standardRate = unitPrice;
+      const groupRate = unitPrice >= 49000 ? 42000 : Math.round(unitPrice * 0.85);
+      if (selectedQuantity >= 5 && standardRate > groupRate) {
+        baseTravelerPrice = groupRate * selectedQuantity;
+        groupDiscountApplied = (standardRate - groupRate) * selectedQuantity;
+      } else {
+        baseTravelerPrice = standardRate * selectedQuantity;
+      }
+    }
+  } else {
+    baseTravelerPrice = unitPrice * nightsCount * selectedQuantity;
+  }
 
   const totalPrice = baseTravelerPrice;
   const depositPercent = listing.depositPercent || 25;
@@ -279,30 +306,15 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Left Columns */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Overview & Key Highlights */}
-            <section id="overview" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h2 className="text-lg font-bold text-slate-900">
-                {isTour ? "About this Tour & Itinerary" : "About this Property"}
-              </h2>
-              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
-                {listing.description}
-              </p>
-
-              {/* Data-Driven Tour & Property Inclusions */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 text-xs">
-                {(listing.amenities && listing.amenities.length > 0 ? listing.amenities : [
-                  "Included Transportation",
-                  "Licensed Local Guide",
-                  "Confirmed Accommodations",
-                  "Daily Breakfast Included"
-                ]).slice(0, 6).map((amenity, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-slate-700">
-                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span className="truncate">{amenity}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
+            {/* Structured Tour Details or Property Overview */}
+            {isTour ? (
+              <TourStructuredDetails listing={listing} />
+            ) : (
+              <section id="overview" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h2 className="text-lg font-bold text-slate-900">About this Property</h2>
+                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{listing.description}</p>
+              </section>
+            )}
 
             {/* Tour Package / Seat Tier Selection Table */}
             <section id="booking-table" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
@@ -351,8 +363,14 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                         <div className="shrink-0 flex flex-col justify-between items-start md:items-end text-left md:text-right border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                           <div>
                             <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                              {isTour ? "Price per traveler" : "Price per night"}
-                            </span>
+                                {unit.title.toLowerCase().includes("private") || unit.title.toLowerCase().includes("couple")
+                                  ? "Private Room (2 Travelers)"
+                                  : unit.title.toLowerCase().includes("solo")
+                                  ? "Single Room (1 Traveler)"
+                                  : isTour
+                                  ? "Price per traveler (Twin Sharing)"
+                                  : "Price per night"}
+                              </span>
                             <p className="text-xl font-extrabold text-slate-900">
                               PKR {unit.basePrice.toLocaleString()}
                             </p>
@@ -692,22 +710,29 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               </div>
 
               {/* Itemized Price Breakdown */}
-              <div className="space-y-1 text-xs border-t border-slate-100 pt-3">
+              <div className="space-y-1.5 text-xs border-t border-slate-100 pt-3">
                 <div className="flex justify-between text-slate-600">
-                  <span>Base Rate ({selectedQuantity} {selectedQuantity > 1 ? "Travelers" : "Traveler"}):</span>
-                  <span>PKR {baseTravelerPrice.toLocaleString()}</span>
+                  <span>Base Rate ({selectedQuantity} {selectedQuantity > 1 ? "Travelers" : "Traveler"} · {selectedUnit ? formatUnitTitle(selectedUnit.title) : "Tour"}):</span>
+                  <span>PKR {(baseTravelerPrice + groupDiscountApplied).toLocaleString()}</span>
                 </div>
+
+                {groupDiscountApplied > 0 && (
+                  <div className="flex justify-between text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60">
+                    <span>Group Discount (5+ Travelers):</span>
+                    <span>-PKR {groupDiscountApplied.toLocaleString()}</span>
+                  </div>
+                )}
                 
                 <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">
                   <span>Total Package Price:</span>
                   <span>PKR {totalPrice.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[11px] text-slate-500 pt-1">
-                  <span>Online Deposit Due ({depositPercent}%):</span>
+                  <span>Online Advance Deposit (25%):</span>
                   <span className="font-bold text-emerald-800">PKR {depositAmount.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Balance Due on Arrival:</span>
+                  <span>Balance Due on Arrival (75%):</span>
                   <span className="font-bold text-slate-700">PKR {balanceDue.toLocaleString()}</span>
                 </div>
               </div>

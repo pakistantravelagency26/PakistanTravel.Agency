@@ -365,7 +365,9 @@ export async function POST(req: Request) {
       isEdited: false,
       submittedAt: new Date().toISOString(),
       type: "TOUR",
-      duration: body.duration || "5 Days / 4 Nights",
+      durationDays: Math.max(1, Number(body.durationDays || 5)),
+      durationNights: Math.max(0, Math.min((Math.max(1, Number(body.durationDays || 5)) - 1), Number(body.durationNights ?? (Math.max(1, Number(body.durationDays || 5)) - 1)))),
+      duration: `${Math.max(1, Number(body.durationDays || 5))} Days / ${Math.max(0, Math.min((Math.max(1, Number(body.durationDays || 5)) - 1), Number(body.durationNights ?? (Math.max(1, Number(body.durationDays || 5)) - 1))))} Nights`,
       destinationSlug: body.destinationSlug || body.destination || "hunza",
       destinationName: body.destinationName || body.city || "Hunza Valley",
       province: body.province || "Gilgit-Baltistan",
@@ -469,8 +471,8 @@ export async function POST(req: Request) {
           city: newListing.city,
           photos: newListing.photos,
           amenities: newListing.amenities,
-          durationDays: Number(body.durationDays) || 5,
-          durationNights: body.durationNights !== undefined ? Number(body.durationNights) : 4,
+          durationDays: Math.max(1, Number(body.durationDays) || 5),
+          durationNights: Math.max(0, Math.min((Math.max(1, Number(body.durationDays) || 5)) - 1, Number(body.durationNights ?? ((Math.max(1, Number(body.durationDays) || 5)) - 1)))),
           singleSupplement: newListing.singleSupplement !== undefined ? Number(newListing.singleSupplement) : Number(body.singleSupplement || 0),
           depositPercent: Number(body.depositPercent || 25),
           cancellationPolicy: newListing.cancellationPolicy,
@@ -505,8 +507,9 @@ export async function POST(req: Request) {
         for (const dep of departureItems) {
           const s = dep.startDate ? new Date(dep.startDate) : new Date(Date.now() + 7 * 86400000);
           const validStart = isNaN(s.getTime()) ? new Date(Date.now() + 7 * 86400000) : s;
-          const e = dep.endDate ? new Date(dep.endDate) : new Date(validStart.getTime() + (Number(body.durationDays) || 5) * 86400000);
-          const validEnd = isNaN(e.getTime()) ? new Date(validStart.getTime() + (Number(body.durationDays) || 5) * 86400000) : e;
+          const safeDays = Math.max(1, Number(body.durationDays) || 5);
+          const e = dep.endDate ? new Date(dep.endDate) : new Date(validStart.getTime() + (safeDays - 1) * 86400000);
+          const validEnd = isNaN(e.getTime()) ? new Date(validStart.getTime() + (safeDays - 1) * 86400000) : e;
 
           await prisma.departure.create({
             data: {
