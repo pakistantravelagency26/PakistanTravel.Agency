@@ -85,7 +85,7 @@ export default function TermsPage() {
         <div>
           <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Marketplace Agreement</span>
           <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Terms of Service &amp; Booking Policy</h1>
-          <p className="text-xs text-slate-500 mt-1">Last updated: Autumn 2026 · {siteConfig.name}</p>
+          <p className="text-xs text-slate-500 mt-1">Last updated: November 15, 2026 · {siteConfig.name}</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-sky-50 border border-sky-100 text-xs sm:text-sm text-sky-900 flex items-start gap-3">
@@ -93,7 +93,7 @@ export default function TermsPage() {
           <div>
             <p className="font-bold">Important Notice Regarding Platform Role:</p>
             <p className="mt-0.5 text-sky-800">
-              {siteConfig.name} is an online booking intermediary technology platform connecting independent travelers with registered local tour operators, transport owners, and guides across Pakistan. Please read these terms carefully before placing a booking.
+              {siteConfig.name} is an online booking intermediary technology platform connecting independent travelers with independent local tour operators, transport owners, and guides across Pakistan. Please read these terms carefully before placing a booking.
             </p>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function TermsPage() {
                   <strong>Traveler Booking Fees:</strong> Travelers pay the direct operator listing price. The platform charges zero booking fees to travelers.
                 </li>
                 <li>
-                  <strong>Platform Commission:</strong> A customized platform commission agreed upon per tour package (percentage, fixed amount, or waived) is applied to the gross booking value upon completed reservations. Operators receive their guaranteed demanded base rate net of applicable payment processing charges.
+                  <strong>Platform Commission:</strong> A flat 10% platform commission is deducted from the gross booking value upon completed reservations. Travelers pay the direct operator listing price with zero platform booking fees. Operators receive their guaranteed demanded base rate net of applicable payment processing charges.
                 </li>
                 <li>
                   <strong>Payment Processing Fees:</strong> Third-party payment gateway and transaction processing fees (including JazzCash, debit/credit card merchant fees, or interbank IBFT charges) are deducted separately from operator disbursements.
@@ -242,6 +242,76 @@ export default function TermsPage() {
             <div className="space-y-2 text-slate-700">
               <p>
                 All Pakistani citizens traveling to Gilgit-Baltistan, Azad Kashmir, or Khyber Pakhtunkhwa must carry their original valid CNIC. International visitors and overseas Pakistanis (NICOP) must carry valid original passports and relevant tourist visas. Checkpoints at Babusar Top, Diamer, Kohistan, and Jaglot require identity registration.
+              </p>
+            </div>
+          </section>
+
+                    {/* Section 8 */}
+          {/* DRAFT - NEEDS LEGAL REVIEW BY PAKISTANI COUNSEL */}
+          <section className="space-y-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>8. User Accounts &amp; Security</span>
+            </h2>
+            <div className="space-y-2 text-slate-700">
+              <p>
+                Travelers and operators creating accounts must provide accurate, current, and complete registration credentials. You are solely responsible for maintaining the confidentiality of your account credentials and password. Any unauthorized access or suspected security compromise must be reported immediately to our support desk.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 9 */}
+          {/* DRAFT - NEEDS LEGAL REVIEW BY PAKISTANI COUNSEL */}
+          <section className="space-y-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>9. Prohibited Activities &amp; Content</span>
+            </h2>
+            <div className="space-y-2 text-slate-700">
+              <p>
+                Users agree not to: (a) publish fraudulent, misleading, or unauthorized tour listings; (b) reverse engineer, scrape, or extract platform content or source code; (c) post defamatory, abusive, or culturally insensitive remarks; (d) facilitate unlicensed or unlawful activities in violation of Pakistani law; or (e) attempt to bypass platform communication safeguards.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 10 */}
+          {/* DRAFT - NEEDS LEGAL REVIEW BY PAKISTANI COUNSEL */}
+          <section className="space-y-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Handshake className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>10. Dispute Resolution &amp; Escalation</span>
+            </h2>
+            <div className="space-y-2 text-slate-700">
+              <p>
+                In the event of a dispute, grievance, or service dissatisfaction arising from a booking, travelers and operators agree to first submit an official support ticket to the platform support desk ({supportEmail || "support@pakistantravel.agency"}). Both parties agree to participate in good-faith administrative mediation and dispute resolution through the platform support team before seeking external legal or formal administrative remedies.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 11 */}
+          {/* DRAFT - NEEDS LEGAL REVIEW BY PAKISTANI COUNSEL */}
+          <section className="space-y-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-slate-600 shrink-0" />
+              <span>11. Governing Law &amp; Jurisdiction</span>
+            </h2>
+            <div className="space-y-2 text-slate-700">
+              <p>
+                These Terms of Service and any contractual or non-contractual disputes arising hereunder shall be governed by and construed in accordance with the laws of the Islamic Republic of Pakistan. The competent courts situated in Islamabad, Pakistan, shall have exclusive jurisdiction over any unresolved disputes subject to the initial mediation process.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 12 */}
+          {/* DRAFT - NEEDS LEGAL REVIEW BY PAKISTANI COUNSEL */}
+          <section className="space-y-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>12. Modifications to Terms</span>
+            </h2>
+            <div className="space-y-2 text-slate-700">
+              <p>
+                We reserve the right to revise or amend these Terms of Service at any time to reflect operational, legal, or regulatory updates. Continued use of {siteConfig.name} following the publication of revised terms constitutes full acceptance of the updated terms.
               </p>
             </div>
           </section>

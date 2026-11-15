@@ -11,7 +11,7 @@ import {
 } from "@/services/listing.service";
 import { formatDbListing } from "@/services/serverListing.service";
 import { prisma } from "@/lib/prisma";
-import { COMMISSION_PERCENT } from "@/config/site";
+import { COMMISSION_PERCENT, siteConfig } from "@/config/site";
 import { requireRole, requireVendorOwnership } from "@/lib/permissions";
 import { getTrustedClientIp } from "@/lib/clientIp";
 import { checkServerlessRateLimit } from "@/lib/serverlessRateLimiter";
@@ -374,24 +374,16 @@ export async function POST(req: Request) {
       vendorPrice: Number(body.basePrice),
       basePrice: Number(body.basePrice),
       commissionRate: COMMISSION_PERCENT,
-      avgRating: 5.0,
-      totalReviews: 1,
+      avgRating: 0,
+      totalReviews: 0,
       isFeatured: body.isFeatured ?? true,
       freeCancellation: true,
-      freeCancellationDays: Number(body.freeCancellationDays || 3),
+      freeCancellationDays: Number(body.freeCancellationDays || siteConfig.cancellationPolicy.fullRefundDays),
       badge: "Guided Tour Package",
       photos: photosList,
-      amenities: Array.isArray(body.amenities) && body.amenities.length > 0 
-        ? body.amenities 
-        : [
-            "Dedicated 4x4 Mountain Transport",
-            "Certified Alpine Guide",
-            "Daily Breakfast & Dinner Included",
-            "Standard Hotel Accommodations Included",
-            "First Aid & Emergency Support",
-          ],
+      amenities: Array.isArray(body.amenities) ? body.amenities.filter((a: any) => typeof a === "string" && a.trim().length > 0) : [],
       description: enrichedDescription,
-      cancellationPolicy: `Free cancellation until ${body.freeCancellationDays || 3} days before trip start date. 100% refund.`,
+      cancellationPolicy: (body as any).cancellationPolicy?.trim() || siteConfig.cancellationPolicy.summary,
       singleSupplement: singleSupplementCalc,
       vendor: {
         id: vendorId,

@@ -42,7 +42,7 @@ export const blogPosts: BlogPost[] = [
     lastUpdatedIso: "2026-11-08",
     author: {
       name: "PakistanTravel Editorial Team",
-      role: "Regional Destination Specialists",
+      role: "PakistanTravel Editorial Team",
     },
     readTime: "7 min read",
     category: "Cost & Budget Guides",
@@ -139,7 +139,7 @@ export const blogPosts: BlogPost[] = [
     lastUpdatedIso: "2026-11-08",
     author: {
       name: "PakistanTravel Editorial Team",
-      role: "Regional Destination Specialists",
+      role: "PakistanTravel Editorial Team",
     },
     readTime: "6 min read",
     category: "Seasonal Guides",
@@ -209,7 +209,7 @@ export const blogPosts: BlogPost[] = [
     lastUpdatedIso: "2026-11-08",
     author: {
       name: "PakistanTravel Editorial Team",
-      role: "Regional Destination Specialists",
+      role: "PakistanTravel Editorial Team",
     },
     readTime: "8 min read",
     category: "Route & Adventure Guides",
@@ -284,7 +284,7 @@ export const blogPosts: BlogPost[] = [
     lastUpdatedIso: "2026-11-08",
     author: {
       name: "PakistanTravel Editorial Team",
-      role: "Regional Destination Specialists",
+      role: "PakistanTravel Editorial Team",
     },
     readTime: "7 min read",
     category: "Comparison Guides",
@@ -349,7 +349,7 @@ export const blogPosts: BlogPost[] = [
     lastUpdatedIso: "2026-11-08",
     author: {
       name: "PakistanTravel Editorial Team",
-      role: "Regional Destination Specialists",
+      role: "PakistanTravel Editorial Team",
     },
     readTime: "6 min read",
     category: "Preparation & Gear",

@@ -344,7 +344,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           </div>
         </section>
 
-        {/* Section 5: Real Verified Database Listings */}
+        {/* Section 5: Available Tour Packages */}
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>

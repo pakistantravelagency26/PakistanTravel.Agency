@@ -17,6 +17,7 @@ export const SITE_URL =
     : CANONICAL_SITE_URL;
 export const COMMISSION_PERCENT = Number(process.env.NEXT_PUBLIC_COMMISSION_PERCENT || 10);
 export const PAYOUT_TIMING = "within 48 hours of tour departure";
+export const TERMS_LAST_UPDATED = "November 15, 2026";
 
 export const ADMIN_NOTIFICATION_EMAILS: string[] = [
   process.env.ADMIN_ALERT_EMAIL || "ops@pakistantravel.agency",
@@ -46,6 +47,7 @@ export interface SiteConfig {
   domain: string;
   url: string;
   tagline: string;
+  termsLastUpdated: string;
   contact: {
     // Support email displayed on the platform (TODO: Confirm real support inbox)
     supportEmail: string;
@@ -96,6 +98,7 @@ export const siteConfig: SiteConfig = {
   domain: "www.pakistantravel.agency",
   url: SITE_URL,
   tagline: "Northern Pakistan Tour Packages",
+  termsLastUpdated: TERMS_LAST_UPDATED,
 
   contact: {
     // TODO: User to confirm public support email. If empty, the UI hides the email line.
@@ -123,7 +126,7 @@ export const siteConfig: SiteConfig = {
     commissionPercent: COMMISSION_PERCENT,
     defaultCommissionRate: COMMISSION_PERCENT / 100,
     commissionModel: "deducted_from_vendor",
-    commissionExplanation: "Transparent platform commission is customized and agreed per tour package upon publishing. Operators receive their guaranteed net demanded rate.",
+    commissionExplanation: "Transparent flat 10% platform commission is deducted from operator disbursements upon tour departure. Operators receive their guaranteed net demanded rate with zero monthly listing or software fees.",
     gatewayFeesDeductedSeparately: true,
     gatewayFeesNote: "Payment gateway processing fees (JazzCash, credit/debit cards, bank transfer) are deducted separately from operator disbursements.",
     payoutTiming: PAYOUT_TIMING,

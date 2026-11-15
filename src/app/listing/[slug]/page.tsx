@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: ListingPageProps): Promise<Me
     description = `Book ${listing.title.slice(0, 45)} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with official tour vouchers.`;
   }
   if (description.length < 140) {
-    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital tour vouchers and verified local guidance.`;
+    description = `Book ${listing.title} in ${listing.city} starting from PKR ${listing.basePrice.toLocaleString()} with digital tour vouchers and local operator guidance.`;
   }
   if (description.length > 155) {
     description = description.slice(0, 154).trim();

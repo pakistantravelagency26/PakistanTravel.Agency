@@ -48,7 +48,7 @@ export const tourIntentsData: Record<string, TourIntentData> = {
     introText: [
       "Skardu represents the crown jewel of high-altitude mountain basins in northern Pakistan. Surrounded by the giants of the central Karakoram and situated along the Indus River, guided Skardu tour packages showcase dramatic landscapes ranging from the Katpana and Sarfaranga Cold Deserts to Lower Kachura (Shangrila), Upper Kachura Lake, and restored heritage palaces in Shigar and Khaplu.",
       "A primary highlight of summer itineraries is the 4x4 safari across Deosai National Park, the second-highest alpine plateau on Earth at an average elevation of 4,114 meters. The Deosai track is strictly accessible from mid-July to mid-September, when wildflower blooms surround Sheosar Lake and snowdrifts have melted.",
-      "Packages listed on our platform are hosted by verified independent tour operators from Baltistan. Because commercial flights to Skardu International Airport operate under Visual Flight Rules (VFR) and are weather-dependent, operators offer flexible contingency routing via the Jaglot-Skardu road."
+      "Packages listed on our platform are hosted by independent local tour operators from Baltistan. Because commercial flights to Skardu International Airport operate under Visual Flight Rules (VFR) and are weather-dependent, operators offer flexible contingency routing via the Jaglot-Skardu road."
     ],
     faqs: [
       {

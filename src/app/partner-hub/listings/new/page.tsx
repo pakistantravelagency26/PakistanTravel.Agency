@@ -105,7 +105,7 @@ export default function NewListingPage() {
   // Inclusions & Perks
   const [amenities, setAmenities] = useState<string[]>([
     "Dedicated 4x4 Mountain Transport",
-    "Certified Alpine Guide & Tour Leader",
+    "Local Mountain Guide & Tour Leader",
     "Daily Continental & Desi Breakfast",
     "Nightly Dinner Buffet & BBQ Night",
     "Standard / Deluxe Hotel Night Stays",
@@ -174,7 +174,7 @@ export default function NewListingPage() {
       category: "Guide, Health & Safety",
       icon: LifeBuoy,
       perks: [
-        "Certified Alpine Guide & Tour Leader",
+        "Local Mountain Guide & Tour Leader",
         "First Aid Medical Kit & Emergency Support",
         "Emergency Portable Oxygen Cylinders",
         "24/7 Operations Room & Checkpost Clearance Support",

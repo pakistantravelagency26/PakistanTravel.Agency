@@ -212,7 +212,7 @@ export async function GET(
     </div>
 
     <div class="footer">
-      <p style="margin: 0;">PakistanTravel.Agency · Verified Tour Operator Marketplace</p>
+      <p style="margin: 0;">PakistanTravel.Agency · Independent Tour Operator Marketplace</p>
       <p style="margin: 4px 0 0;">Customer Support: ${siteConfig.contact.supportEmail} · AI Assistant 24/7</p>
     </div>
   </div>

@@ -515,8 +515,13 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               </div>
 
               {/* Review Cards */}
-              <div className="space-y-4">
-                {reviewsList.map((rev) => (
+              {reviewsList.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs text-slate-500">
+                  No guest reviews posted yet. Completed travelers can leave verified reviews after their trip.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviewsList.map((rev) => (
                   <div key={rev.id} className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
                     <div className="flex justify-between items-center">
                       <div>
@@ -539,6 +544,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                   </div>
                 ))}
               </div>
+            )}
             </section>
           </div>
 
@@ -741,7 +747,12 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
                 <div>
                   <h4 className="font-bold text-sm text-slate-900">{listing.vendor.businessName}</h4>
                   <p className="text-[11px] text-slate-500">
-                    Partner since {listing.vendor.joinedYear} · ★ {listing.vendor.rating} Rating
+                    {[
+                      listing.vendor.joinedYear ? `Partner since ${listing.vendor.joinedYear}` : null,
+                      listing.vendor.rating && listing.vendor.totalReviews && listing.vendor.totalReviews > 0
+                        ? `★ ${listing.vendor.rating} (${listing.vendor.totalReviews} ${listing.vendor.totalReviews === 1 ? "review" : "reviews"})`
+                        : null,
+                    ].filter(Boolean).join(" · ") || "Independent Local Operator"}
                   </p>
                 </div>
               </div>
@@ -766,10 +777,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
               )}
 
               <div className="pt-1 space-y-2.5">
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200/60 font-semibold">
-                  <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Typically responds within 2 hours</span>
-                </div>
+                
 
                 <button
                   type="button"

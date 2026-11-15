@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     absolute: "Northern Pakistan Tour Marketplace | PakistanTravel",
   },
   description:
-    "Book northern Pakistan tours from independent local operators with departures from Islamabad, Lahore, and Karachi to Hunza, Skardu, and Swat.",
+    "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat.",
   alternates: {
     canonical: siteUrl,
   },
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "PakistanTravel",
     title: "Northern Pakistan Tour Marketplace | PakistanTravel",
     description:
-      "Book northern Pakistan tours from independent local operators with departures from Islamabad, Lahore, and Karachi to Hunza, Skardu, and Swat.",
+      "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat.",
     images: [
       {
         url: `${siteUrl}/images/og/home-og.jpg`,
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Northern Pakistan Tour Marketplace | PakistanTravel",
     description:
-      "Book northern Pakistan tours from independent local operators with departures from Islamabad, Lahore, and Karachi to Hunza, Skardu, and Swat.",
+      "Book northern Pakistan tours from independent local operators with scheduled departures from Islamabad to Hunza, Skardu, and Swat.",
     images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
@@ -86,7 +86,7 @@ export default async function HomePage() {
       {/* Dynamic Top Announcement Banner */}
       {announcement?.isEnabled && announcement?.text && (
         <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-700 text-white text-xs py-2.5 px-4 text-center font-semibold shadow-sm flex items-center justify-center gap-2">
-          <span>{announcement.text}</span>
+          <span>{listings.length > 0 ? `Autumn & Early Winter 2026 Season Booking Open across ${Array.from(new Set(listings.map((l: any) => l.destinationName || l.city))).join(", ")}!` : (announcement.text || "Explore Northern Pakistan Guided Tour Packages & Scheduled Departures")}</span>
           {announcement.linkUrl && (
             <Link
               href={announcement.linkUrl}

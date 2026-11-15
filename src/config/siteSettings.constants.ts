@@ -193,7 +193,7 @@ export const DEFAULT_SITE_SETTINGS = {
   } as AnnouncementSettings,
 
   MARKETPLACE_SECTION: {
-    badgeText: "Verified Tour Operator Marketplace",
+    badgeText: "Northern Pakistan Tour Marketplace",
     title: "Explore Northern Tour Packages",
     subtitle: "Compare guided tour packages from independent local tour operators across Pakistan",
     emptyStateTitle: "Marketplace Ready for Tours",
@@ -343,7 +343,7 @@ export const DEFAULT_SITE_SETTINGS = {
   PAGE_BLOG: {
     badgeText: "Northern Travel Insights & Guides",
     heading: "Pakistan Travel Blog & Expeditions",
-    subheading: "Essential trip planning advice, real seasonal costs, route conditions, and gear checklists curated by mountain travel writers.",
+    subheading: "Essential trip planning advice, real seasonal costs, route conditions, and gear checklists curated by the PakistanTravel Editorial Team.",
   } as PageBlogSettings,
 };
 

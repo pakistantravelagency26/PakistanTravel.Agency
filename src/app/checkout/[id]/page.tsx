@@ -589,7 +589,7 @@ function CheckoutContent() {
                 </div>
                 {depId && (
                   <div className="flex justify-between text-[11px] text-emerald-700 font-semibold pt-0.5">
-                    <span>Guaranteed Departure:</span>
+                    <span>Scheduled Departure:</span>
                     <span>Fixed Seat Locked</span>
                   </div>
                 )}

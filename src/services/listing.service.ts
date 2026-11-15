@@ -58,8 +58,9 @@ export interface ListingData {
     businessName: string;
     city?: string;
     verified: boolean;
-    joinedYear: number;
-    rating: number;
+    joinedYear?: number;
+    rating?: number;
+    totalReviews?: number;
     licenseNumber?: string;
     registrationNumber?: string;
   };

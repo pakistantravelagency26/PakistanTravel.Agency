@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { formatDbListing } from "@/services/serverListing.service";
+import { getActiveDbListings, formatDbListing } from "@/services/serverListing.service";
 import { SITE_URL, siteConfig } from "@/config/site";
 import { MapPin, Calendar, Compass, ChevronRight, HelpCircle, ShieldCheck } from "lucide-react";
 import { CustomTripRequestForm } from "@/components/tours/CustomTripRequestForm";
@@ -265,7 +265,7 @@ export default async function ToursPage() {
                   New Seasonal Tour Departures Loading
                 </h3>
                 <p className="text-slate-600 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
-                  Independent tour operators are currently scheduling upcoming spring and summer departures. You can request a custom tailored departure using the form below.
+                  Independent local tour operators are currently preparing upcoming seasonal departures. You can request a custom tailored departure using the form below.
                 </p>
               </div>
 

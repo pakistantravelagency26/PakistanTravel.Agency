@@ -94,8 +94,9 @@ export interface PublicVendorProfile {
   businessName: string;
   city?: string;
   verified: boolean;
-  joinedYear: number;
-  rating: number;
+  joinedYear?: number;
+  rating?: number;
+  totalReviews?: number;
   licenseNumber?: string;
   registrationNumber?: string;
 }
@@ -110,8 +111,9 @@ export function sanitizePublicVendor(rawVendor: any): PublicVendorProfile {
     businessName: rawVendor?.businessName || "Local Travel Partner",
     city: rawVendor?.city,
     verified: rawVendor?.status === "VERIFIED",
-    joinedYear: 2024,
-    rating: 4.95,
+    joinedYear: rawVendor?.createdAt ? new Date(rawVendor.createdAt).getFullYear() : undefined,
+    rating: rawVendor?.avgRating !== undefined && rawVendor?.avgRating !== null ? Number(rawVendor.avgRating) : undefined,
+    totalReviews: rawVendor?.totalReviews !== undefined && rawVendor?.totalReviews !== null ? Number(rawVendor.totalReviews) : undefined,
     licenseNumber: rawVendor?.cnicOrTaxNumber || undefined,
     registrationNumber: undefined,
   };

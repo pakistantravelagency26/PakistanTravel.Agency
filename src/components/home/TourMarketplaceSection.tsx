@@ -97,7 +97,7 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>{customSettings?.badgeText || "Verified Tour Operator Marketplace"}</span>
+            <span>{customSettings?.badgeText || "Northern Pakistan Tour Marketplace"}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             {customSettings?.title || "Explore Northern Tour Packages"}
