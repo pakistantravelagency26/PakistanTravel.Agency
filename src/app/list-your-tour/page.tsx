@@ -29,9 +29,24 @@ export const metadata: Metadata = {
     locale: "en_PK",
     url: `${siteUrl}/list-your-tour`,
     siteName: "PakistanTravel",
-    title: "List Your Tour Packages",
+    title: "List Your Tour Packages | PakistanTravel",
     description:
       "List your guided tour packages on PakistanTravel to reach travelers across Pakistan. Enjoy digital booking vouchers, local payments, and low commission.",
+    images: [
+      {
+        url: `${siteUrl}/images/og/home-og.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "List Your Tour Packages with PakistanTravel",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "List Your Tour Packages | PakistanTravel",
+    description:
+      "List your guided tour packages on PakistanTravel to reach travelers across Pakistan. Enjoy digital booking vouchers, local payments, and low commission.",
+    images: [`${siteUrl}/images/og/home-og.jpg`],
   },
 };
 

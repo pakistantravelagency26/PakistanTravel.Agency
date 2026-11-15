@@ -242,7 +242,7 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
           >
             <Image
               src={listing.photos[activePhoto] || listing.photos[0]}
-              alt={`${listing.title} Main Gallery View`}
+              alt={`${listing.title} - Mountain tour scenery and travel experience (${activePhoto + 1} of ${listing.photos.length})`}
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -266,24 +266,27 @@ export function ListingDetailClient({ listing }: ListingDetailClientProps) {
 
           {/* Secondary Thumbnail Grid */}
           <div className="md:col-span-2 grid grid-cols-2 gap-3 h-72 sm:h-96">
-            {listing.photos.slice(0, 4).map((photo, index) => (
-              <div
-                key={index}
-                onClick={() => setActivePhoto(index)}
-                className={`relative h-full overflow-hidden cursor-pointer rounded-lg border-2 transition bg-slate-100 ${
-                  activePhoto === index ? "border-brand-emerald" : "border-transparent opacity-80 hover:opacity-100"
-                }`}
-              >
-                <Image 
-                  src={photo} 
-                  alt={`${listing.title} Preview ${index + 1}`} 
-                  fill
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  loading="lazy"
-                  className="object-cover" 
-                />
-              </div>
-            ))}
+            {(listing.photos.length > 1 ? listing.photos.slice(1, 5) : listing.photos).map((photo, index) => {
+              const photoIdx = listing.photos.length > 1 ? index + 1 : index;
+              return (
+                <div
+                  key={photoIdx}
+                  onClick={() => setActivePhoto(photoIdx)}
+                  className={`relative h-full overflow-hidden cursor-pointer rounded-lg border-2 transition bg-slate-100 ${
+                    activePhoto === photoIdx ? "border-brand-emerald" : "border-transparent opacity-80 hover:opacity-100"
+                  }`}
+                >
+                  <Image 
+                    src={photo} 
+                    alt={`${listing.title} - Tour highlight and route landscape view ${photoIdx + 1}`} 
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    loading="lazy"
+                    className="object-cover" 
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 

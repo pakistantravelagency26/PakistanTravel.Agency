@@ -67,8 +67,36 @@ export default function SupportChatWidget() {
     pathname === "/register" ||
     pathname.startsWith("/forgot-password");
 
+  const [isReady, setIsReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
+
+  // Defer mounting until idle or user interaction for optimal Core Web Vitals
+  useEffect(() => {
+    function activate() {
+      setIsReady(true);
+      window.removeEventListener("scroll", activate);
+      window.removeEventListener("pointerdown", activate);
+      window.removeEventListener("touchstart", activate);
+    }
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(() => setTimeout(activate, 1500));
+      } else {
+        setTimeout(activate, 2500);
+      }
+      window.addEventListener("scroll", activate, { passive: true, once: true });
+      window.addEventListener("pointerdown", activate, { passive: true, once: true });
+      window.addEventListener("touchstart", activate, { passive: true, once: true });
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scroll", activate);
+        window.removeEventListener("pointerdown", activate);
+        window.removeEventListener("touchstart", activate);
+      }
+    };
+  }, []);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -291,7 +319,7 @@ export default function SupportChatWidget() {
     { label: "List My Tour Package", query: "How can a local tour operator list packages on the platform?" },
   ];
 
-  if (isExcluded) {
+  if (isExcluded || !isReady) {
     return null;
   }
 

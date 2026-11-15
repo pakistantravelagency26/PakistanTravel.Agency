@@ -436,6 +436,16 @@ export default function NewListingPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Require at least 3 distinct photos
+    const distinctPhotos = Array.from(
+      new Set((formData.photos || "").split(",").map((s) => s.trim()).filter(Boolean))
+    );
+    if (distinctPhotos.length < 3) {
+      setError("At least 3 distinct photos are required before a tour package can be published.");
+      return;
+    }
+
     setLoading(true);
 
     try {

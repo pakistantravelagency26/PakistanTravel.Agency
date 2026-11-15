@@ -264,10 +264,20 @@ export async function POST(req: Request) {
       photosList = body.photos.split(",").map((p: string) => p.trim()).filter(Boolean);
     }
 
+    // Require at least 3 distinct photos before a listing can be published
+    const distinctPhotos = Array.from(new Set(photosList));
+    if (((rawBody as any).status === "PUBLISHED" || (rawBody as any).action === "PUBLISH") && distinctPhotos.length < 3) {
+      return NextResponse.json(
+        { error: "At least 3 distinct photos are required before a tour package can be published." },
+        { status: 400 }
+      );
+    }
+
     if (photosList.length === 0) {
       photosList = [
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200",
         "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200",
       ];
     }
 

@@ -206,7 +206,6 @@ export function Navbar() {
                 fill
                 sizes="44px"
                 className="object-cover"
-                priority
               />
             </div>
             <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">

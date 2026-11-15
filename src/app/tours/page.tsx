@@ -52,12 +52,21 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "PakistanTravel",
       locale: "en_PK",
       type: "website",
+      images: [
+        {
+          url: `${SITE_URL}/images/og/home-og.jpg`,
+          width: 1200,
+          height: 630,
+          alt: "Compare Northern Pakistan Tour Packages",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: "Compare Northern Pakistan Tour Packages | PakistanTravel",
       description:
         "Compare guided northern Pakistan tour packages and scheduled departures across Hunza, Skardu, Swat, and Kumrat with direct independent operator bookings.",
+      images: [`${SITE_URL}/images/og/home-og.jpg`],
     },
   };
 }

@@ -58,6 +58,9 @@ const nextConfig = {
   // Use standalone output only during containerized Docker builds, never on Vercel
   ...(process.env.DOCKER_BUILD === "standalone" ? { output: "standalone" } : {}),
   images: {
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1600],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },

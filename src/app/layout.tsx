@@ -156,13 +156,32 @@ try {
 gtag('js', new Date());`,
           }}
         />
-        {/* Google Tag Manager Official Snippet - Container: GTM-PRQQWCK8 (Connected to GA4 G-NB90NTK7FY) */}
+        {/* Google Tag Manager - Loaded on Interaction / Idle for Core Web Vitals Optimization */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            __html: `(function(w,d,s,l,i){
+  w[l]=w[l]||[];
+  var loaded=false;
+  function loadGTM(){
+    if(loaded)return;
+    loaded=true;
+    w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+    var f=d.getElementsByTagName(s)[0],j=d.createElement(s);
+    j.async=true;
+    j.src='https://www.googletagmanager.com/gtm.js?id='+i+(l!='dataLayer'?'&l='+l:'');
+    f.parentNode.insertBefore(j,f);
+    window.removeEventListener('scroll',loadGTM);
+    window.removeEventListener('pointerdown',loadGTM);
+    window.removeEventListener('touchstart',loadGTM);
+  }
+  if('requestIdleCallback' in window){
+    requestIdleCallback(function(){setTimeout(loadGTM,1500);});
+  }else{
+    setTimeout(loadGTM,2500);
+  }
+  window.addEventListener('scroll',loadGTM,{passive:true,once:true});
+  window.addEventListener('pointerdown',loadGTM,{passive:true,once:true});
+  window.addEventListener('touchstart',loadGTM,{passive:true,once:true});
 })(window,document,'script','dataLayer','GTM-PRQQWCK8');`,
           }}
         />
