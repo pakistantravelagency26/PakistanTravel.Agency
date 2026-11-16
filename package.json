@@ -13,7 +13,7 @@
     "test": "node --experimental-strip-types --test tests/h3-pricing-duration.test.mjs tests/booking-flow.test.mjs tests/chatbot.test.mjs tests/anti-leakage.test.mjs tests/access-control.test.mjs tests/login-protection.test.mjs tests/password-reset.test.mjs tests/two-factor.test.mjs tests/booking-emails.test.mjs tests/admin-booking-email-settings.test.mjs tests/seo.test.mjs tests/group2-auth.test.mjs tests/group3-authorization.test.mjs tests/group4-input-safety.test.mjs tests/group5-api-security.test.mjs tests/group6-cleanup.test.mjs tests/group7-dependencies.test.mjs tests/group8-database.test.mjs"
   },
   "dependencies": {
-    "@neon/config": "1.11.3",
+    "@neon/config": "1.14.0",
     "@neon/env": "1.6.15",
     "@prisma/client": "5.22.0",
     "bcryptjs": "2.4.3",
