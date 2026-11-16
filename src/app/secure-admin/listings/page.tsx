@@ -516,7 +516,7 @@ export default function AdminListingsPage() {
         </div>
       )}
 
-      {/* DEEP INSPECTION MODAL (AK AK CHEEZ YAHAN SE CHECK HOGI) */}
+      {/* Comprehensive Tour Inspection Modal */}
       {selectedTour && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
           <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto space-y-6">
@@ -586,7 +586,7 @@ export default function AdminListingsPage() {
               )}
             </div>
 
-            {/* Detailed Parameters Grid (Ek ek cheez) */}
+            {/* Detailed Parameters Grid */}
             <div className="space-y-2">
               <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                 2. Operational & Pricing Specifications
@@ -1012,7 +1012,7 @@ export default function AdminListingsPage() {
                       <span className="text-base sm:text-lg font-black block mt-0.5 text-slate-800">
                         PKR {vendorRate.toLocaleString()}
                       </span>
-                      <span className="text-[9px] text-slate-500 block">Vendor ka apna amount</span>
+                      <span className="text-[9px] text-slate-500 block">Vendor net disbursement amount</span>
                     </div>
 
                     {/* Agency Commission */}
@@ -1028,7 +1028,7 @@ export default function AdminListingsPage() {
                         {commAmt > 0 ? `+ PKR ${commAmt.toLocaleString()}` : "PKR 0 (Free Listing)"}
                       </span>
                       <span className="text-[9px] text-amber-100/90 block">
-                        {commissionMode === "FIXED" ? `Equivalent: ~${effectiveRate}%` : "Humara Profit"}
+                        {commissionMode === "FIXED" ? `Equivalent: ~${effectiveRate}%` : "Platform Commission"}
                       </span>
                     </div>
                   </div>
@@ -1037,7 +1037,7 @@ export default function AdminListingsPage() {
                   <div className="p-3.5 rounded-xl bg-emerald-600 text-white flex items-center justify-between shadow-md">
                     <div>
                       <span className="text-[10px] text-emerald-100 font-bold uppercase tracking-wider block">
-                        Total Amount Jo Web Par Jaye Ga (Customer Price)
+                        Total Customer Selling Price (Live on Website)
                       </span>
                       <span className="text-xs text-emerald-100">
                         Vendor (PKR {vendorRate.toLocaleString()}) + Commission (PKR {commAmt.toLocaleString()})
@@ -1057,7 +1057,7 @@ export default function AdminListingsPage() {
             })()}
 
             <p className="text-[11px] text-slate-500 leading-normal">
-              Approve hotay hi yeh tour status <strong>PUBLISHED</strong> ho kar foran website par <strong>Total Amount</strong> k sath active ho jaye ga aur vendor ko uski demanded raqam guaranteed rahay gi.
+              Upon approval, this tour status will update to <strong>PUBLISHED</strong> and become immediately active on the website with the <strong>Total Amount</strong>, while securing the vendor net disbursement rate.
             </p>
 
             {/* Modal Actions */}
