@@ -241,7 +241,7 @@ export function Navbar() {
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg hover:bg-slate-100 text-purple-100"
+              className="p-2 rounded-lg hover:bg-purple-900 text-purple-100"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -280,7 +280,7 @@ export function Navbar() {
                   key={link.id || link.url}
                   href={link.url}
                   onClick={() => setIsMenuOpen(false)}
-                  className="p-2 rounded-lg bg-brand-primaryDark hover:bg-slate-100 text-purple-100 font-medium truncate"
+                  className="p-2 rounded-lg bg-brand-primaryDark hover:bg-purple-900 text-purple-100 font-medium truncate"
                 >
                   {link.label}
                 </Link>
