@@ -89,10 +89,10 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="space-y-12 pb-20 bg-slate-50/50">
+    <div className="space-y-12 pb-20 bg-brand-primaryLight">
       {/* Dynamic Top Announcement Banner */}
       {announcement?.isEnabled && announcement?.text && (
-        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-700 text-white text-xs py-2.5 px-4 text-center font-semibold shadow-sm flex items-center justify-center gap-2">
+        <div className="bg-gradient-to-r from-brand-primaryDark via-brand-primary to-brand-primaryDark text-white text-xs py-2.5 px-4 text-center font-semibold shadow-sm flex items-center justify-center gap-2">
           <span>{listings.length > 0 ? `Autumn & Early Winter 2026 Season Booking Open across ${Array.from(new Set(listings.map((l: any) => l.destinationName || l.city))).join(", ")}!` : (announcement.text || "Explore Northern Pakistan Guided Tour Packages & Scheduled Departures")}</span>
           {announcement.linkUrl && (
             <Link
@@ -106,18 +106,18 @@ export default async function HomePage() {
       )}
 
       {/* Light & Modern Hero Banner */}
-      <section className="relative pt-12 pb-20 md:pb-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-sky-50/80 via-white to-slate-50">
+      <section className="relative pt-12 pb-20 md:pb-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-brand-navy via-brand-primaryDark to-brand-navy">
         <div className="max-w-6xl mx-auto text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-sky-800 text-xs font-bold shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-brand-primaryDark text-xs font-bold shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
             <span>{hero?.badgeText || "Northern Pakistan Tour Operator Marketplace"}</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
             {hero?.title || "Discover Pakistan's Majestic Mountains & Valleys"}
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-purple-100 max-w-2xl mx-auto leading-relaxed">
             {hero?.subtitle || "Compare and book guided tour packages directly from independent local operators across northern Pakistan."}
           </p>
         </div>
@@ -131,7 +131,7 @@ export default async function HomePage() {
           >
             {/* Destination */}
             <div className="md:col-span-6 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
-              <MapPin className="w-5 h-5 text-sky-600 shrink-0" />
+              <MapPin className="w-5 h-5 text-brand-primary shrink-0" />
               <div className="w-full text-left">
                 <label htmlFor="destination-select" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Where in Pakistan?</label>
                 <select
@@ -152,7 +152,7 @@ export default async function HomePage() {
 
             {/* Travel Date */}
             <div className="md:col-span-3 bg-slate-50 hover:bg-slate-100/70 transition rounded-2xl px-4 py-3 flex items-center gap-3 text-slate-800 border border-slate-100">
-              <Calendar className="w-5 h-5 text-teal-600 shrink-0" />
+              <Calendar className="w-5 h-5 text-brand-primary shrink-0" />
               <div className="w-full text-left">
                 <label htmlFor="travel-date-input" className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">When?</label>
                 <input
@@ -168,7 +168,7 @@ export default async function HomePage() {
             <div className="md:col-span-3 flex items-center">
               <button
                 type="submit"
-                className="w-full h-full min-h-[52px] bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0"
+                className="w-full h-full min-h-[52px] bg-gradient-to-r from-brand-primary to-brand-primary hover:from-brand-primaryDark hover:to-brand-primaryDark text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/30 transition transform hover:-translate-y-0.5 active:translate-y-0"
               >
                 <Search className="w-4 h-4" />
                 <span>Search Tours</span>
@@ -208,7 +208,7 @@ export default async function HomePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+            <div className="w-9 h-9 rounded-xl bg-brand-primaryLight text-brand-primary flex items-center justify-center font-bold">
               <Headphones className="w-5 h-5" />
             </div>
             <div>
@@ -227,7 +227,7 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
           <div>
-            <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+            <span className="text-xs font-bold text-brand-primary uppercase tracking-wider block">
               Regional Destinations
             </span>
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -239,7 +239,7 @@ export default async function HomePage() {
           </div>
           <Link
             href="/destinations"
-            className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1 shrink-0"
+            className="text-xs font-bold text-brand-primary hover:text-brand-primaryDark hover:underline flex items-center gap-1 shrink-0"
           >
             <span>Explore all 13 destination guides</span>
             <Compass className="w-3.5 h-3.5" />
@@ -251,14 +251,14 @@ export default async function HomePage() {
             <Link
               key={dest.slug}
               href={`/destinations/${dest.slug}`}
-              className="group p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+              className="group p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-purple-300 hover:shadow-md transition flex flex-col justify-between"
             >
               <div className="space-y-1">
-                <span className="text-[11px] font-bold text-slate-900 group-hover:text-sky-600 transition block">
+                <span className="text-[11px] font-bold text-slate-900 group-hover:text-brand-primary transition block">
                   {dest.label}
                 </span>
               </div>
-              <span className="text-[10px] text-sky-600 font-semibold mt-2 flex items-center gap-0.5 group-hover:underline">
+              <span className="text-[10px] text-brand-primary font-semibold mt-2 flex items-center gap-0.5 group-hover:underline">
                 View guide &amp; tours &rarr;
               </span>
             </Link>
