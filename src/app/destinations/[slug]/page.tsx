@@ -382,7 +382,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
         {/* Section 1: Comprehensive Editorial Overview (500+ Words) */}
         <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-sm space-y-6">
           <div className="flex items-center gap-2">
-            <Compass className="w-5 h-5 text-sky-600" />
+            <Compass className="w-5 h-5 text-brand-primary" />
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               About &amp; Geography of {dest.name}
             </h2>
@@ -422,7 +422,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
             </div>
 
             <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primaryDark bg-brand-primaryLight px-2.5 py-1 rounded-full">
                 Winter &amp; Blossom
               </span>
               <h3 className="font-extrabold text-base text-slate-900">{dest.bestTimeToVisit.offSeason}</h3>
@@ -482,7 +482,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {dest.topAttractions.map((att, idx) => (
               <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-                <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center text-xs font-black">
+                <div className="w-7 h-7 rounded-lg bg-purple-100 text-brand-primaryDark flex items-center justify-center text-xs font-black">
                   {idx + 1}
                 </div>
                 <h3 className="font-extrabold text-sm text-slate-900">{att.name}</h3>
@@ -496,7 +496,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
-              <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-brand-primary uppercase tracking-wider block">
                 Available Guided Tours
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -505,7 +505,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
             </div>
             <Link
               href={destinationTourIntentMap[dest.slug] || `/tours?destination=${dest.slug}`}
-              className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1 self-start sm:self-auto"
+              className="text-xs font-bold text-brand-primary hover:text-brand-primaryDark hover:underline flex items-center gap-1 self-start sm:self-auto"
             >
               <span>View all {dest.name} tour packages</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -547,11 +547,11 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
 
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                     <div className="space-y-1.5">
-                      <div className="flex items-center gap-1 text-[11px] text-sky-600 font-semibold">
+                      <div className="flex items-center gap-1 text-[11px] text-brand-primary font-semibold">
                         <MapPin className="w-3 h-3 shrink-0" />
                         <span>{item.city}, {item.province}</span>
                       </div>
-                      <h3 className="font-bold text-slate-900 text-sm group-hover:text-sky-600 transition line-clamp-2 leading-snug">
+                      <h3 className="font-bold text-slate-900 text-sm group-hover:text-brand-primary transition line-clamp-2 leading-snug">
                         {item.title}
                       </h3>
                       <div className="flex items-center gap-1 text-[11px] text-slate-500 pt-0.5">
@@ -578,7 +578,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
         {/* Section 6: Frequently Asked Questions (with FAQPage Schema) */}
         <section className="space-y-6">
           <div className="flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-sky-600" />
+            <HelpCircle className="w-5 h-5 text-brand-primary" />
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Frequently Asked Questions About {dest.name}
             </h2>
@@ -597,7 +597,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
         <section className="space-y-4 pt-6 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-brand-primary uppercase tracking-wider block">
                 Regional Exploration
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -606,7 +606,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
             </div>
             <Link
               href="/destinations"
-              className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-brand-primary hover:text-brand-primaryDark hover:underline flex items-center gap-1"
             >
               <span>All 13 Destinations</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -618,17 +618,17 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               <Link
                 key={rel.slug}
                 href={`/destinations/${rel.slug}`}
-                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-purple-300 hover:shadow-md transition flex flex-col justify-between"
               >
                 <div>
                   <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
                     {rel.province}
                   </span>
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-sky-600 transition mt-1">
+                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-brand-primary transition mt-1">
                     {rel.name}
                   </h3>
                 </div>
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 mt-3">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-primary mt-3">
                   <span>View destination guide</span>
                   <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition" />
                 </div>
@@ -641,7 +641,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
         <section className="space-y-4 pt-6 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-sky-600 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-brand-primary uppercase tracking-wider block">
                 Editorial Guides
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
@@ -650,7 +650,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
             </div>
             <Link
               href="/blog"
-              className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-brand-primary hover:text-brand-primaryDark hover:underline flex items-center gap-1"
             >
               <span>Explore All Guides</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -662,17 +662,17 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
               <Link
                 key={guide.slug}
                 href={`/blog/${guide.slug}`}
-                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-sky-300 hover:shadow-md transition flex flex-col justify-between"
+                className="group p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:border-purple-300 hover:shadow-md transition flex flex-col justify-between"
               >
                 <div>
-                  <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wider block">
                     {guide.category}
                   </span>
-                  <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-sky-600 transition mt-1 line-clamp-2">
+                  <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-brand-primary transition mt-1 line-clamp-2">
                     {guide.title}
                   </h3>
                 </div>
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600 mt-3">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-primary mt-3">
                   <span>Read travel guide</span>
                   <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition" />
                 </div>

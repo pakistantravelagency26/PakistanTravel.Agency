@@ -10,17 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          // Musandam Tours inspired clean, light ocean & coastal palette
-          primary: "#0284c7",       // Ocean blue
-          primaryDark: "#0369a1",
-          primaryLight: "#f0f9ff",
-          teal: "#0d9488",          // Fjord / Lake turquoise
-          tealLight: "#f0fdfa",
-          amber: "#f97316",         // Sunset warm orange CTA
-          amberHover: "#ea580c",
+          // Purple and lavender brand palette
+          primary: "#6A2FC8",       
+          primaryDark: "#25134D",
+          primaryLight: "#F2E9FF",
+          teal: "#6A2FC8",          
+          tealLight: "#F2E9FF",
+          amber: "#6A2FC8",         
+          amberHover: "#25134D",
           emerald: "#059669",
           emeraldLight: "#ecfdf5",
-          navy: "#0f172a",
+          navy: "#0B0720",
         },
       },
     },

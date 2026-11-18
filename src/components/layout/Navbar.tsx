@@ -55,12 +55,12 @@ export function Navbar() {
   const userRole = session?.user?.role;
 
   return (
-    <header className="bg-white text-slate-800 sticky top-0 z-50 shadow-sm border-b border-slate-100">
+    <header className="bg-brand-navy text-purple-100 sticky top-0 z-50 shadow-sm border-b border-purple-900">
       {/* Top Announcement Bar */}
-      <div className="bg-slate-50 border-b border-slate-100 text-slate-600 text-[11px] py-1.5 px-4 sm:px-6 lg:px-8">
+      <div className="bg-brand-primaryDark border-b border-purple-900 text-purple-100 text-[11px] py-1.5 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1 font-medium text-slate-700">
+            <span className="flex items-center gap-1 font-medium text-purple-100">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Compare and book tours from independent local operators
             </span>
@@ -70,12 +70,12 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="/list-your-tour"
-              className="text-slate-700 hover:text-sky-600 font-semibold hidden md:inline-flex items-center gap-1 text-[11px]"
+              className="text-purple-100 hover:text-purple-300 font-semibold hidden md:inline-flex items-center gap-1 text-[11px]"
             >
               List your tour
             </Link>
             <span className="text-slate-300 hidden md:inline">|</span>
-            <span className="font-semibold text-slate-700 hidden sm:inline">PKR (Rs.)</span>
+            <span className="font-semibold text-purple-100 hidden sm:inline">PKR (Rs.)</span>
             <span className="text-slate-300">|</span>
 
             {isLoggedIn ? (
@@ -92,7 +92,7 @@ export function Navbar() {
                 {userRole === "VENDOR" && (
                   <Link
                     href="/partner-hub/dashboard"
-                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-700 hover:bg-sky-800 text-white text-[11px] font-bold shadow-sm transition"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primaryDark hover:bg-brand-primaryDark text-white text-[11px] font-bold shadow-sm transition"
                   >
                     <Building2 className="w-3.5 h-3.5" />
                     Partner Hub
@@ -101,17 +101,17 @@ export function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-1.5 font-bold text-slate-800 hover:text-sky-600 transition"
+                    className="flex items-center gap-1.5 font-bold text-purple-100 hover:text-purple-300 transition"
                   >
-                    <div className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-[9px] font-bold">
+                    <div className="w-4 h-4 rounded-full bg-brand-primary text-white flex items-center justify-center text-[9px] font-bold">
                       {session?.user?.name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <span className="max-w-[100px] truncate">{session?.user?.name}</span>
                   </button>
 
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in fade-in text-xs">
-                      <div className="px-3.5 py-2 border-b border-slate-100">
+                    <div className="absolute right-0 mt-2 w-56 bg-brand-navy text-purple-100 rounded-xl shadow-xl border border-purple-900 py-1.5 z-50 animate-in fade-in text-xs">
+                      <div className="px-3.5 py-2 border-b border-purple-900">
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                           {userRole === "ADMIN"
                             ? "Super Administrator"
@@ -119,7 +119,7 @@ export function Navbar() {
                             ? "Partner / Vendor"
                             : "Signed in as Traveler"}
                         </p>
-                        <p className="text-xs font-bold text-slate-900 truncate">{session?.user?.email}</p>
+                        <p className="text-xs font-bold text-purple-100 truncate">{session?.user?.email}</p>
                       </div>
 
                       {userRole === "ADMIN" && (
@@ -137,9 +137,9 @@ export function Navbar() {
                         <Link
                           href="/partner-hub/dashboard"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3.5 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold border-b border-sky-100"
+                          className="flex items-center gap-2 px-3.5 py-2.5 bg-brand-primaryLight hover:bg-purple-100 text-brand-primaryDark font-bold border-b border-purple-100"
                         >
-                          <Building2 className="w-4 h-4 text-sky-700 shrink-0" />
+                          <Building2 className="w-4 h-4 text-brand-primaryDark shrink-0" />
                           Partner Extranet
                         </Link>
                       )}
@@ -147,7 +147,7 @@ export function Navbar() {
                       <Link
                         href="/account/bookings"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
+                        className="flex items-center gap-2 px-3.5 py-2 hover:bg-brand-primaryDark text-purple-100 font-semibold"
                       >
                         <UserIcon className="w-3.5 h-3.5 text-slate-400" />
                         My Bookings & Vouchers
@@ -156,7 +156,7 @@ export function Navbar() {
                       <Link
                         href="/account/wishlist"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-3.5 py-2 hover:bg-slate-50 text-slate-700 font-semibold"
+                        className="flex items-center gap-2 px-3.5 py-2 hover:bg-brand-primaryDark text-purple-100 font-semibold"
                       >
                         <Heart className="w-3.5 h-3.5 text-slate-400" />
                         Saved Wishlist
@@ -164,7 +164,7 @@ export function Navbar() {
 
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 text-red-600 hover:bg-red-50 text-left border-t border-slate-100 font-semibold"
+                        className="w-full flex items-center gap-2 px-3.5 py-2 text-red-600 hover:bg-red-50 text-left border-t border-purple-900 font-semibold"
                       >
                         <LogOut className="w-3.5 h-3.5 text-red-500" />
                         Sign Out
@@ -177,7 +177,7 @@ export function Navbar() {
               <div className="flex items-center gap-2 font-bold text-[11px]">
                 <Link
                   href="/register"
-                  className="text-slate-700 hover:text-sky-600 transition"
+                  className="text-purple-100 hover:text-purple-300 transition"
                 >
                   Register
                 </Link>
@@ -199,7 +199,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo - Anchor text is brand name only */}
           <Link href="/" className="flex items-center gap-3 group" aria-label="PakistanTravel Homepage">
-            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-md shadow-sky-600/15 group-hover:scale-105 transition shrink-0">
+            <div className="relative w-11 h-11 rounded-2xl overflow-hidden shadow-md shadow-brand-primary/15 group-hover:scale-105 transition shrink-0">
               <Image
                 src="/logo.png"
                 alt="PakistanTravel.Agency Logo"
@@ -208,18 +208,18 @@ export function Navbar() {
                 className="object-cover"
               />
             </div>
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
-              Pakistan<span className="text-sky-600">Travel</span><span className="text-orange-500">.Agency</span>
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-purple-100">
+              Pakistan<span className="text-brand-primary">Travel</span><span className="text-orange-500">.Agency</span>
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-purple-100">
             {navLinks.map((link) => (
               <Link
                 key={link.id || link.url}
                 href={link.url}
-                className="hover:text-sky-600 transition"
+                className="hover:text-purple-300 transition"
               >
                 {link.label}
               </Link>
@@ -230,9 +230,9 @@ export function Navbar() {
           <div className="hidden sm:flex items-center gap-2.5">
             <Link
               href="/tours"
-              className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-brand-primaryLight hover:bg-purple-100 text-brand-primaryDark border border-purple-200 text-xs font-bold transition flex items-center gap-2"
             >
-              <Compass className="w-4 h-4 text-sky-600" />
+              <Compass className="w-4 h-4 text-brand-primary" />
               <span>Explore Tours</span>
             </Link>
           </div>
@@ -241,7 +241,7 @@ export function Navbar() {
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg hover:bg-slate-100 text-slate-700"
+              className="p-2 rounded-lg hover:bg-purple-900 text-purple-100"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -251,11 +251,11 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3">
+        <div className="lg:hidden bg-brand-navy border-t border-purple-900 px-4 py-4 space-y-3">
           <div className="space-y-2 text-sm font-semibold">
             <Link
               href="/tours"
-              className="block py-2.5 px-3 rounded-xl bg-slate-50 text-slate-800 font-bold hover:text-sky-600 flex items-center justify-between"
+              className="block py-2.5 px-3 rounded-xl bg-brand-primaryDark text-purple-100 font-bold hover:text-purple-300 flex items-center justify-between"
               onClick={() => setIsMenuOpen(false)}
             >
               <span>Explore Tour Packages</span>
@@ -264,14 +264,14 @@ export function Navbar() {
 
             <Link
               href="/list-your-tour"
-              className="block py-2.5 px-3 rounded-xl bg-sky-50 text-sky-900 font-bold hover:bg-sky-100 flex items-center justify-between"
+              className="block py-2.5 px-3 rounded-xl bg-brand-primaryLight text-brand-navy font-bold hover:bg-purple-100 flex items-center justify-between"
               onClick={() => setIsMenuOpen(false)}
             >
               <span>List Your Tour Package</span>
-              <Compass className="w-4 h-4 text-sky-600" />
+              <Compass className="w-4 h-4 text-brand-primary" />
             </Link>
 
-            <div className="pt-2 pb-1 border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider px-3">
+            <div className="pt-2 pb-1 border-b border-purple-900 text-xs text-slate-400 font-bold uppercase tracking-wider px-3">
               Navigation
             </div>
             <div className="grid grid-cols-2 gap-2 px-1 text-xs">
@@ -280,7 +280,7 @@ export function Navbar() {
                   key={link.id || link.url}
                   href={link.url}
                   onClick={() => setIsMenuOpen(false)}
-                  className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium truncate"
+                  className="p-2 rounded-lg bg-brand-primaryDark hover:bg-purple-900 text-purple-100 font-medium truncate"
                 >
                   {link.label}
                 </Link>
@@ -289,9 +289,9 @@ export function Navbar() {
           </div>
 
           {isLoggedIn ? (
-            <div className="pt-3 border-t border-slate-100 space-y-2">
+            <div className="pt-3 border-t border-purple-900 space-y-2">
               <div className="px-3 py-1 flex items-center justify-between text-xs text-slate-500">
-                <span className="font-bold text-slate-800 truncate">{session?.user?.name || session?.user?.email}</span>
+                <span className="font-bold text-purple-100 truncate">{session?.user?.name || session?.user?.email}</span>
                 <span className="text-[10px] uppercase font-bold text-emerald-700">
                   {userRole === "ADMIN" ? "Super Admin" : userRole === "VENDOR" ? "Vendor" : "Traveler"}
                 </span>
@@ -309,7 +309,7 @@ export function Navbar() {
               {userRole === "VENDOR" && (
                 <Link
                   href="/partner-hub/dashboard"
-                  className="w-full text-center py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow"
+                  className="w-full text-center py-2.5 rounded-xl bg-brand-primaryDark hover:bg-brand-primaryDark text-white text-xs font-bold flex items-center justify-center gap-2 shadow"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Building2 className="w-4 h-4" />
@@ -319,7 +319,7 @@ export function Navbar() {
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <Link
                   href="/account/bookings"
-                  className="text-center py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold"
+                  className="text-center py-2 rounded-xl bg-brand-primaryDark border border-purple-900 text-purple-100 text-xs font-semibold"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Bookings
@@ -336,10 +336,10 @@ export function Navbar() {
               </div>
             </div>
           ) : (
-            <div className="pt-3 border-t border-slate-100 flex gap-2">
+            <div className="pt-3 border-t border-purple-900 flex gap-2">
               <Link
                 href="/login"
-                className="w-1/2 text-center py-2.5 rounded-xl border border-slate-200 text-slate-800 text-xs font-bold"
+                className="w-1/2 text-center py-2.5 rounded-xl border border-purple-900 text-purple-100 text-xs font-bold"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sign in
