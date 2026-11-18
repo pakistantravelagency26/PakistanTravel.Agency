@@ -178,16 +178,16 @@ export default async function HomePage() {
         </div>
 
         {/* Confidence Badges */}
-        <div className="max-w-4xl mx-auto mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-slate-600">
+        <div className="max-w-4xl mx-auto mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-purple-100">
           <Link href="/partner-info" className="flex items-center gap-3 hover:opacity-80 transition group">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:scale-105 transition">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block group-hover:text-emerald-700">
+              <span className="font-bold text-white block group-hover:text-purple-200">
                 {hero?.badge1Title || "Independent Local Tour Operators"}
               </span>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-purple-200">
                 {hero?.badge1Sub || "Regional Partner Network · Partner Information"}
               </span>
             </div>
@@ -198,10 +198,10 @@ export default async function HomePage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">
+              <span className="font-bold text-white block">
                 {hero?.badge2Title || "JazzCash & EasyPaisa"}
               </span>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-purple-200">
                 {hero?.badge2Sub || "Plus Credit Cards & Bank Transfer"}
               </span>
             </div>
@@ -212,10 +212,10 @@ export default async function HomePage() {
               <Headphones className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-slate-900 block">
+              <span className="font-bold text-white block">
                 {hero?.badge3Title || "Customer Support Desk"}
               </span>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-purple-200">
                 {hero?.badge3Sub || "24/7 AI Chat · Email Desk Mon-Sat"}
               </span>
             </div>
