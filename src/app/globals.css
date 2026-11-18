@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-start-rgb: 248, 250, 252;
+  --foreground-rgb: 11, 7, 32;
+  --background-start-rgb: 242, 233, 255;
   --background-end-rgb: 255, 255, 255;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #f8fafc;
+  background: #F2E9FF;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -21,14 +21,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F2E9FF;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #D1B8FF;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #9D71E8;
 }
