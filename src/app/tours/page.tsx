@@ -195,11 +195,11 @@ export default async function ToursPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <main className="min-h-screen bg-slate-50 pb-20">
+      <main className="min-h-screen bg-brand-primaryLight pb-20">
         {/* Hero Section */}
-        <div className="bg-gradient-to-b from-[#0A5C36] to-[#074729] text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-b from-[#6A2FC8] to-[#25134D] text-white py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto space-y-4">
-            <div className="flex items-center gap-2 text-emerald-200 text-xs font-semibold uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-purple-200 text-xs font-semibold uppercase tracking-wider">
               <Link href="/" className="hover:underline">Home</Link>
               <ChevronRight className="w-3.5 h-3.5" />
               <span>Tour Packages</span>
@@ -207,7 +207,7 @@ export default async function ToursPage() {
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
               Northern Pakistan Tour Packages &amp; Guided Itineraries
             </h1>
-            <p className="text-emerald-100 max-w-2xl text-sm sm:text-base leading-relaxed">
+            <p className="text-purple-100 max-w-2xl text-sm sm:text-base leading-relaxed">
               Compare scheduled group departures and private custom itineraries operated directly by independent local tour operators across Gilgit-Baltistan and Khyber Pakhtunkhwa.
             </p>
           </div>
@@ -234,7 +234,7 @@ export default async function ToursPage() {
         {/* Destination Quick Navigation Grid */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
           <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 flex items-center gap-2">
-            <Compass className="w-5 h-5 text-emerald-700" />
+            <Compass className="w-5 h-5 text-brand-primaryDark" />
             <span>Explore Tours by Destination</span>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -242,9 +242,9 @@ export default async function ToursPage() {
               <Link
                 key={dest.slug}
                 href={`/tours?destination=${dest.slug}`}
-                className="bg-white hover:bg-emerald-50/50 p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 transition text-center group shadow-sm flex flex-col justify-center"
+                className="bg-white hover:bg-brand-primaryLight/50 p-4 rounded-2xl border border-slate-200 hover:border-purple-300 transition text-center group shadow-sm flex flex-col justify-center"
               >
-                <span className="font-extrabold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-700 block">
+                <span className="font-extrabold text-xs sm:text-sm text-slate-900 group-hover:text-brand-primaryDark block">
                   {dest.name}
                 </span>
                 <span className="text-[10px] text-slate-400 mt-1 block">
@@ -259,7 +259,7 @@ export default async function ToursPage() {
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-              <Compass className="w-6 h-6 text-[#0A5C36]" />
+              <Compass className="w-6 h-6 text-[#6A2FC8]" />
               <span>Available Tour Packages ({listings.length})</span>
             </h2>
           </div>
@@ -298,7 +298,7 @@ export default async function ToursPage() {
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover group-hover:scale-105 transition duration-500"
                       />
-                      <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold text-[#0A5C36] shadow-sm flex items-center gap-1">
+                      <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold text-[#6A2FC8] shadow-sm flex items-center gap-1">
                         <span>{item.vendor?.businessName || "Local Operator"}</span>
                       </div>
                     </div>
@@ -316,7 +316,7 @@ export default async function ToursPage() {
                             </>
                           )}
                         </div>
-                        <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#0A5C36] transition line-clamp-2">
+                        <h3 className="font-extrabold text-base text-slate-900 group-hover:text-[#6A2FC8] transition line-clamp-2">
                           {item.title}
                         </h3>
                       </div>
@@ -328,7 +328,7 @@ export default async function ToursPage() {
                             PKR {item.basePrice.toLocaleString()}
                           </div>
                         </div>
-                        <span className="text-xs font-bold text-[#0A5C36] group-hover:underline">
+                        <span className="text-xs font-bold text-[#6A2FC8] group-hover:underline">
                           View Details →
                         </span>
                       </div>
@@ -348,7 +348,7 @@ export default async function ToursPage() {
         {/* Tour FAQs Section */}
         <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 space-y-6">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-primaryDark uppercase tracking-wider">
               <HelpCircle className="w-4 h-4" />
               <span>Common Questions</span>
             </div>
@@ -361,11 +361,11 @@ export default async function ToursPage() {
             {tourFaqs.map((faq, idx) => (
               <details
                 key={idx}
-                className="bg-white rounded-2xl p-5 border border-slate-200 group open:ring-1 open:ring-emerald-500/20 shadow-sm"
+                className="bg-white rounded-2xl p-5 border border-slate-200 group open:ring-1 open:ring-brand-primary/20 shadow-sm"
               >
                 <summary className="font-extrabold text-sm text-slate-900 cursor-pointer list-none flex items-center justify-between">
                   <span>{faq.q}</span>
-                  <span className="text-emerald-600 font-bold ml-2 transition group-open:rotate-45">+</span>
+                  <span className="text-brand-primary font-bold ml-2 transition group-open:rotate-45">+</span>
                 </summary>
                 <p className="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed pt-2 border-t border-slate-100">
                   {faq.a}
