@@ -20,7 +20,7 @@ const CookieConsentBanner = dynamic(
 const siteUrl = SITE_URL;
 
 export const viewport: Viewport = {
-  themeColor: "#059669",
+  themeColor: "#6A2FC8",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,

@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            backgroundColor: "#022c22",
-            backgroundImage: "radial-gradient(circle at 25% 25%, #064e3b 0%, #022c22 70%)",
+            backgroundColor: "#0B0720",
+            backgroundImage: "radial-gradient(circle at 50% 25%, #25134D 0%, #0B0720 75%)",
             padding: "60px 80px",
             fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
             color: "#ffffff",
@@ -48,15 +48,15 @@ export async function GET(request: NextRequest) {
                 style={{
                   width: "48px",
                   height: "48px",
-                  borderRadius: "12px",
-                  backgroundColor: "#059669",
+                  borderRadius: "14px",
+                  backgroundColor: "#6A2FC8",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontWeight: 900,
                   fontSize: "26px",
                   color: "#ffffff",
-                  boxShadow: "0 4px 12px rgba(5, 150, 105, 0.4)",
+                  boxShadow: "0 6px 20px rgba(106, 47, 200, 0.5)",
                 }}
               >
                 P
@@ -66,10 +66,10 @@ export async function GET(request: NextRequest) {
                   fontSize: "24px",
                   fontWeight: 700,
                   letterSpacing: "-0.5px",
-                  color: "#ecfdf5",
+                  color: "#F2E9FF",
                 }}
               >
-                Pakistan<span style={{ color: "#34d399" }}>Travel</span>
+                Pakistan<span style={{ color: "#9D71E8" }}>Travel</span>
               </span>
             </div>
 
@@ -77,15 +77,15 @@ export async function GET(request: NextRequest) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "rgba(5, 150, 105, 0.25)",
-                border: "1px solid rgba(52, 211, 153, 0.4)",
+                backgroundColor: "rgba(106, 47, 200, 0.35)",
+                border: "1px solid rgba(209, 184, 255, 0.4)",
                 borderRadius: "9999px",
                 padding: "8px 20px",
                 fontSize: "14px",
                 fontWeight: 700,
                 letterSpacing: "1.5px",
                 textTransform: "uppercase",
-                color: "#6ee7b7",
+                color: "#D1B8FF",
               }}
             >
               {category}
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
                 color: "#ffffff",
                 letterSpacing: "-1px",
                 maxWidth: "1000px",
-                textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+                textShadow: "0 2px 14px rgba(0,0,0,0.5)",
               }}
             >
               {title}
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
               <div
                 style={{
                   fontSize: "22px",
-                  color: "#a7f3d0",
+                  color: "#D1B8FF",
                   lineHeight: 1.4,
                   maxWidth: "900px",
                   fontWeight: 400,
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+              borderTop: "1px solid rgba(209, 184, 255, 0.2)",
               paddingTop: "28px",
               width: "100%",
             }}
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 fontSize: "17px",
-                color: "#94a3b8",
+                color: "#9D71E8",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 fontSize: "16px",
-                color: "#34d399",
+                color: "#D1B8FF",
                 fontWeight: 600,
                 display: "flex",
                 alignItems: "center",

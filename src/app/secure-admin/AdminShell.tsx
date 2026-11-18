@@ -95,13 +95,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white text-slate-700 flex flex-col justify-between shrink-0 border-r border-slate-200">
+      {/* Sidebar - Dark Indigo & Violet Palette */}
+      <aside className="w-full md:w-64 bg-[#0B0720] text-[#D1B8FF] flex flex-col justify-between shrink-0 border-r border-[#25134D]">
         <div>
           {/* Admin Header */}
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-5 border-b border-[#25134D] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-sm shrink-0">
+              <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-sm shrink-0 border border-[#6A2FC8]/40">
                 <Image
                   src="/logo.png"
                   alt="PakistanTravel.Agency"
@@ -111,8 +111,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 />
               </div>
               <div>
-                <span className="font-extrabold text-slate-900 text-sm tracking-tight block">Control Center</span>
-                <p className="text-[10px] text-emerald-700 font-semibold font-mono">
+                <span className="font-extrabold text-white text-sm tracking-tight block">Control Center</span>
+                <p className="text-[10px] text-[#9D71E8] font-semibold font-mono">
                   {isSuperAdmin ? "Super Admin" : "Staff Portal"}
                 </p>
               </div>
@@ -130,11 +130,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   href={item.href}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                     isActive
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-bold"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      ? "bg-[#6A2FC8] text-white shadow-lg shadow-[#6A2FC8]/30 font-bold"
+                      : "text-[#D1B8FF] hover:text-white hover:bg-[#25134D]"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#9D71E8]"}`} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -143,18 +143,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Bottom actions */}
-        <div className="p-4 border-t border-slate-100 space-y-1">
+        <div className="p-4 border-t border-[#25134D] space-y-1">
           <Link
             href="/secure-admin/profile"
-            className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 px-3 py-2 rounded-xl hover:bg-slate-100 transition"
+            className="flex items-center gap-2 text-xs font-semibold text-[#D1B8FF] hover:text-white px-3 py-2 rounded-xl hover:bg-[#25134D] transition"
           >
-            <UserIcon className="w-3.5 h-3.5 text-emerald-600" />
+            <UserIcon className="w-3.5 h-3.5 text-[#9D71E8]" />
             <span>My Profile & Settings</span>
           </Link>
 
           <Link
             href="/"
-            className="flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition"
+            className="flex items-center justify-between text-xs font-semibold text-[#D1B8FF] hover:text-white px-3 py-2 rounded-xl hover:bg-[#25134D] transition"
           >
             <span>Live Marketplace</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -162,7 +162,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
           <button
             onClick={() => signOut({ callbackUrl: "/secure-admin/login" })}
-            className="w-full flex items-center gap-2 text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-2 rounded-xl hover:bg-red-50 transition text-left"
+            className="w-full flex items-center gap-2 text-xs font-semibold text-red-400 hover:text-red-300 px-3 py-2 rounded-xl hover:bg-red-950/30 transition text-left"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out</span>
@@ -172,21 +172,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col overflow-y-auto bg-slate-50">
-        <header className="h-16 border-b border-slate-200 px-6 flex items-center justify-between bg-white/80 backdrop-blur-sm sticky top-0 z-30">
+        <header className="h-16 border-b border-[#25134D]/20 px-6 flex items-center justify-between bg-[#0B0720] text-white sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs font-semibold text-slate-700">Pakistan Travel Network Live & Monitored</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#9D71E8] animate-pulse"></span>
+            <span className="text-xs font-semibold text-[#D1B8FF]">Pakistan Travel Network Live & Monitored</span>
           </div>
 
           <div className="flex items-center gap-3 text-xs">
             <Link
               href="/secure-admin/profile"
-              className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 px-3.5 py-1.5 rounded-full border border-slate-200 transition font-medium text-[11px]"
+              className="inline-flex items-center gap-2 bg-[#25134D] hover:bg-[#3D1680] text-[#F2E9FF] px-3.5 py-1.5 rounded-full border border-[#6A2FC8]/40 transition font-medium text-[11px]"
             >
-              <UserIcon className="w-3.5 h-3.5 text-emerald-600" />
+              <UserIcon className="w-3.5 h-3.5 text-[#D1B8FF]" />
               <span className="font-bold">{session?.user?.name || session?.user?.email}</span>
               {(session?.user as any)?.username && (
-                <span className="text-slate-400 font-mono">(@{(session?.user as any).username})</span>
+                <span className="text-[#D1B8FF]/60 font-mono">(@{(session?.user as any).username})</span>
               )}
             </Link>
           </div>

@@ -3,18 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 11, 7, 32;
-  --background-start-rgb: 242, 233, 255;
+  --foreground-rgb: 11, 7, 32; /* #0B0720 */
+  --background-start-rgb: 250, 247, 255;
   --background-end-rgb: 255, 255, 255;
 }
 
+::selection {
+  background-color: #6A2FC8;
+  color: #ffffff;
+}
+
 body {
-  color: rgb(var(--foreground-rgb));
-  background: #F2E9FF;
+  color: #0B0720;
+  background: #FAF7FF;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Custom scrollbar */
+/* Custom Purple Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -31,4 +36,17 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #9D71E8;
+}
+
+/* Purple Ambient Glow Utilities */
+.glow-purple {
+  box-shadow: 0 10px 40px -10px rgba(106, 47, 200, 0.45);
+}
+
+.glow-purple-sm {
+  box-shadow: 0 4px 20px -2px rgba(106, 47, 200, 0.25);
+}
+
+.glow-purple-ambient {
+  background-image: radial-gradient(circle at 50% 0%, rgba(106, 47, 200, 0.18) 0%, rgba(11, 7, 32, 0) 70%);
 }

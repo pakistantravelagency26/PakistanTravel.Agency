@@ -335,10 +335,10 @@ export default function SupportChatWidget() {
               trackChatStarted({ pagePath: pathname || "/" });
             }}
             aria-label="Open PakistanTravel AI Assistant"
-            className="group relative flex items-center gap-2.5 px-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:-translate-y-0.5 border border-emerald-500/30"
+            className="group relative flex items-center gap-2.5 px-4 py-3 bg-[#6A2FC8] hover:bg-[#541FB3] text-white rounded-full shadow-xl shadow-[#6A2FC8]/25 hover:shadow-2xl hover:shadow-[#6A2FC8]/35 transition-all duration-200 transform hover:-translate-y-0.5 border border-[#9D71E8]/40"
           >
             <div className="relative">
-              <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+              <Sparkles className="w-5 h-5 text-[#D1B8FF] animate-pulse" />
               {hasUnread && (
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white" />
               )}
@@ -356,17 +356,17 @@ export default function SupportChatWidget() {
           className="fixed bottom-4 right-4 z-50 w-[94vw] sm:w-[420px] h-[600px] max-h-[88vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-slate-900 text-white p-4 shrink-0 flex items-center justify-between shadow-md">
+          <div className="bg-gradient-to-r from-[#0B0720] via-[#25134D] to-[#6A2FC8] text-white p-4 shrink-0 flex items-center justify-between shadow-md">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-emerald-600/60 border border-emerald-400/40 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-amber-300" />
+              <div className="w-9 h-9 rounded-full bg-[#6A2FC8]/60 border border-[#D1B8FF]/40 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-[#D1B8FF]" />
               </div>
               <div>
                 <h3 className="text-xs font-bold flex items-center gap-1.5 tracking-tight">
                   {siteConfig.name} AI Desk
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="inline-block w-2 h-2 rounded-full bg-[#D1B8FF] animate-pulse" />
                 </h3>
-                <p className="text-[10px] text-emerald-100 font-medium">
+                <p className="text-[10px] text-[#F2E9FF] font-medium">
                   24/7 Grounded Assistance • Multi-Vendor Tours
                 </p>
               </div>
