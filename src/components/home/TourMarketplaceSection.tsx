@@ -95,7 +95,7 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/70 pb-5">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primaryLight text-brand-primaryDark text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
             <span>{customSettings?.badgeText || "Northern Pakistan Tour Marketplace"}</span>
           </div>
@@ -115,7 +115,7 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tour packages or operators..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-primary shadow-sm"
           />
           {searchQuery && (
             <button
@@ -175,7 +175,7 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
               setSelectedCategory("ALL");
               setSearchQuery("");
             }}
-            className="text-xs font-bold text-sky-600 hover:underline"
+            className="text-xs font-bold text-brand-primary hover:underline"
           >
             Reset Filters
           </button>
@@ -218,14 +218,14 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
                 <div className="space-y-1.5">
                   {/* Location & Province */}
                   <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                    <span className="flex items-center gap-1 text-sky-600 font-semibold truncate">
+                    <span className="flex items-center gap-1 text-brand-primary font-semibold truncate">
                       <MapPin className="w-3 h-3 shrink-0" /> {item.destinationName}
                     </span>
                     <span className="text-[10px] text-slate-400 shrink-0">{item.province}</span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-sky-600 transition line-clamp-2 leading-snug">
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-primary transition line-clamp-2 leading-snug">
                     {item.title}
                   </h3>
 
@@ -239,7 +239,7 @@ export function TourMarketplaceSection({ initialListings = [], customSettings }:
                 {/* Rating & Pricing Bottom Bar */}
                 <div className="pt-2.5 border-t border-slate-100 flex items-end justify-between">
                   <div className="flex items-center gap-1 text-xs">
-                    <div className="bg-sky-600 text-white px-1.5 py-0.5 rounded-md text-[11px] font-extrabold shadow-sm flex items-center gap-0.5">
+                    <div className="bg-brand-primary text-white px-1.5 py-0.5 rounded-md text-[11px] font-extrabold shadow-sm flex items-center gap-0.5">
                       <Star className="w-2.5 h-2.5 fill-white text-white" />
                       <span>{item.avgRating}</span>
                     </div>
