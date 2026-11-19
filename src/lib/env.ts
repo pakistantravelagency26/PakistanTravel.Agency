@@ -110,8 +110,17 @@ export function validateEnvironment(): z.infer<typeof envSchema> {
     }
   }
 
+  // Validate the same database connection selected by Prisma.
+  const effectiveDbUrl =
+    (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("db.prisma.io"))
+      ? (process.env.NEON_DATABASE_URL || process.env.DATABASE_URL)
+      : (process.env.DATABASE_URL || process.env.NEON_DATABASE_URL);
+
   // 2. Validate environment schema
-  const parsed = envSchema.safeParse(process.env);
+  const parsed = envSchema.safeParse({
+    ...process.env,
+    DATABASE_URL: effectiveDbUrl,
+  });
   if (!parsed.success) {
     const errors = parsed.error.flatten().fieldErrors;
     const errorMsg = `Environment configuration validation failed:\n${JSON.stringify(
@@ -130,11 +139,6 @@ export function validateEnvironment(): z.infer<typeof envSchema> {
 
   // 3. Strict production assertions at runtime
   if (isProdRuntime) {
-    const effectiveDbUrl =
-      (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("db.prisma.io"))
-        ? (process.env.NEON_DATABASE_URL || process.env.DATABASE_URL)
-        : (process.env.DATABASE_URL || process.env.NEON_DATABASE_URL);
-
     if (!effectiveDbUrl || effectiveDbUrl.includes("db.prisma.io")) {
       throw new Error("FATAL: DATABASE_URL or NEON_DATABASE_URL is strictly required in production!");
     }
