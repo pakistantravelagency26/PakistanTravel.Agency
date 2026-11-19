@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { moderateListing } from "@/services/listing.service";
 import { formatDbListing } from "@/services/serverListing.service";
 
 export const dynamic = "force-dynamic";
@@ -31,9 +30,8 @@ export async function PATCH(
       );
     }
 
-    // 1. Update permanently in Neon PostgreSQL Database
-    let updatedDbListing = null;
-    try {
+    // Publish the listing and approved prices together, or leave it unchanged.
+    const updatedDbListing = await prisma.$transaction(async (tx) => {
       const dbStatus = action === "APPROVE" ? "PUBLISHED" : "ARCHIVED";
       const updateData: any = { status: dbStatus };
       if (body.commissionRate !== undefined && body.commissionRate !== null) {
@@ -45,35 +43,31 @@ export async function PATCH(
       if (body.totalPrice !== undefined && body.totalPrice !== null) {
         const approvedBasePrice = Number(body.totalPrice);
         updateData.basePrice = approvedBasePrice;
-        try {
-          const existingUnits = await prisma.listingUnit.findMany({
-            where: { listingId: id },
-          });
+        const existingUnits = await tx.listingUnit.findMany({
+          where: { listingId: id },
+        });
 
-          const primaryUnit = existingUnits.find((u) => u.id.includes("perperson")) || existingUnits[0];
-          const vendorBasePrice = Number(body.vendorPrice || primaryUnit?.basePrice || updateData.vendorPrice || approvedBasePrice);
-          const markupMultiplier = vendorBasePrice > 0 ? (approvedBasePrice / vendorBasePrice) : 1;
+        const primaryUnit = existingUnits.find((u) => u.id.includes("perperson")) || existingUnits[0];
+        const vendorBasePrice = Number(body.vendorPrice || primaryUnit?.basePrice || updateData.vendorPrice || approvedBasePrice);
+        const markupMultiplier = vendorBasePrice > 0 ? (approvedBasePrice / vendorBasePrice) : 1;
 
-          for (const unit of existingUnits) {
-            if (unit.id.includes("perperson") || existingUnits.length === 1) {
-              await prisma.listingUnit.update({
-                where: { id: unit.id },
-                data: { basePrice: approvedBasePrice },
-              });
-            } else {
-              const currentPrice = Number(unit.basePrice);
-              const newPrice = Math.round(currentPrice * markupMultiplier);
-              await prisma.listingUnit.update({
-                where: { id: unit.id },
-                data: { basePrice: newPrice },
-              });
-            }
+        for (const unit of existingUnits) {
+          if (unit.id.includes("perperson") || existingUnits.length === 1) {
+            await tx.listingUnit.update({
+              where: { id: unit.id },
+              data: { basePrice: approvedBasePrice },
+            });
+          } else {
+            const currentPrice = Number(unit.basePrice);
+            const newPrice = Math.round(currentPrice * markupMultiplier);
+            await tx.listingUnit.update({
+              where: { id: unit.id },
+              data: { basePrice: newPrice },
+            });
           }
-        } catch (unitErr) {
-          console.warn("Unit update error during moderate:", unitErr);
         }
       }
-      updatedDbListing = await prisma.listing.update({
+      return tx.listing.update({
         where: { id },
         data: updateData,
         include: {
@@ -86,44 +80,18 @@ export async function PATCH(
           },
         },
       });
-    } catch (dbErr) {
-      console.warn("DB listing moderate error:", dbErr);
-    }
+    });
 
-    // 2. Also update in-memory
-    const updated = moderateListing(
-      id,
-      action === "APPROVE" ? "APPROVED" : "REJECTED",
-      body.notes
-    );
-
-    if (!updated && !updatedDbListing) {
-      return NextResponse.json(
-        { success: false, error: "Listing not found" },
-        { status: 404 }
-      );
-    }
-
-    const title = updatedDbListing?.title || updated?.title || "Tour Package";
-    const finalListing = updatedDbListing
-      ? formatDbListing(updatedDbListing)
-      : {
-          ...(updated || {}),
-          id,
-          title,
-          basePrice: body.totalPrice !== undefined ? Number(body.totalPrice) : 35000,
-          vendorPrice: body.vendorPrice !== undefined ? Number(body.vendorPrice) : 30000,
-          moderationStatus: action === "APPROVE" ? "APPROVED" : "REJECTED",
-          commissionRate: body.commissionRate !== undefined ? Number(body.commissionRate) : 12.0,
-          photos: [],
-          amenities: [],
-        };
+    const title = updatedDbListing.title;
+    const finalListing = formatDbListing(updatedDbListing);
 
     // On-demand ISR revalidation across marketplace catalog
     try {
       revalidatePath("/");
       revalidatePath("/tours");
       revalidatePath("/destinations");
+      revalidatePath("/destinations/[slug]", "page");
+      revalidatePath("/tours/[intent]", "page");
       revalidatePath("/sitemap.xml");
       if (finalListing?.slug) {
         revalidatePath(`/listing/${finalListing.slug}`);
@@ -141,8 +109,12 @@ export async function PATCH(
       listing: finalListing,
     });
   } catch (error: any) {
+    if (error?.code === "P2025") {
+      return NextResponse.json({ success: false, error: "Listing not found" }, { status: 404 });
+    }
+    console.error("Listing moderation failed:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "The moderation change could not be saved. Please retry." },
       { status: 500 }
     );
   }
