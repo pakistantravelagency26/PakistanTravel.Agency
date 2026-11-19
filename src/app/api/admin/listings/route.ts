@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { getAllListingsForAdmin, ListingData } from "@/services/listing.service";
+import type { ListingData } from "@/services/listing.service";
 import { formatDbListing } from "@/services/serverListing.service";
 
 export const dynamic = "force-dynamic";
@@ -46,11 +46,10 @@ export async function GET() {
       listings: formatted,
     });
   } catch (error: any) {
-    console.error("Neon DB admin listings query error, falling back to memory:", error);
-    const listings = getAllListingsForAdmin();
-    return NextResponse.json({
-      success: true,
-      listings,
-    });
+    console.error("Neon DB admin listings query error:", error);
+    return NextResponse.json(
+      { success: false, error: "Unable to load saved tours. Please retry." },
+      { status: 500 }
+    );
   }
 }
