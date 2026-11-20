@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { destinationsData } from "@/data/destinationData";
+import { defaultTravelCosts, resolveTravelCosts, travelCostsKey } from "@/config/travelCosts";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,11 @@ export async function GET() {
       orderBy: { name: "asc" },
     });
 
+    const costRecords = await prisma.siteSetting.findMany({
+      where: { key: { in: destinations.map((d) => travelCostsKey(d.slug)) } },
+    });
+    const costsByKey = new Map(costRecords.map((record) => [record.key, record.value]));
+
     return NextResponse.json({
       success: true,
       destinations: destinations.map((d) => ({
@@ -34,6 +41,9 @@ export async function GET() {
         image: d.image,
         isFeatured: d.isFeatured,
         listingsCount: d._count.listings,
+        travelCosts: destinationsData[d.slug]
+          ? resolveTravelCosts(defaultTravelCosts(destinationsData[d.slug].approximateCosts), costsByKey.get(travelCostsKey(d.slug)))
+          : null,
       })),
     });
   } catch (error: any) {
