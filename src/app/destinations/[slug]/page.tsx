@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { destinationsData } from "@/data/destinationData";
 import { prisma } from "@/lib/prisma";
+import { defaultTravelCosts, resolveTravelCosts, travelCostsKey } from "@/config/travelCosts";
 import { formatDbListing } from "@/services/serverListing.service";
 import { ListingData } from "@/services/listing.service";
 
@@ -220,6 +221,14 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
 
   if (!dest) {
     notFound();
+  }
+
+  let travelCosts = defaultTravelCosts(dest.approximateCosts);
+  try {
+    const record = await prisma.siteSetting.findUnique({ where: { key: travelCostsKey(dest.slug) } });
+    travelCosts = resolveTravelCosts(travelCosts, record?.value);
+  } catch (error) {
+    console.error("Could not load destination travel costs:", error);
   }
 
   // Fetch real database listings for this destination
@@ -436,7 +445,7 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
           <div className="flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-orange-500" />
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              Approximate Travel Costs (2026 Season)
+              {travelCosts.heading}
             </h2>
           </div>
 
@@ -444,27 +453,27 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Backpacker / Budget</span>
-                <p className="text-2xl font-black text-slate-900">{dest.approximateCosts.budgetPerDay}</p>
-                <p className="text-[11px] text-slate-500">Per person per day including clean guesthouse and local dining.</p>
+                <p className="text-2xl font-black text-slate-900">{travelCosts.budgetPerDay}</p>
+                <p className="text-[11px] text-slate-500">{travelCosts.budgetDescription}</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
                 <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Comfort / Mid-Range</span>
-                <p className="text-2xl font-black text-emerald-950">{dest.approximateCosts.midRangePerDay}</p>
-                <p className="text-[11px] text-emerald-800">Estimated per traveler with standard hotel accommodation and guided transport.</p>
+                <p className="text-2xl font-black text-emerald-950">{travelCosts.midRangePerDay}</p>
+                <p className="text-[11px] text-emerald-800">{travelCosts.midRangeDescription}</p>
               </div>
 
               <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Luxury Heritage Tour Tier</span>
-                <p className="text-2xl font-black text-white">{dest.approximateCosts.luxuryPerDay}</p>
-                <p className="text-[11px] text-slate-300">Heritage suites, luxury valley lodges, and private mountain transport included in itinerary.</p>
+                <p className="text-2xl font-black text-white">{travelCosts.luxuryPerDay}</p>
+                <p className="text-[11px] text-slate-300">{travelCosts.luxuryDescription}</p>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2.5">
               <HelpCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                <strong>Pricing Disclaimer:</strong> {dest.approximateCosts.notes} Confirm current rates directly with operators before booking.
+                <strong>Pricing Disclaimer:</strong> {travelCosts.notes} Confirm current rates directly with operators before booking.
               </p>
             </div>
           </div>
