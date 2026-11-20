@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { destinationsData } from "@/data/destinationData";
+import { travelCostsKey, travelCostsSchema } from "@/config/travelCosts";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +61,25 @@ export async function PATCH(
 
     const { id } = params;
     const body = await req.json();
+
+    if (body.travelCosts !== undefined) {
+      const parsed = travelCostsSchema.safeParse(body.travelCosts);
+      if (!parsed.success) {
+        return NextResponse.json({ success: false, error: "Please complete all travel cost fields within the allowed lengths." }, { status: 400 });
+      }
+      const destination = await prisma.destination.findUnique({ where: { id } });
+      if (!destination || !destinationsData[destination.slug]) {
+        return NextResponse.json({ success: false, error: "Destination guide not found." }, { status: 404 });
+      }
+      const key = travelCostsKey(destination.slug);
+      await prisma.siteSetting.upsert({
+        where: { key },
+        create: { key, value: parsed.data },
+        update: { value: parsed.data },
+      });
+      revalidatePath(`/destinations/${destination.slug}`);
+      return NextResponse.json({ success: true, travelCosts: parsed.data });
+    }
 
     const updated = await prisma.destination.update({
       where: { id },

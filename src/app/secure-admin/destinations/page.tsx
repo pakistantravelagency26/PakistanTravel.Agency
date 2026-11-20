@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import type { TravelCosts } from "@/config/travelCosts";
 import { MapPin, Plus, Star, Trash2, X, AlertCircle, Loader2 } from "lucide-react";
 
 interface DestinationItem {
@@ -13,6 +14,7 @@ interface DestinationItem {
   image: string;
   isFeatured: boolean;
   listingsCount: number;
+  travelCosts: TravelCosts | null;
 }
 
 export default function AdminDestinationsPage() {
@@ -21,6 +23,36 @@ export default function AdminDestinationsPage() {
   const [showModal, setShowModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [editingCosts, setEditingCosts] = useState<DestinationItem | null>(null);
+  const [costDraft, setCostDraft] = useState<TravelCosts | null>(null);
+  const [savingCosts, setSavingCosts] = useState(false);
+  const [costError, setCostError] = useState<string | null>(null);
+  const [costSuccess, setCostSuccess] = useState<string | null>(null);
+
+  async function saveTravelCosts(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingCosts || !costDraft) return;
+    setSavingCosts(true);
+    setCostError(null);
+    try {
+      const res = await fetch(`/api/admin/destinations/${editingCosts.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ travelCosts: costDraft }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Unable to save travel costs.");
+      setDestinations(prev => prev.map(d => d.id === editingCosts.id ? { ...d, travelCosts: data.travelCosts } : d));
+      setCostSuccess(`Travel costs saved for ${editingCosts.name}.`);
+      setEditingCosts(null);
+      setCostDraft(null);
+    } catch (err) {
+      setCostError(err instanceof Error ? err.message : "Unable to save travel costs.");
+    } finally {
+      setSavingCosts(false);
+    }
+  }
 
   // Form State
   const [name, setName] = useState("");
@@ -144,6 +176,8 @@ export default function AdminDestinationsPage() {
         </button>
       </div>
 
+      {costSuccess && <p role="status" className="rounded-xl bg-purple-50 p-4 text-sm text-purple-800">{costSuccess}</p>}
+
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
           <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
@@ -229,8 +263,61 @@ export default function AdminDestinationsPage() {
                   {dest.isFeatured ? "★ Featured" : "Standard"}
                 </span>
               </div>
+              {dest.travelCosts && (
+                <button
+                  onClick={() => {
+                    setEditingCosts(dest);
+                    setCostDraft({ ...dest.travelCosts! });
+                    setCostError(null);
+                    setCostSuccess(null);
+                  }}
+                  className="m-4 mt-0 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-purple-700"
+                >
+                  Edit Travel Costs
+                </button>
+              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {editingCosts && costDraft && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="travel-costs-title" className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
+            <h2 id="travel-costs-title" className="text-lg font-bold text-slate-900">Travel Costs — {editingCosts.name}</h2>
+            <p className="mt-1 text-sm text-slate-500">Edit the approximate costs shown on this destination guide. These are informational estimates, not tour booking prices.</p>
+            {costError && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{costError}</p>}
+            <form onSubmit={saveTravelCosts} className="mt-5 space-y-4">
+              {([
+                { key: "heading", label: "Section heading / season", max: 160 },
+                { key: "budgetPerDay", label: "Backpacker / Budget price range", max: 100 },
+                { key: "budgetDescription", label: "Budget description", max: 500 },
+                { key: "midRangePerDay", label: "Comfort / Mid-range price range", max: 100 },
+                { key: "midRangeDescription", label: "Mid-range description", max: 500 },
+                { key: "luxuryPerDay", label: "Luxury price range", max: 100 },
+                { key: "luxuryDescription", label: "Luxury description", max: 500 },
+                { key: "notes", label: "Pricing disclaimer", max: 2000 },
+              ] as { key: keyof TravelCosts; label: string; max: number }[]).map(field => (
+                <div key={field.key}>
+                  <label htmlFor={`cost-${field.key}`} className="mb-1 block text-sm font-semibold text-slate-700">{field.label}</label>
+                  <textarea
+                    id={`cost-${field.key}`}
+                    value={costDraft[field.key]}
+                    onChange={e => setCostDraft(prev => prev ? { ...prev, [field.key]: e.target.value } : prev)}
+                    rows={field.max > 160 ? 3 : 1}
+                    maxLength={field.max}
+                    required
+                    disabled={savingCosts}
+                    className="w-full rounded-xl border border-slate-300 p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              ))}
+              <div className="flex justify-end gap-3">
+                <button type="button" disabled={savingCosts} onClick={() => { setEditingCosts(null); setCostDraft(null); }} className="rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50">Cancel</button>
+                <button type="submit" disabled={savingCosts} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-700 disabled:opacity-50">{savingCosts ? "Saving..." : "Save Travel Costs"}</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
